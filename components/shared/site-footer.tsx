@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { NewsletterForm } from './newsletter-form';
 
 type FooterLinkItem = { label: string; href: string };
@@ -46,10 +47,7 @@ export function SiteFooter() {
         <div className="p-8 sm:p-12">
           <div className="grid md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-8">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="grid place-items-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-display font-bold text-sm">R</span>
-                <span className="font-display font-bold text-lg">RITM</span>
-              </div>
+              <Image src="/ritm-logo-light.svg" alt="RITM" width={98} height={28} className="h-7 w-auto" />
               <p className="text-white/70 text-sm max-w-xs leading-relaxed mt-3">Подпишись на дропы и забирай новые вещи первым. Без спама.</p>
               <NewsletterForm />
             </div>

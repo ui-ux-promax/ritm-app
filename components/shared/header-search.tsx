@@ -9,7 +9,7 @@ export function HeaderSearch() {
   return (
     <form
       onSubmit={(e) => { e.preventDefault(); router.push(q.trim() ? `/catalog?q=${encodeURIComponent(q.trim())}` : '/catalog'); }}
-      className="hidden sm:flex items-center gap-2 bg-surface-soft rounded-full px-3 h-10 w-44 lg:w-56"
+      className="hidden sm:flex items-center gap-2 rounded-full border border-line bg-surface px-3 h-10 w-44 lg:w-56"
     >
       <Search className="w-4 h-4 text-ink-muted" aria-hidden />
       <label className="sr-only" htmlFor="hsearch">Поиск одежды</label>
