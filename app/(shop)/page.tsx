@@ -11,6 +11,7 @@ import { EditorialSection } from '@/components/shared/home/editorial-section';
 import { BestsellersSection } from '@/components/shared/home/bestsellers-section';
 import { SeasonSection } from '@/components/shared/home/season-section';
 import { BlogSection } from '@/components/shared/home/blog-section';
+import { NewsletterBanner } from '@/components/shared/home/newsletter-banner';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +36,7 @@ export default async function HomePage() {
       <BestsellersSection products={bestsellers} wishlistedIds={wishlistedIds} />
       <SeasonSection />
       <BlogSection />
+      <NewsletterBanner />
     </>
   );
 }
