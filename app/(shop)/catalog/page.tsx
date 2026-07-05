@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
@@ -12,6 +13,7 @@ import { MobileFilterDrawer } from '@/components/shared/catalog/mobile-filter-dr
 import { SortSelect } from '@/components/shared/catalog/sort-select';
 import { ActiveFilterChips } from '@/components/shared/catalog/active-filter-chips';
 import { Pagination } from '@/components/shared/catalog/pagination';
+import { CatalogHero } from '@/components/shared/catalog/catalog-hero';
 import { EmptyCatalog, ProductGridSkeleton } from '@/components/shared/catalog/catalog-states';
 
 export const dynamic = 'force-dynamic';
@@ -44,7 +46,12 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
   return (
     <div className="mx-auto max-w-[1240px] px-4 sm:px-6 pt-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
-      <h1 className="font-display font-bold text-[28px] sm:text-[40px] mb-6">Каталог</h1>
+      <CatalogHero total={total} />
+      <nav className="flex items-center gap-2 text-xs text-ink-muted mt-4 mb-2" aria-label="Хлебные крошки">
+        <Link href="/" className="hover:text-ink">Главная</Link>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        <span className="text-ink font-semibold">Каталог</span>
+      </nav>
       <div className="grid md:grid-cols-[240px_1fr] gap-6 lg:gap-8">
         <FilterSidebar facets={facets} />
         <div>
