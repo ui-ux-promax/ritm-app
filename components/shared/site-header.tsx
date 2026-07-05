@@ -56,7 +56,7 @@ export function SiteHeader() {
 
           {/* Quick chips + search */}
           <div className="flex items-center gap-2.5 overflow-x-auto">
-            <Link href="/catalog?sort=new" className="h-[38px] px-4 inline-flex items-center rounded-full border border-line bg-surface text-[13px] font-semibold hover:border-ink/35 transition-colors bg-primary text-primary-foreground border-primary">Новинки</Link>
+            <Link href="/catalog?sort=new" className="h-[38px] px-4 inline-flex items-center rounded-full bg-primary border border-primary text-primary-foreground text-[13px] font-semibold hover:border-ink/35 transition-colors">Новинки</Link>
             <Link href="/catalog?filter=sale" className="h-[38px] px-4 inline-flex items-center rounded-full border border-line bg-surface text-[13px] font-semibold hover:border-ink/35 transition-colors">Sale</Link>
             <HeaderSearch />
           </div>
