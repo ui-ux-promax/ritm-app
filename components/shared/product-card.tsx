@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '@/components/ui';
-import { PriceTag } from './price-tag';
 import { WishlistHeart } from '@/components/shared/wishlist/wishlist-heart';
 import type { ProductCardData } from '@/lib/product-summary';
 
@@ -34,9 +33,6 @@ export function ProductCard({ data, wishlisted = false }: { data: ProductCardDat
             <div className="w-full h-full grid place-items-center text-ink-muted text-xs">нет фото</div>
           )}
         </Link>
-        {!data.soldOut && (
-          <WishlistHeart productId={data.id} initialActive={wishlisted} variant="card" />
-        )}
       </div>
       {/* Body */}
       <div className="px-1 pt-4">
@@ -44,14 +40,17 @@ export function ProductCard({ data, wishlisted = false }: { data: ProductCardDat
           <Link href={href} className="hover:underline underline-offset-2">{data.name}</Link>
         </h3>
         <p className="mt-2 text-ink-muted text-[13px] leading-[1.45]">{data.categoryName}</p>
-        {/* Actions */}
-        <div className="flex items-center justify-between gap-2.5 mt-4">
-          <PriceTag
-            price={data.minPrice}
-            compareAtPrice={data.minCompareAtPrice}
-            className="!min-w-[112px] !h-9 !rounded-full !border !border-line !text-xs !font-bold !px-4"
-          />
+        {/* Actions — price pill + tool buttons (heart + cart) */}
+        <div className="flex items-center justify-between gap-2.5 mt-[18px]">
+          {/* Price pill */}
+          <span className="inline-flex items-center justify-center h-9 min-w-[112px] px-4 rounded-full border border-line text-ink text-xs font-bold tnum">
+            {data.minPrice.toLocaleString('ru-RU')} ₽
+          </span>
+          {/* Tool buttons */}
           <div className="flex items-center gap-2">
+            {!data.soldOut && (
+              <WishlistHeart productId={data.id} initialActive={wishlisted} variant="card" />
+            )}
             {!data.soldOut && (
               <Link
                 href={href}
