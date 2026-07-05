@@ -1,6 +1,5 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { Search } from 'lucide-react';
 import { useState } from 'react';
 
 export function HeaderSearch() {
@@ -9,11 +8,22 @@ export function HeaderSearch() {
   return (
     <form
       onSubmit={(e) => { e.preventDefault(); router.push(q.trim() ? `/catalog?q=${encodeURIComponent(q.trim())}` : '/catalog'); }}
-      className="hidden sm:flex items-center gap-2 rounded-full border border-line bg-surface px-3 h-10 w-44 lg:w-56"
+      className="flex items-center h-[42px] rounded-full border border-line bg-surface px-4 gap-3 min-w-0 flex-1 max-w-[470px]"
+      role="search"
     >
-      <Search className="w-4 h-4 text-ink-muted" aria-hidden />
-      <label className="sr-only" htmlFor="hsearch">Поиск одежды</label>
-      <input id="hsearch" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Поиск одежды" className="bg-transparent text-sm outline-none w-full" />
+      <label className="sr-only" htmlFor="hsearch">Поиск товаров</label>
+      <input
+        id="hsearch"
+        type="search"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Поиск..."
+        className="min-w-0 flex-1 border-0 outline-none bg-transparent text-[13px] text-ink placeholder:text-ink-muted/80"
+      />
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m16.5 16.5 4 4"/>
+      </svg>
     </form>
   );
 }
