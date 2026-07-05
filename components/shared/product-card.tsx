@@ -35,13 +35,13 @@ export function ProductCard({ data, wishlisted = false }: { data: ProductCardDat
         </Link>
       </div>
       {/* Body */}
-      <div className="px-1 pt-4 flex flex-col h-[112px]">
+      <div className="px-1 pt-4 flex flex-col h-[140px]">
         <h3 className="font-display font-bold text-[21px] leading-[1.12] line-clamp-2 min-h-[47px]">
           <Link href={href} className="hover:underline underline-offset-2">{data.name}</Link>
         </h3>
         <p className="mt-2 text-ink-muted text-[13px] leading-[1.45] line-clamp-1 min-h-[19px]">{data.categoryName}</p>
         {/* Actions — price pill + tool buttons (heart + cart) */}
-        <div className="flex items-center justify-between gap-2.5 mt-auto">
+        <div className="flex items-center justify-between gap-2.5 mt-auto pt-[18px]">
           {/* Price pill */}
           <span className="inline-flex items-center justify-center h-9 min-w-[112px] px-4 rounded-full border border-line text-ink text-xs font-bold tnum">
             {data.minPrice.toLocaleString('ru-RU')} ₽
