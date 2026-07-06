@@ -7,7 +7,7 @@ import { findProducts } from '@/lib/find-products';
 import { buildCatalogItemListJsonLd, catalogSeoDescription, defaultOgImage } from '@/lib/seo';
 import { getWishlistProductIds } from '@/lib/wishlist';
 import { wishlistCookieName } from '@/lib/wishlist-cookie';
-import { ProductCard } from '@/components/shared/product-card';
+import { CatalogProductCard } from '@/components/shared/catalog/catalog-product-card';
 import { FilterSidebar } from '@/components/shared/catalog/filter-sidebar';
 import { MobileFilterDrawer } from '@/components/shared/catalog/mobile-filter-drawer';
 import { SortSelect } from '@/components/shared/catalog/sort-select';
@@ -68,7 +68,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
             <EmptyCatalog />
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {products.map((p) => <ProductCard key={p.slug} data={p} wishlisted={wishlistedIds.has(p.id)} />)}
+              {products.map((p) => <CatalogProductCard key={p.slug} data={p} wishlisted={wishlistedIds.has(p.id)} />)}
             </div>
           )}
           <Suspense><Pagination page={page} totalPages={totalPages} /></Suspense>
