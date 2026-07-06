@@ -9,9 +9,9 @@ const columns: { title: string; links: FooterLinkItem[] }[] = [
     title: 'Магазин',
     links: [
       { label: 'Новинки', href: '/catalog?sort=new' },
-      { label: 'Футболки', href: '/catalog?category=tees' },
-      { label: 'Худи', href: '/catalog?category=hoodies' },
-      { label: 'Верхняя одежда', href: '/catalog?category=outerwear' },
+      { label: 'Женщинам', href: '/catalog' },
+      { label: 'Мужчинам', href: '/catalog' },
+      { label: 'Sale', href: '/catalog?filter=sale' },
     ],
   },
   {
@@ -19,16 +19,17 @@ const columns: { title: string; links: FooterLinkItem[] }[] = [
     links: [
       { label: 'Доставка', href: '/legal/delivery' },
       { label: 'Возврат', href: '/legal/refund' },
-      { label: 'Размерная сетка', href: '#' },
+      { label: 'Таблица размеров', href: '#' },
       { label: 'Контакты', href: '#' },
     ],
   },
   {
-    title: 'Мы рядом',
+    title: 'Бренд',
     links: [
-      { label: 'Telegram', href: '#' },
-      { label: 'VK', href: '#' },
-      { label: 'YouTube', href: '#' },
+      { label: 'О Ritm', href: '#' },
+      { label: 'Магазины', href: '#' },
+      { label: 'Карьера', href: '#' },
+      { label: 'Блог', href: '/blog' },
     ],
   },
 ];
@@ -42,35 +43,31 @@ function FooterLink({ href, className, children }: { href: string; className?: s
 
 export function SiteFooter() {
   return (
-    <footer className="mx-auto max-w-[1240px] px-4 sm:px-6 pt-16 sm:pt-20 pb-8">
-      <div className="rounded-[28px] overflow-hidden text-white bg-footer">
-        <div className="p-8 sm:p-12">
-          <div className="grid md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-8">
-            <div>
-              <Image src="/ritm-logo-light.svg" alt="RITM" width={98} height={28} className="h-7 w-auto" />
-              <p className="text-white/70 text-sm max-w-xs leading-relaxed mt-3">Подпишись на дропы и забирай новые вещи первым. Без спама.</p>
-              <NewsletterForm />
-            </div>
-            {columns.map((col) => (
-              <div key={col.title}>
-                <p className="font-semibold text-sm mb-3">{col.title}</p>
-                <ul className="space-y-2 text-sm text-white/70">
-                  {col.links.map((l) => (
-                    <li key={l.label}>
-                      <FooterLink href={l.href} className="hover:text-white">{l.label}</FooterLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+    <footer className="mt-[70px] bg-footer text-white">
+      <div className="mx-auto max-w-[1200px] px-6">
+        <div className="grid md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-8 pt-[52px] pb-9">
+          {/* Brand + newsletter */}
+          <div>
+            <Image src="/ritm-logo-light.svg" alt="Ritm" width={112} height={32} className="w-[112px] h-auto" />
+            <p className="text-white/60 text-sm mt-2.5 max-w-[320px]">Подписка на новые капсулы, restock размеров и закрытые скидки.</p>
+            <NewsletterForm />
           </div>
-          <div className="border-t border-white/10 mt-8 pt-5 flex flex-col sm:flex-row gap-2 justify-between text-xs text-white/70">
-            <p>© 2026 RITM. Все цены в рублях.</p>
-            <div className="flex gap-4">
-              <Link href="/legal/privacy" className="hover:text-white">Политика конфиденциальности</Link>
-              <Link href="/legal/terms" className="hover:text-white">Условия</Link>
+          {/* Link columns */}
+          {columns.map((col) => (
+            <div key={col.title}>
+              <h4 className="text-sm font-bold mb-2">{col.title}</h4>
+              {col.links.map((l) => (
+                <FooterLink key={l.label} href={l.href} className="block py-[5px] text-sm text-white/60 hover:text-white transition-colors">
+                  {l.label}
+                </FooterLink>
+              ))}
             </div>
-          </div>
+          ))}
+        </div>
+        {/* Bottom bar */}
+        <div className="border-t border-white/[0.12] py-[18px] flex flex-wrap justify-between gap-4 text-xs text-white/45">
+          <span>© 2026 Ritm</span>
+          <span>Fashion ecommerce prototype · RU</span>
         </div>
       </div>
     </footer>

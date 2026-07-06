@@ -7,12 +7,24 @@ export const productCardInclude = {
     orderBy: [{ isDefault: 'desc' as const }, { sortOrder: 'asc' as const }],
     include: {
       images: { orderBy: { sortOrder: 'asc' as const }, take: 1 },
-      variants: { select: { price: true, compareAtPrice: true, stock: true, active: true } },
+      variants: { select: { size: true, sizeOrder: true, price: true, compareAtPrice: true, stock: true, active: true } },
     },
   },
 } satisfies Prisma.ProductInclude;
 
 export type ProductForCard = Prisma.ProductGetPayload<{ include: typeof productCardInclude }>;
+
+export interface CardColorway {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+}
+
+export interface CardSize {
+  size: string;
+  sizeOrder: number;
+  inStock: boolean;
+}
 
 export interface ProductCardData {
   id: string;
@@ -26,6 +38,8 @@ export interface ProductCardData {
   minCompareAtPrice: number | null;
   badges: ProductBadge[];
   soldOut: boolean;
+  colorways: CardColorway[];
+  sizes: CardSize[];
 }
 
 export function buildProductCardData(
@@ -49,6 +63,26 @@ export function buildProductCardData(
     cfg,
   );
 
+  const colorways: CardColorway[] = product.colorways.map((cw) => ({
+    id: cw.id,
+    name: cw.name,
+    imageUrl: cw.images[0]?.url ?? null,
+  }));
+
+  // Collect unique sizes from all colorways, sorted by sizeOrder
+  const sizeMap = new Map<string, CardSize>();
+  for (const cw of product.colorways) {
+    for (const v of cw.variants) {
+      if (!v.active) continue;
+      if (!sizeMap.has(v.size)) {
+        sizeMap.set(v.size, { size: v.size, sizeOrder: v.sizeOrder, inStock: v.stock > 0 });
+      } else if (v.stock > 0) {
+        sizeMap.get(v.size)!.inStock = true;
+      }
+    }
+  }
+  const sizes = Array.from(sizeMap.values()).sort((a, b) => a.sizeOrder - b.sizeOrder);
+
   return {
     id: product.id,
     slug: product.slug,
@@ -61,5 +95,7 @@ export function buildProductCardData(
     minCompareAtPrice,
     badges,
     soldOut: stock.soldOut,
+    colorways,
+    sizes,
   };
 }

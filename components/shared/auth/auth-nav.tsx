@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
-import { User } from 'lucide-react';
 import { auth, signOut } from '@/auth';
 import { cartCookieName } from '@/lib/cart-cookie';
 import { wishlistCookieName } from '@/lib/wishlist-cookie';
@@ -15,10 +14,14 @@ export async function AuthNav() {
     return (
       <Link
         href="/login"
-        className="w-10 h-10 grid place-items-center rounded-full hover:bg-surface-soft"
+        className="w-[34px] h-[34px] grid place-items-center rounded-full border border-line/72 bg-surface shadow-sm hover:border-ink/35 transition-colors"
         aria-label="Войти"
       >
-        <User className="w-5 h-5" aria-hidden />
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="8.25"/>
+          <circle cx="12" cy="10.35" r="2.35"/>
+          <path d="M7.95 16.35a5 5 0 0 1 8.1 0"/>
+        </svg>
       </Link>
     );
   }
@@ -27,10 +30,14 @@ export async function AuthNav() {
     <div className="flex items-center">
       <Link
         href="/profile"
-        className="w-10 h-10 grid place-items-center rounded-full hover:bg-surface-soft"
+        className="w-[34px] h-[34px] grid place-items-center rounded-full border border-line/72 bg-surface shadow-sm hover:border-ink/35 transition-colors"
         aria-label="Профиль"
       >
-        <User className="w-5 h-5" aria-hidden />
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="8.25"/>
+          <circle cx="12" cy="10.35" r="2.35"/>
+          <path d="M7.95 16.35a5 5 0 0 1 8.1 0"/>
+        </svg>
       </Link>
       <form
         action={async () => {
