@@ -106,14 +106,15 @@ export default async function ProductPage({ params, searchParams }: Params) {
 
   const galleryImages = active.images.map((im) => ({ url: im.url, alt: im.alt ?? product.name }));
 
-  // TEMP: pad gallery to 3 images for bento-grid preview
-  if (galleryImages.length < 3) {
+  // TEMP: pad gallery to 4 images for bento-grid preview (main + 2 top + 1 wide)
+  if (galleryImages.length < 4) {
     const fallbacks = [
       '/products/product-white-tee.png',
       '/products/product-black-tee.png',
       '/products/product-soft-hoodie.png',
+      '/products/product-pink-outer.png',
     ];
-    while (galleryImages.length < 3) {
+    while (galleryImages.length < 4) {
       const fb = fallbacks[galleryImages.length % fallbacks.length];
       galleryImages.push({ url: fb, alt: `${product.name} — фото ${galleryImages.length + 1}` });
     }
@@ -211,7 +212,7 @@ export default async function ProductPage({ params, searchParams }: Params) {
           </div>
 
           {/* Sticky: buy bar + specs */}
-          <div className="lg:sticky lg:top-[140px] grid gap-[22px] z-5 bg-bg">
+          <div className="lg:sticky lg:top-[140px] grid gap-[22px] bg-bg pb-[22px]">
             <div className="flex items-center justify-between gap-4 border border-line rounded-[18px] bg-surface p-3.5">
               <div className="flex items-baseline gap-1">
                 <span className="font-display font-bold text-[30px] text-accent leading-none tnum">
