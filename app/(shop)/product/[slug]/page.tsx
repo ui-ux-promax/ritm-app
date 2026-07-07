@@ -158,14 +158,12 @@ export default async function ProductPage({ params, searchParams }: Params) {
         activeColorwaySlug={active.slug}
         activeColorwayName={active.name}
         panelVariants={panelVariants}
-        specs={specs}
         ratingAvg={displayCount > 0 ? displayAvg : null}
         ratingCount={displayCount}
         reviews={displayReviews}
         reviewState={reviewState}
         related={related}
         wishlistedIds={wishlistedIds}
-        wishlisted={wishlistedIds.has(product.id)}
       />
     </div>
   );
