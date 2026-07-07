@@ -28,7 +28,6 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState<string | null>(null);
   const [couponPending, setCouponPending] = useState(false);
-  const [isPickup, setIsPickup] = useState(false);
 
   const methods = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
@@ -105,46 +104,22 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
             <section className="border border-line rounded-[24px] bg-surface p-[22px] grid gap-4 mt-4">
               <div className="flex items-center gap-3">
                 <span className="w-8 h-8 grid place-items-center rounded-full bg-primary text-primary-foreground font-display font-bold text-sm">2</span>
-                <h2 className="font-display font-bold text-[17px] tracking-tight">Адрес доставки или пункт выдачи</h2>
-                <button type="button" onClick={() => setIsPickup(!isPickup)}
-                  className="ml-auto text-ink-muted text-[13px] font-semibold hover:text-ink transition-colors"
-                  style={{ color: isPickup ? 'hsl(var(--color-accent))' : undefined }}>
-                  {isPickup ? 'Адрес доставки' : 'Пункт выдачи'}
-                </button>
+                <h2 className="font-display font-bold text-[17px] tracking-tight">Адрес доставки</h2>
               </div>
-              {!isPickup ? (
-                <>
-                  <div className="grid gap-2">
-                    <label className="text-ink-muted text-xs font-bold uppercase tracking-wider" htmlFor="city">Город</label>
-                    <input id="city" type="text" autoComplete="address-level2" placeholder="Москва"
-                      {...register('city')}
-                      className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
-                    {errors.city && <span className="text-danger text-xs font-semibold">{errors.city.message}</span>}
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="grid gap-2 relative">
-                      <label className="text-ink-muted text-xs font-bold uppercase tracking-wider" htmlFor="addressLine">Улица и дом</label>
-                      <input id="addressLine" autoComplete="off" placeholder="ул. Тверская, 12"
-                        {...register('addressLine')}
-                        className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
-                      <AddressSuggest />
-                      {errors.addressLine && <span className="text-danger text-xs font-semibold">{errors.addressLine.message}</span>}
-                    </div>
-                    <div className="grid gap-2">
-                      <label className="text-ink-muted text-xs font-bold uppercase tracking-wider" htmlFor="addressComment">Комментарий</label>
-                      <input id="addressComment" type="text" placeholder="Квартира, этаж"
-                        {...register('addressComment')}
-                        className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="grid gap-2">
-                  <label className="text-ink-muted text-xs font-bold uppercase tracking-wider">Пункт выдачи</label>
-                  <input type="text" placeholder="Нажмите «Пункт выдачи» чтобы выбрать на карте"
-                    className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
-                </div>
-              )}
+              <div className="grid gap-2 relative">
+                <label className="text-ink-muted text-xs font-bold uppercase tracking-wider" htmlFor="addressLine">Адрес</label>
+                <input id="addressLine" autoComplete="off" placeholder="Город, улица, дом, квартира"
+                  {...register('addressLine')}
+                  className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
+                <AddressSuggest />
+                {errors.addressLine && <span className="text-danger text-xs font-semibold">{errors.addressLine.message}</span>}
+              </div>
+              <div className="grid gap-2">
+                <label className="text-ink-muted text-xs font-bold uppercase tracking-wider" htmlFor="addressComment">Комментарий</label>
+                <input id="addressComment" type="text" placeholder="Квартира, этаж, код домофона"
+                  {...register('addressComment')}
+                  className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
+              </div>
             </section>
 
             {/* 3. Delivery */}
