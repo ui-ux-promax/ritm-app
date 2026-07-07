@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { Badge } from '@/components/ui';
+import { useCartStore } from '@/store';
 import type { ProductCardData, CardColorway, CardSize } from '@/lib/product-summary';
 
 const BEIGE_BLUR =
@@ -30,11 +31,19 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [added, setAdded] = useState(false);
   const [fav, setFav] = useState(wishlisted);
+  const addCartItem = useCartStore((s) => s.addCartItem);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (selectedSize === null) return;
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1200);
+    const size = data.sizes[selectedSize];
+    if (!size || !size.variantId) return;
+    try {
+      await addCartItem({ productVariantId: size.variantId });
+      setAdded(true);
+      setTimeout(() => setAdded(false), 1200);
+    } catch {
+      /* store sets error */
+    }
   };
 
   return (
