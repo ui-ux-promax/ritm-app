@@ -106,6 +106,19 @@ export default async function ProductPage({ params, searchParams }: Params) {
   const wishlistedIds = await getWishlistProductIds(session, wlStore.get(wishlistCookieName)?.value);
 
   const galleryImages = active.images.map((im) => ({ url: im.url, alt: im.alt ?? product.name }));
+
+  // Ensure at least 3 images for bento grid (2 top + 1 wide)
+  if (galleryImages.length < 3) {
+    const fallbacks = [
+      '/products/product-white-tee.png',
+      '/products/product-black-tee.png',
+      '/products/product-soft-hoodie.png',
+    ];
+    while (galleryImages.length < 3) {
+      const fb = fallbacks[galleryImages.length % fallbacks.length];
+      galleryImages.push({ url: fb, alt: `${product.name} — фото ${galleryImages.length + 1}` });
+    }
+  }
   const soldOut = !active.variants.some((v) => v.active && v.stock > 0);
   const galleryIsNew = !soldOut && isNewByDate(product.createdAt, now, NEW_PRODUCT_WINDOW_DAYS);
   const panelColorways = product.colorways.map((cw) => ({ slug: cw.slug, name: cw.name, thumbUrl: cw.images[0]?.url ?? null }));
