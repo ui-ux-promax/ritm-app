@@ -62,15 +62,13 @@ export default function CartPage() {
       ) : items.length === 0 ? (
         <div className="mt-6"><EmptyCart /></div>
       ) : (
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-6 mt-6 items-start">
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-6 mt-6 items-stretch">
           {/* Line items */}
           <div className="grid gap-3.5">
             {items.map((it) => <CartLineItem key={it.id} item={it} />)}
           </div>
           {/* Summary */}
-          <div className="self-stretch">
-            <OrderSummary totalAmount={totalAmount} count={count} />
-          </div>
+          <OrderSummary totalAmount={totalAmount} count={count} />
         </div>
       )}
     </div>

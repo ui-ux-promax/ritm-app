@@ -12,7 +12,7 @@ export function OrderSummary({ totalAmount, count }: { totalAmount: number; coun
 
   return (
     <aside>
-      <div className="lg:sticky lg:top-[90px] border border-line rounded-[24px] bg-surface p-[22px] grid gap-4 self-start">
+      <div className="lg:sticky lg:top-[90px] border border-line rounded-[24px] bg-surface p-[22px] grid gap-4">
         <h2 className="font-display font-bold text-[19px] tracking-tight">Сумма заказа</h2>
 
         {/* Promo */}
