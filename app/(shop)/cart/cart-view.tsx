@@ -7,8 +7,10 @@ import { Skeleton } from '@/components/ui';
 import { Breadcrumbs } from '@/components/shared/product/breadcrumbs';
 import { formatPrice } from '@/lib/format';
 import { FREE_SHIPPING_THRESHOLD } from '@/constants/config';
+import type { ProductCardData } from '@/lib/product-summary';
+import { CartRelatedGrid } from '@/components/shared/cart/cart-related-grid';
 
-export default function CartPage() {
+export function CartView({ related }: { related: ProductCardData[] }) {
   const { items, totalAmount, loading } = useCart();
   const count = items.reduce((a, i) => a + i.quantity, 0);
 
@@ -71,6 +73,9 @@ export default function CartPage() {
           <OrderSummary totalAmount={totalAmount} count={count} />
         </div>
       )}
+
+      {/* Related — "Добавить к заказу" */}
+      <CartRelatedGrid items={related} />
     </div>
   );
 }
