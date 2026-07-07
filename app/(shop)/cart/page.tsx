@@ -68,7 +68,9 @@ export default function CartPage() {
             {items.map((it) => <CartLineItem key={it.id} item={it} />)}
           </div>
           {/* Summary */}
-          <OrderSummary totalAmount={totalAmount} count={count} />
+          <div className="self-stretch">
+            <OrderSummary totalAmount={totalAmount} count={count} />
+          </div>
         </div>
       )}
     </div>
