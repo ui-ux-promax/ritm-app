@@ -128,7 +128,7 @@ export function ProductView({
             {/* Buy bar (pp-buy) */}
             <div className="flex items-center justify-between gap-4 border border-line rounded-[18px] bg-surface p-3.5">
               <div className="flex items-baseline gap-1 font-display font-bold tracking-tight">
-                <span className="text-[18px] text-accent">₽</span>
+                <span className="text-[18px] text-accent leading-none">₽</span>
                 <span className="text-[30px] text-accent leading-none tnum">{minPrice.toLocaleString('ru-RU')}</span>
               </div>
               <button type="button" className="inline-flex items-center gap-2.5 min-h-[52px] px-6 rounded-full bg-primary text-primary-foreground text-[15px] font-bold whitespace-nowrap hover:bg-footer transition-colors">
