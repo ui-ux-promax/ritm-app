@@ -1,13 +1,13 @@
 'use client';
+
 import Link from 'next/link';
-import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button } from '@/components/ui';
 import { useCartStore } from '@/store';
-import { formatPrice } from '@/lib/format';
-import { cn } from '@/lib/utils';
 import { useCountdown } from '@/hooks/use-countdown';
+import { RatingStars } from './rating-stars';
+import { ProductAccordions } from './product-accordions';
+import { cn } from '@/lib/utils';
 
 export interface PanelColorway { slug: string; name: string; thumbUrl: string | null; }
 export interface PanelVariant { id: string; size: string; stock: number; active: boolean; price: number; compareAtPrice: number | null; }
@@ -20,9 +20,25 @@ interface Props {
   variants: PanelVariant[];
   fitNote: string | null;
   productSlug: string;
+  description: string | null;
+  ratingAvg: number | null;
+  ratingCount: number;
 }
 
-export function PurchasePanel({ productName, colorways, activeColorwaySlug, activeColorwayName, variants, fitNote, productSlug }: Props) {
+const COLOR_HSL: Record<string, string> = {
+  'Черный': 'hsl(220 9% 7%)',
+  'Молочный': 'hsl(42 18% 88%)',
+  'Шалфей': 'hsl(151 18% 56%)',
+  'Хаки': 'hsl(55 15% 56%)',
+  'Розовый': 'hsl(345 42% 82%)',
+  'Светло-серый': 'hsl(0 0% 72%)',
+  'Серый': 'hsl(220 6% 62%)',
+};
+
+export function PurchasePanel({
+  productName, colorways, activeColorwaySlug, activeColorwayName,
+  variants, fitNote, productSlug, description, ratingAvg, ratingCount,
+}: Props) {
   const [sizeId, setSizeId] = useState<string | null>(null);
   const addCartItem = useCartStore((s) => s.addCartItem);
   const [adding, setAdding] = useState(false);
@@ -47,50 +63,84 @@ export function PurchasePanel({ productName, colorways, activeColorwaySlug, acti
       if (axios.isAxiosError(e) && e.response?.status === 429) {
         startCooldown(Number(e.response.data?.retryAfterSec) || 0);
       }
-      /* прочие ошибки — стор выставит error */
     } finally {
       setAdding(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Цена / скидка / наличие */}
-      <div className="flex items-end flex-wrap gap-x-3 gap-y-1">
-        <p className="font-display font-bold text-[28px] tnum leading-none">{formatPrice(shownPrice)}</p>
-        {shownCompare && shownCompare > shownPrice && (
-          <>
-            <p className="text-ink-muted text-base font-medium line-through tnum mb-0.5">{formatPrice(shownCompare)}</p>
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-warm text-ink mb-1">−{Math.round((1 - shownPrice / shownCompare) * 100)}%</span>
-          </>
-        )}
-      </div>
-      <p className={cn('text-xs font-semibold', soldOut ? 'text-danger' : 'text-success')}>
-        {soldOut ? 'Распродано' : 'В наличии'}
-      </p>
+    <div id="buy" className="border border-line rounded-[24px] bg-surface p-[22px] grid gap-2">
+      {/* Title */}
+      <h1 className="font-display font-bold text-[28px] sm:text-[38px] leading-none tracking-[-0.04em]">
+        {productName}
+      </h1>
 
-      {/* Расцветки (свотчи-фото → ?color=) */}
-      <div>
-        <p className="font-semibold text-sm">Цвет: <span className="text-ink-muted font-normal">{activeColorwayName}</span></p>
-        <div className="flex gap-2.5 mt-2">
-          {colorways.map((cw) => (
-            <Link key={cw.slug} href={`/product/${productSlug}?color=${cw.slug}`} scroll={false} aria-current={cw.slug === activeColorwaySlug ? 'true' : undefined} aria-label={`Цвет ${cw.name}`}
-              className={cn('w-11 h-11 rounded-xl overflow-hidden bg-surface-soft', cw.slug === activeColorwaySlug ? 'ring-2 ring-offset-2 ring-[hsl(var(--color-text))]' : 'border border-line hover:border-ink')}>
-              {cw.thumbUrl && <Image src={cw.thumbUrl} alt={cw.name} width={44} height={44} className="object-contain p-1 w-full h-full" />}
-            </Link>
-          ))}
+      {/* Rating */}
+      {ratingAvg !== null && ratingCount > 0 && (
+        <div className="flex items-center gap-3 mt-1">
+          <RatingStars value={ratingAvg} size={17} />
+          <span className="font-bold tnum">{ratingAvg.toFixed(1)}</span>
+          <span className="text-ink-muted text-[13px]">{ratingCount} отзывов</span>
+        </div>
+      )}
+
+      {/* Color */}
+      <div className="mt-4">
+        <p className="text-xs font-bold uppercase tracking-wider mb-2.5">
+          Цвет <span className="text-ink-muted font-normal normal-case ml-2">{activeColorwayName}</span>
+        </p>
+        <div className="flex flex-wrap gap-3.5" role="radiogroup" aria-label="Выбор цвета">
+          {colorways.map((cw) => {
+            const isActive = cw.slug === activeColorwaySlug;
+            return (
+              <Link
+                key={cw.slug}
+                href={`/product/${productSlug}?color=${cw.slug}`}
+                scroll={false}
+                aria-label={cw.name}
+                aria-pressed={isActive}
+                className={cn(
+                  'w-10 h-10 rounded-full border border-line transition-transform hover:scale-110 shrink-0',
+                  isActive && 'outline outline-2 outline-ink outline-offset-3'
+                )}
+                style={{
+                  backgroundColor: COLOR_HSL[cw.name] ?? 'hsl(0 0% 50%)',
+                  boxShadow: 'inset 0 0 0 4px hsl(var(--color-surface))',
+                }}
+              />
+            );
+          })}
         </div>
       </div>
 
-      {/* Размеры EU */}
-      <div>
-        <p className="font-semibold text-sm">Размер <span className="text-ink-muted font-normal">EU</span></p>
-        <div className="grid grid-cols-5 sm:grid-cols-6 gap-2 mt-2" role="group" aria-label="Выбор размера">
+      {/* Size */}
+      <div className="mt-4">
+        <div className="flex items-center justify-between mb-2.5">
+          <p className="text-xs font-bold uppercase tracking-wider">
+            Размер {selected && <span className="text-ink-muted font-normal normal-case ml-2">{selected.size}</span>}
+          </p>
+          <a href="#" className="text-ink-muted text-[13px] hover:text-ink">Таблица размеров</a>
+        </div>
+        <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Выбор размера">
           {variants.map((v) => {
             const disabled = !v.active || v.stock <= 0;
             return (
-              <button key={v.id} type="button" className="size tnum" aria-pressed={v.id === sizeId} disabled={disabled}
-                onClick={() => setSizeId(v.id)}>{v.size}</button>
+              <button
+                key={v.id}
+                type="button"
+                className={cn(
+                  'min-w-[52px] h-12 px-3.5 rounded-[14px] border text-[15px] font-bold transition-colors tnum',
+                  v.id === sizeId
+                    ? 'bg-primary border-primary text-primary-foreground'
+                    : 'border-line bg-surface-soft/55 hover:border-ink/25',
+                  disabled && 'line-through opacity-50 cursor-not-allowed'
+                )}
+                disabled={disabled}
+                aria-pressed={v.id === sizeId}
+                onClick={() => setSizeId(v.id)}
+              >
+                {v.size}
+              </button>
             );
           })}
         </div>
@@ -98,12 +148,23 @@ export function PurchasePanel({ productName, colorways, activeColorwaySlug, acti
       </div>
 
       {/* Add to cart */}
-      <Button variant="primary" size="lg" className="w-full" disabled={!selected || soldOut || cooldown > 0} loading={adding} onClick={onAdd}>
-        {added ? 'Добавлено ✓' : cooldown > 0 ? `Подождите ${cooldown} сек` : !selected ? 'Выберите размер' : `В корзину · ${formatPrice(shownPrice)}`}
-      </Button>
-      {cooldown > 0 && (
-        <p className="text-danger text-xs" role="alert">Слишком часто. Попробуйте через {cooldown} сек</p>
-      )}
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={onAdd}
+          disabled={!selected || soldOut || cooldown > 0 || adding}
+          className={cn(
+            'w-full min-h-[48px] rounded-full font-bold text-sm transition-colors',
+            added ? 'bg-accent text-accent-foreground' : 'bg-primary text-primary-foreground hover:bg-footer',
+            (!selected || soldOut) && 'opacity-50 cursor-not-allowed'
+          )}
+        >
+          {added ? 'Добавлено ✓' : cooldown > 0 ? `Подождите ${cooldown} сек` : 'Добавить в корзину'}
+        </button>
+      </div>
+
+      {/* Accordions */}
+      <ProductAccordions description={description} />
     </div>
   );
 }

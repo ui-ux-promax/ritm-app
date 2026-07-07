@@ -17,7 +17,6 @@ import { auth } from '@/auth';
 import { getReviewEligibility } from '@/lib/review';
 import { getWishlistProductIds } from '@/lib/wishlist';
 import { wishlistCookieName } from '@/lib/wishlist-cookie';
-import { WishlistHeart } from '@/components/shared/wishlist/wishlist-heart';
 import { RatingStars } from '@/components/shared/product/rating-stars';
 import { ReviewsSection } from '@/components/shared/product/reviews-section';
 import type { ReviewItem } from '@/components/shared/product/review-list';
@@ -37,11 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         orderBy: [{ isDefault: 'desc' }, { sortOrder: 'asc' }],
         take: 1,
         select: {
-          images: {
-            orderBy: { sortOrder: 'asc' },
-            take: 1,
-            select: { url: true, alt: true },
-          },
+          images: { orderBy: { sortOrder: 'asc' }, take: 1, select: { url: true, alt: true } },
         },
       },
     },
@@ -54,20 +49,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: product.name,
     description,
     alternates: { canonical: `/product/${slug}` },
-    openGraph: {
-      title: product.name,
-      description,
-      url: `/product/${slug}`,
-      siteName,
-      type: 'website',
-      images: [{ url: image, alt: primaryImage?.alt ?? product.name }],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: product.name,
-      description,
-      images: [image],
-    },
+    openGraph: { title: product.name, description, url: `/product/${slug}`, siteName, type: 'website', images: [{ url: image, alt: primaryImage?.alt ?? product.name }] },
+    twitter: { card: 'summary_large_image', title: product.name, description, images: [image] },
   };
 }
 
@@ -102,7 +85,7 @@ export default async function ProductPage({ params, searchParams }: Params) {
     authorName: r.user.name?.trim() ? r.user.name : 'Покупатель',
   }));
   const avg = agg._avg.rating ?? 0;
-  const count = agg._count; // _count: true → number (НЕ { _all }; подтверждено типами Prisma)
+  const count = agg._count;
   const reviewState: 'eligible' | 'guest' | 'not-purchased' | 'already-reviewed' =
     session?.user?.id ? await getReviewEligibility(session.user.id, product.id) : 'guest';
 
@@ -110,9 +93,6 @@ export default async function ProductPage({ params, searchParams }: Params) {
   const wishlistedIds = await getWishlistProductIds(session, wlStore.get(wishlistCookieName)?.value);
 
   const galleryImages = active.images.map((im) => ({ url: im.url, alt: im.alt ?? product.name }));
-  // «Новинка» поверх главного кадра — по createdAt товара (как в buildProductCardData).
-  // Скидку на PDP показывает только панель покупки (по выбранной вариации), чтобы не дублировать пилл.
-  // Распроданную расцветку не маркируем — паритет с computeBadges (soldOut гасит new/discount).
   const soldOut = !active.variants.some((v) => v.active && v.stock > 0);
   const galleryIsNew = !soldOut && isNewByDate(product.createdAt, now, NEW_PRODUCT_WINDOW_DAYS);
   const panelColorways = product.colorways.map((cw) => ({ slug: cw.slug, name: cw.name, thumbUrl: cw.images[0]?.url ?? null }));
@@ -139,68 +119,95 @@ export default async function ProductPage({ params, searchParams }: Params) {
   const breadcrumbJsonLd = buildBreadcrumbListJsonLd(breadcrumbItems);
 
   return (
-    <div className="mx-auto max-w-[1240px] px-4 sm:px-6 pb-16">
-      <Breadcrumbs items={[
-        { label: 'Главная', href: '/' },
-        { label: 'Каталог', href: '/catalog' },
-        { label: product.category.name, href: `/catalog?category=${product.category.slug}` },
-        { label: product.name },
-      ]} />
+    <div className="mx-auto max-w-[1200px] px-6 pb-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_440px] gap-6 lg:gap-10 mt-6">
-        {/* key по расцветке: при смене ?color= галерея/панель пересоздаются (сброс выбранного размера) */}
-        <ProductGallery key={active.slug} images={galleryImages} productName={product.name} isNew={galleryIsNew} />
-        <div>
-          <p className="text-[11px] text-ink-muted uppercase tracking-wide">{product.category.name} · RITM</p>
-          <h1 className="font-display font-bold text-[28px] sm:text-[34px] leading-tight mt-1">{product.name}</h1>
-          {count > 0 && (
-            <a href="#reviews" className="mt-2 inline-flex"><RatingStars value={avg} count={count} /></a>
-          )}
-          <div className="mt-5">
-            <PurchasePanel
-              key={active.slug}
-              productName={product.name}
-              productSlug={product.slug}
-              colorways={panelColorways}
-              activeColorwaySlug={active.slug}
-              activeColorwayName={active.name}
-              variants={panelVariants}
-              fitNote={product.fitNote}
-            />
-          </div>
-          <div className="mt-3">
-            <WishlistHeart productId={product.id} initialActive={wishlistedIds.has(product.id)} variant="pdp" />
-          </div>
-        </div>
+      <div className="mt-[26px]">
+        <Breadcrumbs items={[
+          { label: 'Главная', href: '/' },
+          { label: 'Каталог', href: '/catalog' },
+          { label: product.category.name, href: `/catalog?category=${product.category.slug}` },
+          { label: product.name },
+        ]} />
       </div>
 
-      {/* Описание + specs */}
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_440px] gap-6 lg:gap-10 mt-12">
-        <div>
-          <h2 className="font-display font-bold text-2xl">Об этой модели</h2>
-          {product.description && <p className="text-ink-muted mt-3 leading-relaxed">{product.description}</p>}
+      {/* 2-column: left = gallery + info card, right = thumbnails + sticky buy + reviews */}
+      <div className="grid lg:grid-cols-[1.08fr_1fr] gap-[30px] mt-5 items-start">
+        {/* LEFT COLUMN */}
+        <div className="grid gap-[22px] content-start">
+          {/* Main image */}
+          <ProductGallery
+            key={active.slug}
+            images={galleryImages}
+            productName={product.name}
+            isNew={galleryIsNew}
+            discountPct={null}
+          />
+
+          {/* Info card: title, rating, color, size, accordions */}
+          <PurchasePanel
+            key={active.slug}
+            productName={product.name}
+            productSlug={product.slug}
+            colorways={panelColorways}
+            activeColorwaySlug={active.slug}
+            activeColorwayName={active.name}
+            variants={panelVariants}
+            fitNote={product.fitNote}
+            description={product.description}
+            ratingAvg={count > 0 ? avg : null}
+            ratingCount={count}
+          />
         </div>
-        <SpecsTable specs={specs} />
+
+        {/* RIGHT COLUMN */}
+        <div className="grid gap-[22px] content-start">
+          {/* Sticky buy bar */}
+          <div className="lg:sticky lg:top-[140px] grid gap-[22px] z-5">
+            <div className="flex items-center justify-between gap-4 border border-line rounded-[18px] bg-surface p-3.5">
+              <div className="flex flex-col">
+                <div className="flex items-baseline gap-1">
+                  <span className="font-display font-bold text-[30px] text-accent leading-none tnum">
+                    {panelVariants.filter(v => v.active && v.stock > 0).length
+                      ? Math.min(...panelVariants.filter(v => v.active && v.stock > 0).map(v => v.price)).toLocaleString('ru-RU')
+                      : '—'}
+                  </span>
+                  <span className="text-[18px] text-accent font-display font-bold">₽</span>
+                </div>
+              </div>
+              <a href="#buy" className="inline-flex items-center gap-2.5 min-h-[52px] px-6 rounded-full bg-primary text-primary-foreground text-[15px] font-bold whitespace-nowrap hover:bg-footer transition-colors">
+                Купить
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            </div>
+
+            {/* Specs */}
+            <SpecsTable specs={specs} />
+          </div>
+
+          {/* Reviews */}
+          <div id="reviews">
+            <ReviewsSection
+              productId={product.id}
+              avg={avg}
+              count={count}
+              reviews={reviews}
+              state={reviewState}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Related */}
       {related.length > 0 && (
-        <section className="mt-16">
-          <h2 className="font-display font-bold text-2xl mb-5">С этим смотрят</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <section className="mt-[70px]">
+          <h2 className="text-center font-display font-bold text-[26px] sm:text-[40px] tracking-tight mb-7">Вам также подойдёт</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-[18px]">
             {related.map((p) => <ProductCard key={p.slug} data={p} wishlisted={wishlistedIds.has(p.id)} />)}
           </div>
         </section>
       )}
-
-      <ReviewsSection
-        productId={product.id}
-        avg={avg} count={count} reviews={reviews} state={reviewState}
-      />
-
-      {/* JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
     </div>
   );
 }
