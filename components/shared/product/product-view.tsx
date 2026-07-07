@@ -63,7 +63,7 @@ export function ProductView({
       </div>
 
       {/* Product: 2-column grid like prototype */}
-      <div className="grid lg:grid-cols-[1.08fr_1fr] gap-[30px] mt-5 items-start">
+      <div className="grid lg:grid-cols-[1.08fr_1fr] gap-[30px] mt-5 items-stretch">
         {/* LEFT COLUMN — main image + info card */}
         <div className="grid gap-[22px]">
           {/* Main image (pp-main) */}
@@ -98,7 +98,7 @@ export function ProductView({
         </div>
 
         {/* RIGHT COLUMN — thumbnails + sticky (buy bar + reviews) */}
-        <div className="grid gap-[22px]">
+        <div className="grid gap-[22px] h-full">
           {/* Thumbnail gallery (pp-gallery) — 2 top + 1 wide bottom */}
           <div className="grid grid-cols-2 gap-3">
             {galleryImages.map((img, i) => {
