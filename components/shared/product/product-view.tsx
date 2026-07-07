@@ -98,7 +98,7 @@ export function ProductView({
         </div>
 
         {/* RIGHT COLUMN — thumbnails + sticky (buy bar + reviews) */}
-        <div className="grid gap-[22px]">
+        <div className="grid gap-[22px] self-stretch">
           {/* Thumbnail gallery (pp-gallery) — 2 top + 1 wide bottom */}
           <div className="grid grid-cols-2 gap-3">
             {galleryImages.map((img, i) => {
