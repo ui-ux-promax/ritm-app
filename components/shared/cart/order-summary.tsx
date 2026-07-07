@@ -11,8 +11,7 @@ export function OrderSummary({ totalAmount, count }: { totalAmount: number; coun
   const total = totalAmount + shipping;
 
   return (
-    <aside>
-      <div className="lg:sticky lg:top-[140px] border border-line rounded-[24px] bg-surface p-[22px] grid gap-4">
+    <div className="lg:sticky lg:top-[140px] border border-line rounded-[24px] bg-surface p-[22px] grid gap-4">
         <h2 className="font-display font-bold text-[19px] tracking-tight">Сумма заказа</h2>
 
         {/* Promo */}
@@ -61,6 +60,5 @@ export function OrderSummary({ totalAmount, count }: { totalAmount: number; coun
           <span className="text-[11px] font-bold text-ink-muted tracking-wider px-2 py-0.5 border border-line rounded-md">SBP</span>
         </div>
       </div>
-    </aside>
   );
 }

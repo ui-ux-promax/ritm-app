@@ -64,13 +64,15 @@ export function CartView({ related }: { related: ProductCardData[] }) {
       ) : items.length === 0 ? (
         <div className="mt-6"><EmptyCart /></div>
       ) : (
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-6 mt-6 items-stretch">
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-6 mt-6 items-start">
           {/* Line items */}
           <div className="grid gap-3.5">
             {items.map((it) => <CartLineItem key={it.id} item={it} />)}
           </div>
           {/* Summary */}
-          <OrderSummary totalAmount={totalAmount} count={count} />
+          <div className="self-stretch">
+            <OrderSummary totalAmount={totalAmount} count={count} />
+          </div>
         </div>
       )}
 
