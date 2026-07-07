@@ -12,13 +12,13 @@ export function OrderSummary({ totalAmount, count }: { totalAmount: number; coun
 
   return (
     <aside>
-      <div className="lg:sticky lg:top-[90px] border border-line rounded-[24px] bg-surface p-[22px] grid gap-4">
+      <div className="lg:sticky lg:top-[90px] border border-line rounded-[24px] bg-surface p-[22px] grid gap-4 self-start">
         <h2 className="font-display font-bold text-[19px] tracking-tight">Сумма заказа</h2>
 
         {/* Promo */}
         <div className="flex gap-2">
           <input type="text" placeholder="Промокод" aria-label="Промокод" className="flex-1 min-w-0 h-[46px] px-3.5 border border-line rounded-[13px] bg-surface text-sm outline-none uppercase placeholder:normal-case placeholder:text-ink-muted/80 hover:border-ink/24 transition-colors" />
-          <button type="button" className="h-[46px] px-4.5 border border-line rounded-[13px] bg-surface-soft font-bold text-[13.5px] whitespace-nowrap hover:border-ink/30 transition-colors">Применить</button>
+          <button type="button" className="h-[46px] px-5 border border-line rounded-[13px] bg-surface-soft font-bold text-[13.5px] whitespace-nowrap hover:border-ink/30 transition-colors">Применить</button>
         </div>
 
         {/* Summary rows */}
