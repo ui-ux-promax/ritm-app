@@ -218,7 +218,7 @@ export function ProfileView({ user, initial, orders }: ProfileViewProps) {
               {name}
             </h1>
             <div className="mt-[9px] flex flex-wrap items-center gap-2.5 text-[13.5px] text-ink-muted">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/12 px-3 py-1 text-xs font-bold text-[hsl(151_45%_26%)]">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(151_35%_38%_/_0.12)] px-3 py-1 text-xs font-bold text-[hsl(151_45%_26%)]">
                 <span className="[&>svg]:h-[13px] [&>svg]:w-[13px]">{ICONS.star}</span>
                 Ritm Club · Gold
               </span>
@@ -245,7 +245,7 @@ export function ProfileView({ user, initial, orders }: ProfileViewProps) {
       {/* Layout: sidebar + panels */}
       <div className="mt-[30px] grid grid-cols-[248px_minmax(0,1fr)] items-start gap-7 max-[900px]:mt-2 max-[900px]:grid-cols-1 max-[900px]:gap-0">
         {/* Sidebar */}
-        <aside className="sticky top-[88px] grid gap-1.5 rounded-[24px] border border-line bg-surface p-3.5 max-[900px]:hidden">
+        <aside className="sticky top-[140px] grid gap-1.5 rounded-[24px] border border-line bg-surface p-3.5 max-[900px]:hidden">
           {PANELS.map((p) => (
             <button
               key={p.key}
