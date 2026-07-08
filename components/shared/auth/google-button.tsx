@@ -2,7 +2,6 @@
 
 import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui';
 import { safeCallbackUrl } from '@/lib/safe-redirect';
 
 // Официальный многоцветный логотип Google G (lucide не содержит бренд-иконок).
@@ -37,15 +36,13 @@ export function GoogleButton() {
   const params = useSearchParams();
   const callbackUrl = safeCallbackUrl(params.get('callbackUrl'));
   return (
-    <Button
+    <button
       type="button"
-      variant="secondary"
-      size="lg"
-      className="w-full flex items-center justify-center gap-2"
+      className="inline-flex items-center justify-center gap-2 h-[46px] border border-line rounded-full bg-surface text-[13.5px] font-bold hover:border-ink/30 hover:bg-surface-soft/50 transition-colors"
       onClick={() => signIn('google', { redirectTo: callbackUrl })}
     >
       <GoogleIcon />
-      Войти через Google
-    </Button>
+      Google
+    </button>
   );
 }
