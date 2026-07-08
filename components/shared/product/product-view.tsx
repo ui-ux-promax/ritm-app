@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { PurchasePanel } from './purchase-panel';
+import { WishlistHeart } from '@/components/shared/wishlist/wishlist-heart';
 import { ReviewsSection } from './reviews-section';
 import { Breadcrumbs } from './breadcrumbs';
 import { ProductCard } from '@/components/shared/product-card';
@@ -34,12 +35,14 @@ interface Props {
   reviewState: 'eligible' | 'guest' | 'not-purchased' | 'already-reviewed';
   related: ProductCardData[];
   wishlistedIds: Set<string>;
+  wishlisted: boolean;
+  productId: string;
 }
 
 export function ProductView({
   product, galleryImages, isNew, panelColorways, activeColorwaySlug,
   activeColorwayName, panelVariants, ratingAvg, ratingCount,
-  reviews, reviewState, related, wishlistedIds,
+  reviews, reviewState, related, wishlistedIds, wishlisted, productId,
 }: Props) {
   const [activeIdx, setActiveIdx] = useState(0);
 
@@ -69,9 +72,9 @@ export function ProductView({
           {/* Main image (pp-main) */}
           <div className="relative aspect-[1/1.04] rounded-[24px] border border-line bg-surface-soft overflow-hidden">
             {/* Fav button top-left */}
-            <button type="button" aria-label="В избранное" className="absolute left-4 top-4 z-10 w-[42px] h-[42px] rounded-full bg-surface/90 backdrop-blur grid place-items-center">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 20.5s-7.25-4.45-7.25-10.2A4.35 4.35 0 0 1 12 7.25a4.35 4.35 0 0 1 7.25 3.05C19.25 16.05 12 20.5 12 20.5Z"/></svg>
-            </button>
+            <div className="absolute left-4 top-4 z-10">
+              <WishlistHeart productId={productId} initialActive={wishlisted} variant="pdp" />
+            </div>
             {/* Badge top-right */}
             <span className="absolute right-4 top-4 z-10 px-4 py-2 rounded-full bg-surface/90 backdrop-blur text-[13px] font-bold">
               {product.category.name}

@@ -163,6 +163,8 @@ export default async function ProductPage({ params, searchParams }: Params) {
         reviewState={reviewState}
         related={related}
         wishlistedIds={wishlistedIds}
+        wishlisted={wishlistedIds.has(product.id)}
+        productId={product.id}
       />
     </div>
   );

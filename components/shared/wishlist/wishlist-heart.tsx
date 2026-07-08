@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Heart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toggleWishlist } from '@/app/actions/wishlist';
 import { useWishlistStore } from '@/store';
@@ -10,7 +9,7 @@ import { cn } from '@/lib/utils';
 type Props = {
   productId: string;
   initialActive: boolean;
-  variant?: 'card' | 'pdp';
+  variant?: 'card' | 'pdp' | 'catalog';
 };
 
 export function WishlistHeart({ productId, initialActive, variant = 'card' }: Props) {
@@ -39,7 +38,7 @@ export function WishlistHeart({ productId, initialActive, variant = 'card' }: Pr
         }
         setActive(res.active);
         fetchCount(); // сверяем с авторитетным счётчиком сервера
-        router.refresh(); // обновить список на /wishlist
+        router.refresh(); // обновить список на /profile#favorites
       } catch {
         setActive(!next); // откат при сбое экшена (сеть/сервер)
         if (next) decrement(); else increment(); // откат бейджа
@@ -50,6 +49,26 @@ export function WishlistHeart({ productId, initialActive, variant = 'card' }: Pr
 
   const label = active ? 'Убрать из избранного' : 'В избранное';
 
+  if (variant === 'catalog') {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={active}
+        aria-label={label}
+        className={cn(
+          'w-[46px] h-[46px] grid place-items-center rounded-full border transition-colors',
+          active ? 'border-danger text-danger' : 'border-line text-ink hover:border-danger/50 hover:text-danger',
+        )}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+          <path d="M12 20.5s-7.25-4.45-7.25-10.2A4.35 4.35 0 0 1 12 7.25a4.35 4.35 0 0 1 7.25 3.05C19.25 16.05 12 20.5 12 20.5Z"/>
+        </svg>
+        <span className="sr-only" role="status" aria-live="polite">{error ?? ''}</span>
+      </button>
+    );
+  }
+
   if (variant === 'pdp') {
     return (
       <button
@@ -57,10 +76,14 @@ export function WishlistHeart({ productId, initialActive, variant = 'card' }: Pr
         onClick={onClick}
         aria-pressed={active}
         aria-label={label}
-        className="btn btn-secondary btn-md inline-flex items-center gap-2"
+        className={cn(
+          'w-[42px] h-[42px] rounded-full bg-surface/90 backdrop-blur grid place-items-center border transition-colors',
+          active ? 'border-danger text-danger' : 'border-line hover:border-danger/50 hover:text-danger',
+        )}
       >
-        <Heart className={cn('w-5 h-5', active && 'fill-current text-[#e23b4e]')} aria-hidden />
-        <span>{active ? 'В избранном' : 'В избранное'}</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" aria-hidden="true" className={active ? 'text-[#e23b4e]' : ''}>
+          <path d="M12 20.5s-7.25-4.45-7.25-10.2A4.35 4.35 0 0 1 12 7.25a4.35 4.35 0 0 1 7.25 3.05C19.25 16.05 12 20.5 12 20.5Z"/>
+        </svg>
         <span className="sr-only" role="status" aria-live="polite">{error ?? ''}</span>
       </button>
     );
