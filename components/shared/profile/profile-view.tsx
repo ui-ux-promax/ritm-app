@@ -77,6 +77,22 @@ interface SavedCard {
   isDefault: boolean;
 }
 
+// ── Icons ──────────────────────────────────────────────────────────────────
+
+const ICONS = {
+  overview: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>,
+  orders: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M5 7.5 12 4l7 3.5v9L12 20l-7-3.5z"/><path d="m5 7.5 7 3.5 7-3.5"/><path d="M12 11v9"/></svg>,
+  favorites: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 20.5s-7.25-4.45-7.25-10.2A4.35 4.35 0 0 1 12 7.25a4.35 4.35 0 0 1 7.25 3.05C19.25 16.05 12 20.5 12 20.5Z"/></svg>,
+  addresses: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>,
+  payments: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 9.5h18"/></svg>,
+  settings: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 7.04 3.4l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>,
+  logout: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M15 17l5-5-5-5"/><path d="M20 12H9"/><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/></svg>,
+  star: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m12 3 2.4 5.1 5.6.7-4.1 3.9 1.05 5.5L12 16.9l-4.95 2.3L8.1 13.7 4 9.8l5.6-.7Z"/></svg>,
+  money: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+  arrow: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>,
+  chevron: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="m9 6 6 6-6 6"/></svg>,
+} as const;
+
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const PANELS: Array<{ key: PanelKey; label: string }> = [
@@ -185,8 +201,8 @@ export function ProfileView({ user, initial, orders }: ProfileViewProps) {
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-[13px] text-ink-muted">
         <Link href="/" className="hover:text-ink">Главная</Link>
-        <span>/</span>
-        <span>Профиль</span>
+        <span className="[&>svg]:h-[14px] [&>svg]:w-[14px] opacity-60">{ICONS.chevron}</span>
+        <span className="font-semibold text-ink">Профиль</span>
       </nav>
 
       {/* Account hero */}
@@ -202,25 +218,28 @@ export function ProfileView({ user, initial, orders }: ProfileViewProps) {
               {name}
             </h1>
             <div className="mt-[9px] flex flex-wrap items-center gap-2.5 text-[13.5px] text-ink-muted">
-              <span className="rounded-full bg-accent/12 px-3 py-1 text-xs font-bold text-[hsl(151_45%_26%)]">
-                Gold
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/12 px-3 py-1 text-xs font-bold text-[hsl(151_45%_26%)]">
+                <span className="[&>svg]:h-[13px] [&>svg]:w-[13px]">{ICONS.star}</span>
+                Ritm Club · Gold
               </span>
+              <span className="h-[3px] w-[3px] rounded-full bg-ink-muted/55" />
               <span>{user.email}</span>
-              <span>·</span>
+              <span className="h-[3px] w-[3px] rounded-full bg-ink-muted/55" />
               <span>С нами с {fmtDate.format(new Date(user.createdAt))}</span>
             </div>
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: '/' })}
-              className="mt-3.5 h-[38px] rounded-full border border-line bg-surface px-4 text-[13px] font-bold text-ink-muted hover:border-danger/40 hover:text-danger"
+              className="mt-3.5 inline-flex h-[38px] items-center gap-2 rounded-full border border-line bg-surface px-4 text-[13px] font-bold text-ink-muted hover:border-danger/40 hover:text-danger"
             >
+              <span className="[&>svg]:h-4 [&>svg]:w-4">{ICONS.logout}</span>
               Выйти
             </button>
           </div>
         </div>
 
         {/* Loyalty card */}
-        <Loyalty />
+        <Loyalty name={name} createdAt={user.createdAt} />
       </section>
 
       {/* Layout: sidebar + panels */}
@@ -238,6 +257,9 @@ export function ProfileView({ user, initial, orders }: ProfileViewProps) {
                 panel === p.key && 'bg-primary text-primary-foreground hover:bg-primary',
               )}
             >
+              <span className={cn('h-[18px] w-[18px] shrink-0 [&_svg]:h-[18px] [&_svg]:w-[18px]', panel === p.key ? 'text-primary-foreground' : 'text-ink-muted')}>
+                {ICONS[p.key]}
+              </span>
               <span className="flex-1">{p.label}</span>
               {p.key === 'orders' && <NavCount active={panel === p.key}>{orders.length}</NavCount>}
               {p.key === 'favorites' && <NavCount active={panel === p.key}>{favorites.length}</NavCount>}
@@ -247,9 +269,10 @@ export function ProfileView({ user, initial, orders }: ProfileViewProps) {
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: '/' })}
-            className="rounded-[14px] px-[13px] py-[11px] text-left text-sm font-semibold text-danger hover:bg-danger/10"
+            className="flex items-center gap-3 rounded-[14px] px-[13px] py-[11px] text-left text-sm font-semibold text-danger hover:bg-danger/10"
           >
-            Выйти
+            <span className="h-[18px] w-[18px] shrink-0 text-danger [&_svg]:h-[18px] [&_svg]:w-[18px]">{ICONS.logout}</span>
+            <span className="flex-1">Выйти</span>
           </button>
         </aside>
 
@@ -274,7 +297,7 @@ export function ProfileView({ user, initial, orders }: ProfileViewProps) {
         {/* Panels */}
         <div className="min-w-0">
           <Panel id="overview" active={panel === 'overview'} title="Обзор" text="Главное по аккаунту, заказам и сохранённым данным.">
-            <Overview user={user} orders={orders} totalSpent={totalSpent} favs={favorites.length} />
+            <Overview user={user} orders={orders} totalSpent={totalSpent} favs={favorites.length} go={go} />
           </Panel>
 
           <Panel id="orders" active={panel === 'orders'} title="Заказы" text="История покупок, трекинг доставки и детали каждого заказа.">
@@ -346,21 +369,25 @@ function Panel({ id, active, title, text, children }: {
 
 // ── Loyalty card ──────────────────────────────────────────────────────────
 
-function Loyalty() {
+function Loyalty({ name, createdAt }: { name: string; createdAt: string }) {
   const p = Math.min(100, Math.round((POINTS / 2000) * 100));
   return (
     <div className="relative isolate grid gap-3.5 overflow-hidden rounded-[24px] bg-footer px-[22px] py-5 text-primary-foreground shadow-[0_22px_70px_hsl(var(--color-text)/.08)] max-[980px]:max-w-[460px]">
-      {/* Watermark */}
-      <div className="absolute -right-3.5 -bottom-[18px] font-display text-[140px] font-extrabold leading-none opacity-[.08]">
-        R
-      </div>
+      {/* Watermark — Ritm logo outline */}
+      <svg className="absolute -right-3.5 -bottom-[18px] h-auto w-[190px] text-primary-foreground opacity-[.08] pointer-events-none" viewBox="0 0 120 34" fill="none" aria-hidden="true">
+        <path d="M6 25L17 8L27 25L36 8L46 25" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M58 9V25M70 9V25" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/>
+        <path d="M82 25V9L99 25V9" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M112 10L104 18L113 25M103 9V25" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
 
       {/* Top: eyebrow + gold badge */}
       <div className="z-[1] flex justify-between">
         <span className="text-[10.5px] font-extrabold uppercase tracking-[.18em] text-primary-foreground/70">
           Ritm Club
         </span>
-        <span className="rounded-full border border-warm/40 bg-warm/15 px-[11px] py-[3px] text-[11px] font-bold text-[hsl(42_92%_72%)]">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-warm/40 bg-warm/15 px-[11px] py-[3px] text-[11px] font-bold text-[hsl(42_92%_72%)]">
+          <span className="[&>svg]:h-3 [&>svg]:w-3">{ICONS.star}</span>
           Gold
         </span>
       </div>
@@ -370,19 +397,21 @@ function Loyalty() {
         <span className="tnum font-display text-[38px] font-extrabold leading-none tracking-tight text-warm">
           {POINTS.toLocaleString('ru-RU')}
         </span>
-        <span className="text-[12.5px] font-semibold text-primary-foreground/70">баллов</span>
+        <span className="text-[12.5px] font-semibold text-primary-foreground/72">бонусных баллов</span>
       </div>
 
       {/* Meta */}
-      <div className="z-[1] text-[12.5px] text-primary-foreground/80">
-        До Platinum: <b className="text-primary-foreground">{2000 - POINTS} баллов</b> · Кэшбэк 7%
+      <div className="z-[1] flex flex-wrap items-center gap-2.5 text-[12.5px] text-primary-foreground/82">
+        <b className="text-primary-foreground">{name}</b>
+        <span className="h-[3px] w-[3px] rounded-full bg-primary-foreground/40" />
+        <span>в Ritm с {fmtDate.format(new Date(createdAt))}</span>
       </div>
 
       {/* Progress bar */}
       <div className="z-[1] grid gap-2">
-        <div className="flex justify-between text-[11.5px] text-primary-foreground/80">
-          <span>Прогресс уровня</span>
-          <b>{p}%</b>
+        <div className="flex items-center justify-between gap-2.5 text-[11.5px] text-primary-foreground/78">
+          <span>До статуса Platinum — <b className="text-primary-foreground">{2000 - POINTS} баллов</b></span>
+          <b className="tnum">{p}%</b>
         </div>
         <div className="h-[7px] overflow-hidden rounded-full bg-primary-foreground/15">
           <div className="h-full rounded-full bg-gradient-to-r from-warm/75 to-warm" style={{ width: `${p}%` }} />
@@ -394,11 +423,12 @@ function Loyalty() {
 
 // ── Overview panel ────────────────────────────────────────────────────────
 
-function Overview({ user, orders, totalSpent, favs }: {
+function Overview({ user, orders, totalSpent, favs, go }: {
   user: ProfileUser;
   orders: ProfileOrder[];
   totalSpent: number;
   favs: number;
+  go: (key: PanelKey) => void;
 }) {
   const a = ADDRESSES[0];
   const c = CARDS[0];
@@ -406,16 +436,22 @@ function Overview({ user, orders, totalSpent, favs }: {
     <>
       {/* Stats */}
       <div className="grid grid-cols-4 gap-3.5 max-[1024px]:grid-cols-2">
-        <Stat n={orders.length} t="Заказов" />
-        <Stat n={formatPrice(totalSpent)} t="Потрачено" />
-        <Stat n={favs} t="В избранном" />
-        <Stat n={POINTS.toLocaleString('ru-RU')} t="Баллов Ritm Club" />
+        <Stat icon={ICONS.orders} n={orders.length} t="Заказов" />
+        <Stat icon={ICONS.money} n={formatPrice(totalSpent)} t="Потрачено" />
+        <Stat icon={ICONS.favorites} n={favs} t="В избранном" />
+        <Stat icon={ICONS.star} n={POINTS.toLocaleString('ru-RU')} t="Баллов Ritm Club" />
       </div>
 
       {/* Columns: recent orders + profile summary */}
       <div className="mt-[18px] grid grid-cols-[1.4fr_1fr] gap-[18px] max-[1024px]:grid-cols-1">
         <Card>
-          <h3 className="mb-3.5 font-display text-base font-extrabold">Последние заказы</h3>
+          <div className="mb-3.5 flex items-center justify-between gap-3">
+            <h3 className="font-display text-base font-extrabold">Последние заказы</h3>
+            <button type="button" onClick={() => go('orders')} className="inline-flex items-center gap-1.5 text-[13px] font-bold text-ink-muted hover:text-ink">
+              Все заказы
+              <span className="[&>svg]:h-[14px] [&>svg]:w-[14px]">{ICONS.arrow}</span>
+            </button>
+          </div>
           {orders.slice(0, 3).map((o) => <MiniOrder key={o.orderNumber} order={o} />)}
           {orders.length === 0 && (
             <p className="rounded-[18px] border border-dashed border-line bg-surface-soft p-4 text-sm text-ink-muted">
@@ -425,7 +461,13 @@ function Overview({ user, orders, totalSpent, favs }: {
         </Card>
 
         <Card>
-          <h3 className="mb-3.5 font-display text-base font-extrabold">Профиль</h3>
+          <div className="mb-3.5 flex items-center justify-between gap-3">
+            <h3 className="font-display text-base font-extrabold">Профиль</h3>
+            <button type="button" onClick={() => go('settings')} className="inline-flex items-center gap-1.5 text-[13px] font-bold text-ink-muted hover:text-ink">
+              Изменить
+              <span className="[&>svg]:h-[14px] [&>svg]:w-[14px]">{ICONS.arrow}</span>
+            </button>
+          </div>
           <Row k="Имя" v={user.name || 'Не указано'} />
           <Row k="E-mail" v={user.email} />
           <Row k="Телефон" v={user.phone || 'Не указан'} />
@@ -455,11 +497,11 @@ function Orders(p: {
       {/* Toolbar */}
       <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] gap-3.5 max-[760px]:grid-cols-1">
         <label className="grid h-11 max-w-[320px] grid-cols-[auto_minmax(0,1fr)] items-center gap-2.5 rounded-full border border-line bg-surface px-4 text-ink-muted max-[760px]:max-w-none">
-          <span aria-hidden="true" className="h-[17px] w-[17px] rounded-full border border-ink-muted/60" />
+          <svg className="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
           <input
             value={p.query}
             onChange={(e) => p.setQuery(e.target.value)}
-            placeholder="Найти заказ или товар..."
+            placeholder="Найти заказ или товар…"
             className="min-w-0 bg-transparent text-sm text-ink outline-none"
           />
         </label>
@@ -598,9 +640,11 @@ function OrderCard({ order, open, toggle }: {
               {/* Actions */}
               <div className="mt-[18px] flex flex-wrap gap-2.5">
                 <button type="button" className="inline-flex h-[42px] items-center gap-2 rounded-full bg-primary px-[18px] text-[13px] font-bold text-primary-foreground">
+                  <svg className="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 4v4h4"/></svg>
                   Повторить заказ
                 </button>
                 <button type="button" className="inline-flex h-[42px] items-center gap-2 rounded-full border border-line bg-surface px-[18px] text-[13px] font-bold">
+                  <svg className="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><path d="M14 3h7v7"/><path d="M21 3 10 14"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
                   Накладная
                 </button>
               </div>
@@ -666,24 +710,28 @@ function Tiles({ addresses }: { addresses?: boolean }) {
       {addresses
         ? ADDRESSES.map((a) => (
             <Tile key={a.id} def={a.isDefault} title={a.name} sub={a.role}
+              icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9.5h14V10"/><path d="M9.5 19.5V14h5v5.5"/></svg>}
               body={<><b className="text-ink">{a.city}</b><br />{a.line}<br />{a.note}</>} />
           ))
         : CARDS.map((c) => (
             <Tile key={c.id} def={c.isDefault} title={c.brand} sub={`•••• ${c.last4}`}
+              icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 9.5h18"/></svg>}
               body={<>Действует до <b className="text-ink">{c.expiry}</b></>} />
           ))}
       <button
         type="button"
         className="grid min-h-[150px] place-items-center gap-2.5 rounded-[24px] border border-dashed border-line text-[13.5px] font-bold text-ink-muted hover:bg-surface/50"
       >
-        <span className="grid h-10 w-10 place-items-center rounded-full bg-surface-soft text-ink">+</span>
+        <span className="grid h-10 w-10 place-items-center rounded-full bg-surface-soft text-ink">
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+        </span>
         {addLabel}
       </button>
     </div>
   );
 }
 
-function Tile({ def, title, sub, body }: { def: boolean; title: string; sub: string; body: ReactNode }) {
+function Tile({ def, title, sub, body, icon }: { def: boolean; title: string; sub: string; body: ReactNode; icon?: ReactNode }) {
   return (
     <div className={cn('relative grid gap-2 rounded-[24px] border border-line bg-surface p-5', def && 'border-accent/45 shadow-[inset_0_0_0_1px_hsl(var(--color-accent)/.2)]')}>
       {def && (
@@ -691,9 +739,16 @@ function Tile({ def, title, sub, body }: { def: boolean; title: string; sub: str
           По умолчанию
         </span>
       )}
-      <div>
-        <div className="text-[14.5px] font-extrabold">{title}</div>
-        <div className="text-xs text-ink-muted">{sub}</div>
+      <div className="flex items-center gap-2.5">
+        {icon && (
+          <span className="grid h-9 w-9 place-items-center rounded-[11px] bg-surface-soft text-ink [&_svg]:h-[18px] [&_svg]:w-[18px]">
+            {icon}
+          </span>
+        )}
+        <div>
+          <div className="text-[14.5px] font-extrabold">{title}</div>
+          <div className="text-xs text-ink-muted">{sub}</div>
+        </div>
       </div>
       <p className="text-[13px] leading-[1.55] text-ink-muted">{body}</p>
       <div className="mt-1.5 flex flex-wrap gap-2">
@@ -949,11 +1004,11 @@ function Card({ children, className }: { children: ReactNode; className?: string
   return <div className={cn('rounded-[24px] border border-line bg-surface p-[22px]', className)}>{children}</div>;
 }
 
-function Stat({ n, t }: { n: string | number; t: string }) {
+function Stat({ icon, n, t }: { icon: ReactNode; n: string | number; t: string }) {
   return (
     <div className="grid gap-2 rounded-[18px] border border-line bg-surface p-[18px]">
-      <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-surface-soft">
-        <span aria-hidden="true" className="h-[18px] w-[18px] rounded-full border border-ink-muted/40" />
+      <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-surface-soft text-ink [&_svg]:h-[19px] [&_svg]:w-[19px]">
+        {icon}
       </span>
       <span className="tnum font-display text-[26px] font-extrabold tracking-tight">{n}</span>
       <span className="text-[12.5px] font-semibold text-ink-muted">{t}</span>
@@ -970,8 +1025,9 @@ function MiniOrder({ order }: { order: ProfileOrder }) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-[13px] font-bold">RITM-{order.orderNumber}</div>
-        <div className="text-xs text-ink-muted">
-          {fmtDate.format(new Date(order.createdAt))} · {order.items.length} поз.
+        <div className="mt-0.5 flex items-center gap-2 text-xs text-ink-muted">
+          <span>{fmtDate.format(new Date(order.createdAt))} · {order.items.length} поз.</span>
+          <OrderStatusBadge status={order.status} paymentStatus={order.paymentStatus} />
         </div>
       </div>
       <div className="tnum text-sm font-extrabold">{formatPrice(order.totalAmount)}</div>
