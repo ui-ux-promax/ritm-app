@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { VerificationGateHost } from '@/components/shared/auth/verification-gate-host';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -49,6 +50,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
         {children}
       </main>
+      <VerificationGateHost />
     </div>
   );
 }
