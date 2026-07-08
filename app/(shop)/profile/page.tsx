@@ -1,7 +1,11 @@
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma-client';
 import { ProfileView, type ProfileOrder } from '@/components/shared/profile/profile-view';
+import { getWishlistItems } from '@/lib/wishlist';
+import { wishlistCookieName } from '@/lib/wishlist-cookie';
+import type { ProductCardData } from '@/lib/product-summary';
 import type { ProfileValues } from '@/services/dto/auth.dto';
 
 export const dynamic = 'force-dynamic';
@@ -11,48 +15,53 @@ export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      phone: true,
-      birthdate: true,
-      createdAt: true,
-      orders: {
-        orderBy: { createdAt: 'desc' },
-        select: {
-          orderNumber: true,
-          status: true,
-          createdAt: true,
-          itemsTotal: true,
-          discountAmount: true,
-          shippingAmount: true,
-          totalAmount: true,
-          paymentMethod: true,
-          shippingMethod: true,
-          city: true,
-          addressLine: true,
-          payment: { select: { status: true } },
-          items: {
-            orderBy: { id: 'asc' },
-            select: {
-              productName: true,
-              imageUrl: true,
-              colorwayName: true,
-              size: true,
-              unitPrice: true,
-              quantity: true,
-              lineTotal: true,
-              productVariant: {
-                select: {
-                  size: true,
-                  price: true,
-                  colorway: {
-                    select: {
-                      name: true,
-                      product: { select: { name: true, brand: true } },
+  const store = await cookies();
+  const wishlistToken = store.get(wishlistCookieName)?.value;
+
+  const [user, wishlistProducts] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        birthdate: true,
+        createdAt: true,
+        orders: {
+          orderBy: { createdAt: 'desc' },
+          select: {
+            orderNumber: true,
+            status: true,
+            createdAt: true,
+            itemsTotal: true,
+            discountAmount: true,
+            shippingAmount: true,
+            totalAmount: true,
+            paymentMethod: true,
+            shippingMethod: true,
+            city: true,
+            addressLine: true,
+            payment: { select: { status: true } },
+            items: {
+              orderBy: { id: 'asc' },
+              select: {
+                productName: true,
+                imageUrl: true,
+                colorwayName: true,
+                size: true,
+                unitPrice: true,
+                quantity: true,
+                lineTotal: true,
+                productVariant: {
+                  select: {
+                    size: true,
+                    price: true,
+                    colorway: {
+                      select: {
+                        name: true,
+                        product: { select: { name: true, brand: true } },
+                      },
                     },
                   },
                 },
@@ -61,8 +70,9 @@ export default async function ProfilePage() {
           },
         },
       },
-    },
-  });
+    }),
+    getWishlistItems(session, wishlistToken),
+  ]);
 
   if (!user) redirect('/login');
 
@@ -109,6 +119,7 @@ export default async function ProfilePage() {
       }}
       initial={initial}
       orders={orders}
+      wishlist={wishlistProducts}
     />
   );
 }

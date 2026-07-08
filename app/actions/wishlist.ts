@@ -38,14 +38,14 @@ export async function toggleWishlist(raw: unknown): Promise<ToggleResult> {
   try {
     if (existing) {
       await prisma.wishlistItem.delete({ where: { id: existing.id } });
-      revalidatePath('/wishlist');
+      revalidatePath('/profile');
       return { ok: true, active: false };
     }
     await prisma.wishlistItem.create({ data: { wishlistId: owner.id, productId } });
   } catch (e) {
     // P2002: гонка дубля на @@unique → товар уже в избранном.
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      revalidatePath('/wishlist');
+      revalidatePath('/profile');
       return { ok: true, active: true };
     }
     // P2003: несуществующий productId (FK) → ошибка клиенту.
@@ -55,6 +55,6 @@ export async function toggleWishlist(raw: unknown): Promise<ToggleResult> {
     throw e;
   }
 
-  revalidatePath('/wishlist');
+  revalidatePath('/profile');
   return { ok: true, active: true };
 }

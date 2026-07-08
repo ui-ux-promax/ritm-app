@@ -19,7 +19,7 @@ export function WishlistBadge() {
 
   return (
     <Link
-      href="/wishlist"
+      href="/profile#favorites"
       className="relative w-[34px] h-[34px] grid place-items-center rounded-full border border-line/72 bg-surface shadow-sm hover:border-ink/35 transition-colors"
       aria-label={count ? `Избранное, ${count}` : 'Избранное пусто'}
     >

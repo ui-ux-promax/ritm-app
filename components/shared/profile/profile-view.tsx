@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { useEffect, useMemo, useState, useTransition, type ReactNode } from 'react';
 import { updateProfile } from '@/app/actions/profile';
+import { toggleWishlist } from '@/app/actions/wishlist';
 import { OrderStatusBadge } from '@/components/shared/orders/order-status-badge';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { ORDER_STATUS_META } from '@/lib/order';
 import { profileSchema, type ProfileValues } from '@/services/dto/auth.dto';
+import type { ProductCardData } from '@/lib/product-summary';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -57,6 +59,7 @@ interface ProfileViewProps {
   user: ProfileUser;
   initial: ProfileValues;
   orders: ProfileOrder[];
+  wishlist: ProductCardData[];
 }
 
 interface SavedAddress {
@@ -129,12 +132,12 @@ const fmtDate = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long'
 
 // ── Main component ─────────────────────────────────────────────────────────
 
-export function ProfileView({ user, initial, orders }: ProfileViewProps) {
+export function ProfileView({ user, initial, orders, wishlist }: ProfileViewProps) {
   const [panel, setPanel] = useState<PanelKey>('overview');
   const [filter, setFilter] = useState<FilterKey>('all');
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState<ReadonlySet<number>>(() => new Set());
-  const [favorites] = useState<Array<never>>([]);
+  const [favorites, setFavorites] = useState<ProductCardData[]>(wishlist);
   const [toast, setToast] = useState<string | null>(null);
   const [prefs, setPrefs] = useState({ orders: true, drops: true, sales: false });
 
@@ -193,6 +196,13 @@ export function ProfileView({ user, initial, orders }: ProfileViewProps) {
     if (next.has(id)) next.delete(id); else next.add(id);
     return next;
   });
+
+  // Remove from favorites (optimistic UI + server toggle)
+  const handleRemoveFavorite = async (productId: string) => {
+    setFavorites((prev) => prev.filter((p) => p.id !== productId));
+    await toggleWishlist({ productId });
+    setToast('Удалено из избранного');
+  };
 
   return (
     <main className="mx-auto w-[min(100%-48px,1200px)] pb-20 pt-[26px] max-[560px]:w-[min(100%-28px,1200px)]">
@@ -315,7 +325,7 @@ export function ProfileView({ user, initial, orders }: ProfileViewProps) {
           </Panel>
 
           <Panel id="favorites" active={panel === 'favorites'} title="Избранное" text="Сохранённые товары — добавьте в корзину, пока есть размеры.">
-            <Empty title="Добавьте товары в избранное" text="Сохраняйте понравившиеся позиции из каталога, чтобы быстро вернуться к ним позже." href="/catalog" />
+            <Favorites favorites={favorites} onRemove={handleRemoveFavorite} />
           </Panel>
 
           <Panel id="addresses" active={panel === 'addresses'} title="Адреса" text="Адреса доставки для оформления заказов.">
@@ -697,6 +707,68 @@ function Timeline({ status, date }: { status: OrderStatusKey; date: string }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ── Favorites panel ───────────────────────────────────────────────────────
+
+function Favorites({ favorites, onRemove }: {
+  favorites: ProductCardData[];
+  onRemove: (productId: string) => void;
+}) {
+  if (favorites.length === 0) {
+    return (
+      <div className="rounded-[24px] border border-dashed border-line bg-surface px-6 py-[60px] text-center">
+        <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-surface-soft text-ink-muted">
+          <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 20.5s-7.25-4.45-7.25-10.2A4.35 4.35 0 0 1 12 7.25a4.35 4.35 0 0 1 7.25 3.05C19.25 16.05 12 20.5 12 20.5Z"/></svg>
+        </div>
+        <h3 className="font-display text-[22px] font-bold tracking-tight">В избранном пусто</h3>
+        <p className="mx-auto mt-2 max-w-[38ch] text-sm text-ink-muted">
+          Нажимайте ♡ на товарах в каталоге, чтобы сохранить их сюда.
+        </p>
+        <Link href="/catalog" className="mt-5 inline-flex h-[50px] items-center gap-2.5 rounded-full bg-primary px-6 text-[15px] font-bold text-primary-foreground">
+          В каталог
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-3 gap-4 max-[1024px]:grid-cols-2 max-[400px]:grid-cols-1">
+      {favorites.map((p) => (
+        <article key={p.slug} className="group rounded-[18px] border border-line bg-surface p-2.5 transition-all hover:border-ink/20 hover:shadow-[0_16px_36px_hsl(var(--color-text)/.07)]">
+          <div className="relative aspect-[1/1.04] overflow-hidden rounded-[13px] bg-surface-soft">
+            <Link href={`/product/${p.slug}`} className="block h-full w-full">
+              {p.imageUrl && (
+                <Image src={p.imageUrl} alt={p.imageAlt} fill sizes="(max-width:400px) 100vw, (max-width:1024px) 50vw, 33vw" className="object-cover transition-transform duration-[400ms] group-hover:scale-105" />
+              )}
+            </Link>
+            <button
+              type="button"
+              onClick={() => onRemove(p.id)}
+              className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-surface/92 text-danger backdrop-blur transition-transform hover:scale-110"
+              aria-label={`Убрать ${p.name} из избранного`}
+            >
+              <svg className="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"><path d="M12 20.5s-7.25-4.45-7.25-10.2A4.35 4.35 0 0 1 12 7.25a4.35 4.35 0 0 1 7.25 3.05C19.25 16.05 12 20.5 12 20.5Z"/></svg>
+            </button>
+          </div>
+          <div className="flex items-end justify-between gap-2.5 px-1.5 pb-px pt-3">
+            <div className="min-w-0">
+              <h3 className="truncate text-sm font-extrabold tracking-tight">{p.name}</h3>
+              <p className="mt-0.5 text-[11.5px] text-ink-muted">{p.brand}</p>
+              <span className="tnum mt-1.5 block font-extrabold text-accent">{formatPrice(p.minPrice)}</span>
+            </div>
+            <Link
+              href={`/product/${p.slug}`}
+              className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full border border-line bg-surface text-ink transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground"
+              aria-label={`Открыть ${p.name}`}
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </Link>
+          </div>
+        </article>
+      ))}
     </div>
   );
 }
