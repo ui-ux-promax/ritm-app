@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { useEffect, useMemo, useState, useTransition, type ReactNode } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { updateProfile } from '@/app/actions/profile';
+import { updatePassword, updateProfile } from '@/app/actions/profile';
 import { toggleWishlist } from '@/app/actions/wishlist';
 import { addAddress, deleteAddress, setDefaultAddress } from '@/app/actions/address';
 import { OrderStatusBadge } from '@/components/shared/orders/order-status-badge';
@@ -889,6 +889,7 @@ function Password({ toast }: { toast: (s: string) => void }) {
   const [v, setV] = useState({ current: '', next: '', repeat: '' });
   const [show, setShow] = useState({ current: false, next: false, repeat: false });
   const [bad, setBad] = useState<ReadonlySet<keyof typeof v>>(() => new Set());
+  const [pending, start] = useTransition();
   const str = strength(v.next);
 
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -899,8 +900,22 @@ function Password({ toast }: { toast: (s: string) => void }) {
     if (v.repeat !== v.next || v.repeat.length < 8) b.add('repeat');
     setBad(b);
     if (b.size === 0) {
-      setV({ current: '', next: '', repeat: '' });
-      toast('Пароль обновлён');
+      start(async () => {
+        const r = await updatePassword({
+          currentPassword: v.current,
+          newPassword: v.next,
+          repeatPassword: v.repeat,
+        });
+        if (!r.ok) {
+          toast(r.error);
+          if (r.error.includes('Текущий')) setBad(new Set(['current']));
+          if (r.error.includes('Новый')) setBad(new Set(['next']));
+          if (r.error.includes('совпадают')) setBad(new Set(['repeat']));
+          return;
+        }
+        setV({ current: '', next: '', repeat: '' });
+        toast('Пароль обновлён');
+      });
     }
   };
 
@@ -926,7 +941,7 @@ function Password({ toast }: { toast: (s: string) => void }) {
         <Pass id="pw-repeat" label="Повторите пароль" value={v.repeat}
           set={(x) => setV({ ...v, repeat: x })} show={show.repeat}
           toggle={() => setShow({ ...show, repeat: !show.repeat })} error={bad.has('repeat')} />
-        <Submit>Обновить пароль</Submit>
+        <Submit pending={pending}>{pending ? 'Обновляем...' : 'Обновить пароль'}</Submit>
       </form>
     </Card>
   );
