@@ -38,6 +38,7 @@ export function AddressSuggest() {
 
   const pick = (s: Suggestion) => {
     skip.current = true;
+    setValue('city', s.data.city ?? '');
     setValue('addressLine', s.value);
     setItems([]);
     setOpen(false);

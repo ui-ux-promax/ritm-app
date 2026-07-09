@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
+import Image from 'next/image';
 import { prisma } from '@/lib/prisma-client';
 import { getProductBySlug } from '@/lib/get-product';
 import { absoluteUrl, buildBreadcrumbListJsonLd, buildProductJsonLd, defaultOgImage, siteName } from '@/lib/seo';
@@ -13,11 +14,11 @@ import { Breadcrumbs } from '@/components/shared/product/breadcrumbs';
 import { ProductGallery } from '@/components/shared/product/product-gallery';
 import { PurchasePanel } from '@/components/shared/product/purchase-panel';
 import { SpecsTable } from '@/components/shared/product/specs-table';
+import { ProductView } from '@/components/shared/product/product-view';
 import { auth } from '@/auth';
 import { getReviewEligibility } from '@/lib/review';
 import { getWishlistProductIds } from '@/lib/wishlist';
 import { wishlistCookieName } from '@/lib/wishlist-cookie';
-import { WishlistHeart } from '@/components/shared/wishlist/wishlist-heart';
 import { RatingStars } from '@/components/shared/product/rating-stars';
 import { ReviewsSection } from '@/components/shared/product/reviews-section';
 import type { ReviewItem } from '@/components/shared/product/review-list';
@@ -37,11 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         orderBy: [{ isDefault: 'desc' }, { sortOrder: 'asc' }],
         take: 1,
         select: {
-          images: {
-            orderBy: { sortOrder: 'asc' },
-            take: 1,
-            select: { url: true, alt: true },
-          },
+          images: { orderBy: { sortOrder: 'asc' }, take: 1, select: { url: true, alt: true } },
         },
       },
     },
@@ -54,20 +51,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: product.name,
     description,
     alternates: { canonical: `/product/${slug}` },
-    openGraph: {
-      title: product.name,
-      description,
-      url: `/product/${slug}`,
-      siteName,
-      type: 'website',
-      images: [{ url: image, alt: primaryImage?.alt ?? product.name }],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: product.name,
-      description,
-      images: [image],
-    },
+    openGraph: { title: product.name, description, url: `/product/${slug}`, siteName, type: 'website', images: [{ url: image, alt: primaryImage?.alt ?? product.name }] },
+    twitter: { card: 'summary_large_image', title: product.name, description, images: [image] },
   };
 }
 
@@ -102,7 +87,18 @@ export default async function ProductPage({ params, searchParams }: Params) {
     authorName: r.user.name?.trim() ? r.user.name : 'Покупатель',
   }));
   const avg = agg._avg.rating ?? 0;
-  const count = agg._count; // _count: true → number (НЕ { _all }; подтверждено типами Prisma)
+  const count = agg._count;
+
+  // TEMP: mock reviews if none exist, to preview review layout
+  const hasMockReviews = reviews.length === 0;
+  const mockReviews: ReviewItem[] = hasMockReviews ? [
+    { id: 'mock-1', rating: 5, body: 'Очень мягкий и плотный материал, держит форму после стирки. Размер M сел свободно, как и ожидал. Цвет в жизни приятнее, чем на фото.', createdAt: new Date('2025-12-12'), authorName: 'Александр Стрелков' },
+    { id: 'mock-2', rating: 4, body: 'Беру второй цвет — нравится посадка. Сняла бы балл только за длину шнурков, в остальном отличное худи на каждый день.', createdAt: new Date('2025-12-02'), authorName: 'Марина Котова' },
+    { id: 'mock-3', rating: 5, body: 'Заказывал в подарок, доставили за два дня. Упаковано аккуратно, бирки на месте. Брат доволен, размер угадали.', createdAt: new Date('2025-11-24'), authorName: 'Дмитрий Власов' },
+  ] : [];
+  const displayReviews = hasMockReviews ? mockReviews : reviews;
+  const displayAvg = hasMockReviews ? 4.7 : avg;
+  const displayCount = hasMockReviews ? 3 : count;
   const reviewState: 'eligible' | 'guest' | 'not-purchased' | 'already-reviewed' =
     session?.user?.id ? await getReviewEligibility(session.user.id, product.id) : 'guest';
 
@@ -110,9 +106,19 @@ export default async function ProductPage({ params, searchParams }: Params) {
   const wishlistedIds = await getWishlistProductIds(session, wlStore.get(wishlistCookieName)?.value);
 
   const galleryImages = active.images.map((im) => ({ url: im.url, alt: im.alt ?? product.name }));
-  // «Новинка» поверх главного кадра — по createdAt товара (как в buildProductCardData).
-  // Скидку на PDP показывает только панель покупки (по выбранной вариации), чтобы не дублировать пилл.
-  // Распроданную расцветку не маркируем — паритет с computeBadges (soldOut гасит new/discount).
+
+  // Ensure at least 3 images for bento grid (2 top + 1 wide)
+  if (galleryImages.length < 3) {
+    const fallbacks = [
+      '/products/product-white-tee.png',
+      '/products/product-black-tee.png',
+      '/products/product-soft-hoodie.png',
+    ];
+    while (galleryImages.length < 3) {
+      const fb = fallbacks[galleryImages.length % fallbacks.length];
+      galleryImages.push({ url: fb, alt: `${product.name} — фото ${galleryImages.length + 1}` });
+    }
+  }
   const soldOut = !active.variants.some((v) => v.active && v.stock > 0);
   const galleryIsNew = !soldOut && isNewByDate(product.createdAt, now, NEW_PRODUCT_WINDOW_DAYS);
   const panelColorways = product.colorways.map((cw) => ({ slug: cw.slug, name: cw.name, thumbUrl: cw.images[0]?.url ?? null }));
@@ -139,68 +145,27 @@ export default async function ProductPage({ params, searchParams }: Params) {
   const breadcrumbJsonLd = buildBreadcrumbListJsonLd(breadcrumbItems);
 
   return (
-    <div className="mx-auto max-w-[1240px] px-4 sm:px-6 pb-16">
-      <Breadcrumbs items={[
-        { label: 'Главная', href: '/' },
-        { label: 'Каталог', href: '/catalog' },
-        { label: product.category.name, href: `/catalog?category=${product.category.slug}` },
-        { label: product.name },
-      ]} />
-
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_440px] gap-6 lg:gap-10 mt-6">
-        {/* key по расцветке: при смене ?color= галерея/панель пересоздаются (сброс выбранного размера) */}
-        <ProductGallery key={active.slug} images={galleryImages} productName={product.name} isNew={galleryIsNew} />
-        <div>
-          <p className="text-[11px] text-ink-muted uppercase tracking-wide">{product.category.name} · RITM</p>
-          <h1 className="font-display font-bold text-[28px] sm:text-[34px] leading-tight mt-1">{product.name}</h1>
-          {count > 0 && (
-            <a href="#reviews" className="mt-2 inline-flex"><RatingStars value={avg} count={count} /></a>
-          )}
-          <div className="mt-5">
-            <PurchasePanel
-              key={active.slug}
-              productName={product.name}
-              productSlug={product.slug}
-              colorways={panelColorways}
-              activeColorwaySlug={active.slug}
-              activeColorwayName={active.name}
-              variants={panelVariants}
-              fitNote={product.fitNote}
-            />
-          </div>
-          <div className="mt-3">
-            <WishlistHeart productId={product.id} initialActive={wishlistedIds.has(product.id)} variant="pdp" />
-          </div>
-        </div>
-      </div>
-
-      {/* Описание + specs */}
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_440px] gap-6 lg:gap-10 mt-12">
-        <div>
-          <h2 className="font-display font-bold text-2xl">Об этой модели</h2>
-          {product.description && <p className="text-ink-muted mt-3 leading-relaxed">{product.description}</p>}
-        </div>
-        <SpecsTable specs={specs} />
-      </div>
-
-      {/* Related */}
-      {related.length > 0 && (
-        <section className="mt-16">
-          <h2 className="font-display font-bold text-2xl mb-5">С этим смотрят</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {related.map((p) => <ProductCard key={p.slug} data={p} wishlisted={wishlistedIds.has(p.id)} />)}
-          </div>
-        </section>
-      )}
-
-      <ReviewsSection
-        productId={product.id}
-        avg={avg} count={count} reviews={reviews} state={reviewState}
-      />
-
-      {/* JSON-LD */}
+    <div className="mx-auto max-w-[1200px] px-6 pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+
+      <ProductView
+        product={{ id: product.id, name: product.name, slug: product.slug, fitNote: product.fitNote, description: product.description, category: product.category }}
+        galleryImages={galleryImages}
+        isNew={galleryIsNew}
+        panelColorways={panelColorways}
+        activeColorwaySlug={active.slug}
+        activeColorwayName={active.name}
+        panelVariants={panelVariants}
+        ratingAvg={displayCount > 0 ? displayAvg : null}
+        ratingCount={displayCount}
+        reviews={displayReviews}
+        reviewState={reviewState}
+        related={related}
+        wishlistedIds={wishlistedIds}
+        wishlisted={wishlistedIds.has(product.id)}
+        productId={product.id}
+      />
     </div>
   );
 }

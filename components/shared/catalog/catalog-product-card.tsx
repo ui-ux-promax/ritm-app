@@ -4,6 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { Badge } from '@/components/ui';
+import { useCartStore } from '@/store';
+import { WishlistHeart } from '@/components/shared/wishlist/wishlist-heart';
 import type { ProductCardData, CardColorway, CardSize } from '@/lib/product-summary';
 
 const BEIGE_BLUR =
@@ -29,12 +31,19 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [added, setAdded] = useState(false);
-  const [fav, setFav] = useState(wishlisted);
+  const addCartItem = useCartStore((s) => s.addCartItem);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (selectedSize === null) return;
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1200);
+    const size = data.sizes[selectedSize];
+    if (!size || !size.variantId) return;
+    try {
+      await addCartItem({ productVariantId: size.variantId });
+      setAdded(true);
+      setTimeout(() => setAdded(false), 1200);
+    } catch {
+      /* store sets error */
+    }
   };
 
   return (
@@ -143,19 +152,7 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
         >
           {added ? 'Добавлено ✓' : 'Добавить в корзину'}
         </button>
-        <button
-          type="button"
-          aria-label="В избранное"
-          aria-pressed={fav}
-          onClick={() => setFav(!fav)}
-          className={`w-[46px] h-[46px] grid place-items-center rounded-full border transition-colors ${
-            fav ? 'border-danger text-danger' : 'border-line text-ink hover:border-danger/50 hover:text-danger'
-          }`}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill={fav ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9">
-            <path d="M12 20.5s-7.25-4.45-7.25-10.2A4.35 4.35 0 0 1 12 7.25a4.35 4.35 0 0 1 7.25 3.05C19.25 16.05 12 20.5 12 20.5Z"/>
-          </svg>
-        </button>
+        <WishlistHeart productId={data.id} initialActive={wishlisted} variant="catalog" />
       </div>
     </article>
   );

@@ -1,32 +1,29 @@
-'use client';
-import { useCart } from '@/hooks/use-cart';
-import { CartLineItem } from '@/components/shared/cart/cart-line-item';
-import { OrderSummary } from '@/components/shared/cart/order-summary';
-import { EmptyCart } from '@/components/shared/cart/empty-cart';
-import { Skeleton } from '@/components/ui';
+import { cookies } from 'next/headers';
+import { auth } from '@/auth';
+import { prisma } from '@/lib/prisma-client';
+import { productCardInclude, buildProductCardData, type ProductCardData } from '@/lib/product-summary';
+import { NEW_PRODUCT_WINDOW_DAYS, LOW_STOCK_THRESHOLD } from '@/constants/config';
+import { getWishlistProductIds } from '@/lib/wishlist';
+import { wishlistCookieName } from '@/lib/wishlist-cookie';
+import { CartView } from './cart-view';
 
-export default function CartPage() {
-  const { items, totalAmount, loading } = useCart();
+export const dynamic = 'force-dynamic';
 
-  return (
-    <div className="mx-auto max-w-[1240px] px-4 sm:px-6 pt-8 pb-16">
-      <h1 className="font-display font-bold text-[28px] sm:text-[40px]">Корзина</h1>
-      {items.length > 0 && <p className="text-ink-muted mt-1">{items.length} товара</p>}
-
-      {loading && items.length === 0 ? (
-        <div className="mt-6 space-y-4">
-          {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
-        </div>
-      ) : items.length === 0 ? (
-        <div className="mt-6"><EmptyCart /></div>
-      ) : (
-        <div className="grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 mt-6">
-          <div className="space-y-4">
-            {items.map((it) => <CartLineItem key={it.id} item={it} />)}
-          </div>
-          <OrderSummary totalAmount={totalAmount} count={items.reduce((a, i) => a + i.quantity, 0)} />
-        </div>
-      )}
-    </div>
+export default async function CartPage() {
+  const now = new Date();
+  const [session, store] = await Promise.all([auth(), cookies()]);
+  const [raw, wishlistedIds] = await Promise.all([
+    prisma.product.findMany({
+      where: { active: true },
+      take: 4,
+      orderBy: { createdAt: 'desc' },
+      include: productCardInclude,
+    }),
+    getWishlistProductIds(session, store.get(wishlistCookieName)?.value),
+  ]);
+  const related: ProductCardData[] = raw.map((p) =>
+    buildProductCardData(p, now, { newWindowDays: NEW_PRODUCT_WINDOW_DAYS, lowStock: LOW_STOCK_THRESHOLD })
   );
+
+  return <CartView related={related} wishlistedIds={wishlistedIds} />;
 }

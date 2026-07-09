@@ -1,10 +1,10 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { Button, Input } from '@/components/ui';
 import { formatPrice } from '@/lib/format';
 import { calcShipping } from '@/lib/order';
 import { FREE_SHIPPING_THRESHOLD } from '@/constants/config';
@@ -12,24 +12,31 @@ import { checkoutSchema, type CheckoutValues } from '@/services/dto/order.dto';
 import { placeOrder } from '@/app/actions/order';
 import { validateCoupon } from '@/app/actions/coupon';
 import { AddressSuggest } from './address-suggest';
+import type { CheckoutDefaults } from '@/lib/checkout-defaults';
 import type { CartDetails } from '@/services/dto/cart.dto';
 
-type Defaults = { contactName: string; contactPhone: string; contactEmail: string };
+const SHIP_INFO = {
+  courier: { label: 'Курьер', desc: '2–4 дня, от 390 ₽' },
+  pickup: { label: 'Пункт выдачи', desc: '2–5 дней', extra: `Бесплатно от ${formatPrice(FREE_SHIPPING_THRESHOLD)}` },
+} as const;
 
-export function CheckoutForm({ details, defaults }: { details: CartDetails; defaults: Defaults }) {
+export function CheckoutForm({ details, defaults }: { details: CartDetails; defaults: CheckoutDefaults }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [coupon, setCoupon] = useState<{ code: string; percent: number; discount: number } | null>(null);
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState<string | null>(null);
   const [couponPending, setCouponPending] = useState(false);
+
   const methods = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { ...defaults, shippingMethod: 'courier', paymentMethod: 'online', city: '', addressLine: '', addressComment: '' },
+    defaultValues: { ...defaults, shippingMethod: 'courier', paymentMethod: 'online' },
   });
   const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = methods;
+  const addressLineRegistration = register('addressLine');
 
   const shippingMethod = watch('shippingMethod');
+  const paymentMethod = watch('paymentMethod');
   const shipping = calcShipping(details.totalAmount, shippingMethod);
   const discount = coupon?.discount ?? 0;
   const total = details.totalAmount - discount + shipping;
@@ -56,110 +63,211 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="grid lg:grid-cols-[1fr_360px] gap-6 lg:gap-8" noValidate>
-      <input type="hidden" {...register('couponCode')} />
-      <div className="space-y-6">
-        <section className="rounded-2xl border border-line bg-surface p-5 space-y-4">
-          <h2 className="font-display font-bold text-xl">Контактные данные</h2>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="contactName">Имя</label>
-            <Input id="contactName" autoComplete="name" {...register('contactName')} />
-            {errors.contactName && <p className="text-danger text-xs mt-1">{errors.contactName.message}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="contactPhone">Телефон</label>
-            <Input id="contactPhone" type="tel" autoComplete="tel" placeholder="+7…" {...register('contactPhone')} />
-            {errors.contactPhone && <p className="text-danger text-xs mt-1">{errors.contactPhone.message}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="contactEmail">E-mail</label>
-            <Input id="contactEmail" type="email" autoComplete="email" {...register('contactEmail')} />
-            {errors.contactEmail && <p className="text-danger text-xs mt-1">{errors.contactEmail.message}</p>}
-          </div>
-        </section>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <input type="hidden" {...register('couponCode')} />
+        <input type="hidden" {...register('city')} />
 
-        <section className="rounded-2xl border border-line bg-surface p-5 space-y-4">
-          <h2 className="font-display font-bold text-xl">Адрес доставки</h2>
-          <div className="relative">
-            <label className="block text-sm font-medium mb-1" htmlFor="addressLine">Адрес</label>
-            <Input id="addressLine" autoComplete="off" placeholder="Город, улица, дом, квартира" {...register('addressLine')} />
-            <AddressSuggest />
-            {errors.addressLine && <p className="text-danger text-xs mt-1">{errors.addressLine.message}</p>}
-          </div>
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_400px] gap-7 mt-[22px] items-start">
+          {/* LEFT — form sections */}
           <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="addressComment">Комментарий к адресу</label>
-            <textarea id="addressComment" className="inp min-h-20" {...register('addressComment')} />
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-line bg-surface p-5 space-y-3">
-          <h2 className="font-display font-bold text-xl">Способ доставки</h2>
-          <label className="flex items-center gap-3 rounded-xl border border-line p-3 cursor-pointer">
-            <input type="radio" value="courier" {...register('shippingMethod')} />
-            <span className="flex-1"><span className="font-semibold">Курьер</span><br /><span className="text-xs text-ink-muted">Бесплатно от {formatPrice(FREE_SHIPPING_THRESHOLD)} · 1–3 дня</span></span>
-          </label>
-          <label className="flex items-center gap-3 rounded-xl border border-line p-3 cursor-pointer">
-            <input type="radio" value="pickup" {...register('shippingMethod')} />
-            <span className="flex-1"><span className="font-semibold">Самовывоз</span><br /><span className="text-xs text-ink-muted">Из пункта выдачи · бесплатно</span></span>
-          </label>
-        </section>
-
-        <section className="rounded-2xl border border-line bg-surface p-5 space-y-3">
-          <h2 className="font-display font-bold text-xl">Способ оплаты</h2>
-          <label className="flex items-center gap-3 rounded-xl border border-line p-3 cursor-pointer">
-            <input type="radio" value="online" {...register('paymentMethod')} />
-            <span className="flex-1"><span className="font-semibold">Картой онлайн</span><br /><span className="text-xs text-ink-muted">Visa, MasterCard, МИР</span></span>
-          </label>
-          <label className="flex items-center gap-3 rounded-xl border border-line p-3 cursor-pointer">
-            <input type="radio" value="cod" {...register('paymentMethod')} />
-            <span className="flex-1"><span className="font-semibold">При получении</span><br /><span className="text-xs text-ink-muted">Наличными или картой курьеру</span></span>
-          </label>
-        </section>
-      </div>
-
-      <aside>
-        <div className="rounded-2xl border border-line bg-surface p-5 space-y-4 lg:sticky lg:top-24">
-          <h2 className="font-display font-bold text-xl">Ваш заказ</h2>
-          {/* Промокод */}
-          <div className="space-y-2">
-            {!coupon ? (
-              <>
-                <div className="flex gap-2">
-                  <Input value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Промокод" />
-                  <Button type="button" variant="secondary" size="md" className="shrink-0" loading={couponPending} onClick={applyCoupon}>Применить</Button>
-                </div>
-                {couponError && <p className="text-danger text-xs" role="alert">{couponError}</p>}
-              </>
-            ) : (
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-success font-semibold">Промокод {coupon.code} ({coupon.percent}%)</span>
-                <button type="button" onClick={removeCoupon} className="text-ink-muted hover:text-ink" aria-label="Убрать промокод">×</button>
+            {/* 1. Contact */}
+            <section className="border border-line rounded-[24px] bg-surface p-[22px] grid gap-4">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 grid place-items-center rounded-full bg-primary text-primary-foreground font-display font-bold text-sm">1</span>
+                <h2 className="font-display font-bold text-[17px] tracking-tight">Контактные данные</h2>
               </div>
-            )}
+              <div className="grid gap-2">
+                <label className="text-ink-muted text-xs font-bold uppercase tracking-wider" htmlFor="contactEmail">E-mail</label>
+                <input id="contactEmail" type="email" autoComplete="email" placeholder="you@example.com"
+                  {...register('contactEmail')}
+                  className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
+                {errors.contactEmail && <span className="text-danger text-xs font-semibold">{errors.contactEmail.message}</span>}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-2">
+                  <label className="text-ink-muted text-xs font-bold uppercase tracking-wider" htmlFor="contactName">Имя</label>
+                  <input id="contactName" type="text" autoComplete="name" placeholder="Иван Иванов"
+                    {...register('contactName')}
+                    className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
+                  {errors.contactName && <span className="text-danger text-xs font-semibold">{errors.contactName.message}</span>}
+                </div>
+                <div className="grid gap-2">
+                  <label className="text-ink-muted text-xs font-bold uppercase tracking-wider" htmlFor="contactPhone">Телефон</label>
+                  <input id="contactPhone" type="tel" autoComplete="tel" placeholder="+7 999 123-45-67"
+                    {...register('contactPhone')}
+                    className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
+                  {errors.contactPhone && <span className="text-danger text-xs font-semibold">{errors.contactPhone.message}</span>}
+                </div>
+              </div>
+            </section>
+
+            {/* 2. Address */}
+            <section className="border border-line rounded-[24px] bg-surface p-[22px] grid gap-4 mt-4">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 grid place-items-center rounded-full bg-primary text-primary-foreground font-display font-bold text-sm">2</span>
+                <h2 className="font-display font-bold text-[17px] tracking-tight">Адрес доставки</h2>
+              </div>
+              <div className="grid gap-2 relative">
+                <label className="text-ink-muted text-xs font-bold uppercase tracking-wider" htmlFor="addressLine">Адрес</label>
+                <input id="addressLine" autoComplete="off" placeholder="Город, улица, дом, квартира"
+                  {...addressLineRegistration}
+                  onChange={(e) => {
+                    void addressLineRegistration.onChange(e);
+                    if (e.target.value !== defaults.addressLine) setValue('city', '');
+                  }}
+                  className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
+                <AddressSuggest />
+                {errors.addressLine && <span className="text-danger text-xs font-semibold">{errors.addressLine.message}</span>}
+              </div>
+              <div className="grid gap-2">
+                <label className="text-ink-muted text-xs font-bold uppercase tracking-wider" htmlFor="addressComment">Комментарий</label>
+                <input id="addressComment" type="text" placeholder="Квартира, этаж, код домофона"
+                  {...register('addressComment')}
+                  className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
+              </div>
+            </section>
+
+            {/* 3. Delivery */}
+            <section className="border border-line rounded-[24px] bg-surface p-[22px] grid gap-4 mt-4">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 grid place-items-center rounded-full bg-primary text-primary-foreground font-display font-bold text-sm">3</span>
+                <h2 className="font-display font-bold text-[17px] tracking-tight">Способ доставки</h2>
+              </div>
+              <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Способ доставки">
+                {(['courier', 'pickup'] as const).map((method) => {
+                  const info = SHIP_INFO[method];
+                  const isActive = shippingMethod === method;
+                  return (
+                    <button key={method} type="button" onClick={() => setValue('shippingMethod', method, { shouldValidate: true })}
+                      className={`flex-1 min-w-[140px] p-3.5 border rounded-[16px] bg-surface flex flex-col gap-1.5 cursor-pointer transition-colors ${isActive ? 'border-primary bg-primary/3' : 'border-line hover:border-ink/30'}`}>
+                      <b className="text-sm font-bold">{info.label}</b>
+                      <span className="text-ink-muted text-[12.5px]">{info.desc}</span>
+                      {'extra' in info && info.extra && <span className="text-accent text-xs font-bold">{info.extra}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* 4. Payment */}
+            <section className="border border-line rounded-[24px] bg-surface p-[22px] grid gap-4 mt-4">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 grid place-items-center rounded-full bg-primary text-primary-foreground font-display font-bold text-sm">4</span>
+                <h2 className="font-display font-bold text-[17px] tracking-tight">Способ оплаты</h2>
+              </div>
+              <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Способ оплаты">
+                {([
+                  { value: 'online', label: 'Карта онлайн' },
+                  { value: 'cod', label: 'Картой при получении' },
+                ] as const).map((opt) => {
+                  const isActive = paymentMethod === opt.value;
+                  return (
+                    <button key={opt.value} type="button" onClick={() => setValue('paymentMethod', opt.value, { shouldValidate: true })}
+                      className={`flex-1 min-w-[140px] p-3.5 border rounded-[16px] bg-surface flex items-center gap-2.5 cursor-pointer transition-colors ${isActive ? 'border-primary bg-primary/3' : 'border-line hover:border-ink/30'}`}>
+                      <span className={`w-5 h-5 rounded-full border grid place-items-center transition-colors ${isActive ? 'border-primary bg-primary' : 'border-line'}`}>
+                        {isActive && <span className="w-2 h-2 rounded-full bg-surface" />}
+                      </span>
+                      <b className="text-sm font-bold">{opt.label}</b>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
           </div>
-          <ul className="space-y-3">
-            {details.items.map((it) => (
-              <li key={it.id} className="flex justify-between gap-3 text-sm">
-                <span className="text-ink-muted">{it.name} · {it.size} · {it.quantity} шт.</span>
-                <span className="font-semibold tnum shrink-0">{formatPrice(it.lineTotal)}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="space-y-2 text-sm border-t border-line pt-4">
-            <div className="flex justify-between"><span className="text-ink-muted">Товары</span><span className="font-semibold tnum">{formatPrice(details.totalAmount)}</span></div>
-            {discount > 0 && (
-              <div className="flex justify-between"><span className="text-ink-muted">Скидка</span><span className="font-semibold text-success tnum">−{formatPrice(discount)}</span></div>
-            )}
-            <div className="flex justify-between"><span className="text-ink-muted">Доставка</span><span className="font-semibold tnum">{shipping === 0 ? 'Бесплатно' : formatPrice(shipping)}</span></div>
+
+          {/* RIGHT — sticky summary */}
+          <div className="self-stretch">
+            <div className="lg:sticky lg:top-[140px] border border-line rounded-[24px] bg-surface grid gap-3.5">
+              {/* Head */}
+              <div className="pt-5 px-[22px]">
+                <h2 className="font-display font-bold text-[18px] tracking-tight">Ваш заказ</h2>
+              </div>
+
+              {/* Items */}
+              <div className="px-[22px]">
+                {details.items.map((it) => (
+                  <div key={it.id} className="flex items-center gap-3 py-2.5 border-t border-line first:border-t-0">
+                    <div className="w-[52px] h-[58px] shrink-0 rounded-[10px] overflow-hidden bg-surface-soft border border-line">
+                      {it.imageUrl && <Image src={it.imageUrl} alt={it.name} width={52} height={58} className="w-full h-full object-cover" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <b className="block text-[13px] font-bold truncate">{it.name}</b>
+                      <span className="text-[11.5px] text-ink-muted">{it.colorwayName} · {it.size}{it.quantity > 1 ? ` × ${it.quantity}` : ''}</span>
+                    </div>
+                    <span className="text-accent font-bold text-[13px] tnum whitespace-nowrap">{formatPrice(it.lineTotal)}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Foot */}
+              <div className="px-[22px] pb-[22px] grid gap-3.5">
+                {/* Ship msg */}
+                <div className="flex items-center gap-1.5 text-accent text-[12.5px] font-semibold">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><path d="M20 6 9 17l-5-5"/></svg>
+                  {shipping === 0 ? 'Бесплатная доставка' : `Доставка: ${formatPrice(shipping)}`}
+                </div>
+
+                {/* Promo */}
+                {!coupon ? (
+                  <div className="flex gap-2">
+                    <input value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Промокод"
+                      className="flex-1 min-w-0 h-11 px-3 border border-line rounded-[12px] bg-surface text-[13px] outline-none uppercase placeholder:normal-case placeholder:text-ink-muted/70" />
+                    <button type="button" onClick={applyCoupon} disabled={couponPending}
+                      className="h-11 px-4 border border-line rounded-[12px] bg-surface-soft font-bold text-[13px] whitespace-nowrap hover:border-ink/30 transition-colors disabled:opacity-50">
+                      {couponPending ? '...' : 'Применить'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-accent font-semibold">Промокод {coupon.code} ({coupon.percent}%)</span>
+                    <button type="button" onClick={removeCoupon} className="text-ink-muted hover:text-ink" aria-label="Убрать промокод">×</button>
+                  </div>
+                )}
+                {couponError && <p className="text-danger text-xs font-semibold" role="alert">{couponError}</p>}
+
+                {/* Rows */}
+                <div className="grid gap-2.5 border-t border-line pt-4">
+                  <div className="flex items-center justify-between gap-3 text-sm text-ink-muted">
+                    <span>Товары ({details.items.reduce((a, i) => a + i.quantity, 0)})</span>
+                    <span className="text-ink font-semibold tnum">{formatPrice(details.totalAmount)}</span>
+                  </div>
+                  {discount > 0 && (
+                    <div className="flex items-center justify-between gap-3 text-sm text-ink-muted">
+                      <span>Скидка</span>
+                      <span className="text-accent font-semibold tnum">−{formatPrice(discount)}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-3 text-sm text-ink-muted">
+                    <span>Доставка</span>
+                    <span className="text-ink font-semibold tnum">{shipping === 0 ? 'Бесплатно' : formatPrice(shipping)}</span>
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div className="flex items-baseline justify-between gap-3 border-t border-line pt-4">
+                  <span className="font-display font-bold text-[17px] tracking-tight">Итого к оплате</span>
+                  <span className="font-display font-bold text-[26px] tnum tracking-tight">{formatPrice(total)}</span>
+                </div>
+
+                {/* Safe note */}
+                <div className="flex items-center justify-center gap-1.5 text-ink-muted text-xs">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+                  Безопасная оплата · возврат 14 дней
+                </div>
+
+                {/* Error */}
+                {error && <p className="text-danger text-sm font-semibold" role="alert">{error}</p>}
+
+                {/* Pay button */}
+                <button type="submit" disabled={isSubmitting}
+                  className="h-14 rounded-full bg-primary text-primary-foreground text-[16px] font-bold inline-flex items-center justify-center gap-2.5 w-full hover:bg-footer transition-colors disabled:opacity-50">
+                  {isSubmitting ? 'Проверяем данные…' : <>Оплатить <span className="tnum">{formatPrice(total)}</span></>}
+                  {!isSubmitting && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>}
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="flex justify-between items-baseline border-t border-line pt-4">
-            <span className="text-lg font-semibold">Итого</span>
-            <span className="font-display font-bold text-2xl tnum">{formatPrice(total)}</span>
-          </div>
-          {error && <p className="text-danger text-sm" role="alert">{error}</p>}
-          <Button type="submit" variant="primary" size="lg" className="w-full" loading={isSubmitting}>Оформить заказ →</Button>
         </div>
-      </aside>
       </form>
     </FormProvider>
   );

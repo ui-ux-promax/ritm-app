@@ -14,6 +14,7 @@ export type UpdateQuantityValues = z.infer<typeof updateQuantitySchema>;
 // Плоская позиция корзины для клиента (Zustand-стор).
 export interface CartStateItem {
   id: string;
+  productId: string;
   quantity: number;
   name: string;
   productSlug: string;

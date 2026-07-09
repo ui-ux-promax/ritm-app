@@ -7,7 +7,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { ensureVerificationGate } from '@/app/actions/verification';
 import { safeCallbackUrl } from '@/lib/safe-redirect';
-import { Button, Input } from '@/components/ui';
 import { PasswordInput } from './password-input';
 import { loginSchema, type LoginValues } from '@/services/dto/auth.dto';
 
@@ -48,21 +47,49 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-      <div>
-        <label htmlFor="email" className="label mb-2 block">Email</label>
-        <Input id="email" type="email" autoComplete="email" className={errors.email ? 'err' : ''} {...register('email')} />
-        {errors.email && <p className="text-danger text-xs mt-1">{errors.email.message}</p>}
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4" noValidate>
+      {/* Email */}
+      <div className="grid gap-2">
+        <label htmlFor="email" className="text-ink-muted text-xs font-bold uppercase tracking-wider">E-mail</label>
+        <div className="relative flex items-center">
+          <svg className="absolute left-3.5 w-[18px] h-[18px] text-ink-muted pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <input
+            id="email" type="email" autoComplete="email" placeholder="you@example.com"
+            {...register('email')}
+            className={`w-full h-12 pl-[42px] pr-3.5 border rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/75 ${errors.email ? 'border-danger' : 'border-line'}`}
+          />
+        </div>
+        {errors.email && <span className="text-danger text-xs font-semibold">{errors.email.message}</span>}
       </div>
-      <div>
-        <label htmlFor="password" className="label mb-2 block">Пароль</label>
-        <PasswordInput id="password" autoComplete="current-password" error={!!errors.password} {...register('password')} />
-        {errors.password && <p className="text-danger text-xs mt-1">{errors.password.message}</p>}
+
+      {/* Password */}
+      <div className="grid gap-2">
+        <label htmlFor="password" className="text-ink-muted text-xs font-bold uppercase tracking-wider">Пароль</label>
+        <div className="relative flex items-center">
+          <svg className="absolute left-3.5 w-[18px] h-[18px] text-ink-muted pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+          <PasswordInput id="password" autoComplete="current-password" error={!!errors.password} {...register('password')} />
+        </div>
+        {errors.password && <span className="text-danger text-xs font-semibold">{errors.password.message}</span>}
       </div>
-      {error && <p className="text-danger text-sm" role="alert">{error}</p>}
-      <Button type="submit" variant="primary" size="lg" className="w-full" loading={isSubmitting}>
-        Войти
-      </Button>
+
+      {/* Remember + forgot */}
+      <div className="flex items-center justify-between gap-3 -mt-0.5">
+        <label className="flex items-center gap-2 text-[13.5px] cursor-pointer">
+          <input type="checkbox" defaultChecked className="w-[18px] h-[18px] accent-[hsl(var(--color-primary))]" />
+          Запомнить меня
+        </label>
+        <a href="#" className="text-ink-muted text-[13.5px] font-semibold hover:text-ink transition-colors">Забыли пароль?</a>
+      </div>
+
+      {/* Error */}
+      {error && <p className="text-danger text-sm font-semibold" role="alert">{error}</p>}
+
+      {/* Submit */}
+      <button type="submit" disabled={isSubmitting}
+        className="h-[52px] rounded-full bg-primary text-primary-foreground text-[15px] font-bold inline-flex items-center justify-center gap-2.5 hover:bg-footer transition-colors disabled:opacity-50">
+        {isSubmitting ? 'Входим…' : 'Войти'}
+        {!isSubmitting && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1"><path d="M5 12h14M13 6l6 6-6 6"/></svg>}
+      </button>
     </form>
   );
 }

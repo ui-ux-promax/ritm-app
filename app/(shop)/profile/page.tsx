@@ -1,8 +1,12 @@
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma-client';
-import { ProfileView } from '@/components/shared/profile/profile-view';
-import type { OrderRow } from '@/components/shared/profile/orders-list';
+import { ProfileView, type ProfileOrder } from '@/components/shared/profile/profile-view';
+import { getWishlistItems } from '@/lib/wishlist';
+import { wishlistCookieName } from '@/lib/wishlist-cookie';
+import type { ProductCardData } from '@/lib/product-summary';
+import type { ProfileValues } from '@/services/dto/auth.dto';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Профиль' };
@@ -10,44 +14,124 @@ export const metadata = { title: 'Профиль' };
 export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+
+  const store = await cookies();
+  const wishlistToken = store.get(wishlistCookieName)?.value;
+
+  const [user, wishlistProducts] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        birthdate: true,
+        createdAt: true,
+        orders: {
+          orderBy: { createdAt: 'desc' },
+          select: {
+            orderNumber: true,
+            status: true,
+            createdAt: true,
+            itemsTotal: true,
+            discountAmount: true,
+            shippingAmount: true,
+            totalAmount: true,
+            paymentMethod: true,
+            shippingMethod: true,
+            city: true,
+            addressLine: true,
+            payment: { select: { status: true } },
+            items: {
+              orderBy: { id: 'asc' },
+              select: {
+                productName: true,
+                imageUrl: true,
+                colorwayName: true,
+                size: true,
+                unitPrice: true,
+                quantity: true,
+                lineTotal: true,
+                productVariant: {
+                  select: {
+                    size: true,
+                    price: true,
+                    colorway: {
+                      select: {
+                        name: true,
+                        product: { select: { name: true, brand: true } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        addresses: {
+          orderBy: { createdAt: 'desc' },
+          select: { id: true, label: true, city: true, street: true, comment: true, isDefault: true },
+        },
+      },
+    }),
+    getWishlistItems(session, wishlistToken),
+  ]);
+
   if (!user) redirect('/login');
 
-  const orders = await prisma.order.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: 'desc' },
-    select: {
-      orderNumber: true,
-      status: true,
-      createdAt: true,
-      totalAmount: true,
-      _count: { select: { items: true } },
-      items: { select: { imageUrl: true, productName: true }, take: 4 },
-      payment: { select: { status: true } },
-    },
-  });
-  const orderRows: OrderRow[] = orders.map((o) => ({
-    orderNumber: o.orderNumber,
-    status: o.status,
-    createdAt: o.createdAt.toISOString(),
-    totalAmount: o.totalAmount,
-    itemCount: o._count.items,
-    thumbs: o.items.map((it) => ({ imageUrl: it.imageUrl, productName: it.productName })),
-    paymentStatus: o.payment?.status ?? null,
+  const initial: ProfileValues = {
+    name: user.name ?? '',
+    phone: user.phone ?? '',
+    birthdate: user.birthdate ? user.birthdate.toISOString().slice(0, 10) : '',
+  };
+
+  const orders: ProfileOrder[] = user.orders.map((order) => ({
+    orderNumber: order.orderNumber,
+    status: order.status,
+    createdAt: order.createdAt.toISOString(),
+    itemsTotal: order.itemsTotal,
+    discountAmount: order.discountAmount,
+    shippingAmount: order.shippingAmount,
+    totalAmount: order.totalAmount,
+    paymentMethod: order.paymentMethod,
+    shippingMethod: order.shippingMethod,
+    city: order.city,
+    addressLine: order.addressLine,
+    paymentStatus: order.payment?.status ?? null,
+    items: order.items.map((item) => ({
+      productName: item.productName,
+      imageUrl: item.imageUrl,
+      productNameFromVariant: item.productVariant.colorway.product.name,
+      brand: item.productVariant.colorway.product.brand,
+      colorwayName: item.colorwayName || item.productVariant.colorway.name,
+      size: item.size || item.productVariant.size,
+      qty: item.quantity,
+      price: item.unitPrice || item.productVariant.price,
+      lineTotal: item.lineTotal,
+    })),
   }));
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10">
-      <h1 className="font-display font-bold text-2xl mb-6">Профиль</h1>
-      <ProfileView
-        email={user.email}
-        initial={{
-          name: user.name ?? '',
-          phone: user.phone ?? '',
-          birthdate: user.birthdate ? user.birthdate.toISOString().slice(0, 10) : '',
-        }}
-        orders={orderRows}
-      />
-    </main>
+    <ProfileView
+      user={{
+        email: user.email,
+        name: user.name ?? '',
+        phone: user.phone ?? '',
+        birthdate: initial.birthdate ?? '',
+        createdAt: user.createdAt.toISOString(),
+      }}
+      initial={initial}
+      orders={orders}
+      wishlist={wishlistProducts}
+      addresses={user.addresses.map((a) => ({
+        id: a.id,
+        label: a.label,
+        city: a.city,
+        street: a.street,
+        comment: a.comment,
+        isDefault: a.isDefault,
+      }))}
+    />
   );
 }

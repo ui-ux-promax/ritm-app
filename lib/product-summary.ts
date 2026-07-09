@@ -7,7 +7,7 @@ export const productCardInclude = {
     orderBy: [{ isDefault: 'desc' as const }, { sortOrder: 'asc' as const }],
     include: {
       images: { orderBy: { sortOrder: 'asc' as const }, take: 1 },
-      variants: { select: { size: true, sizeOrder: true, price: true, compareAtPrice: true, stock: true, active: true } },
+      variants: { select: { id: true, size: true, sizeOrder: true, price: true, compareAtPrice: true, stock: true, active: true } },
     },
   },
 } satisfies Prisma.ProductInclude;
@@ -24,6 +24,7 @@ export interface CardSize {
   size: string;
   sizeOrder: number;
   inStock: boolean;
+  variantId: string;
 }
 
 export interface ProductCardData {
@@ -75,7 +76,7 @@ export function buildProductCardData(
     for (const v of cw.variants) {
       if (!v.active) continue;
       if (!sizeMap.has(v.size)) {
-        sizeMap.set(v.size, { size: v.size, sizeOrder: v.sizeOrder, inStock: v.stock > 0 });
+        sizeMap.set(v.size, { size: v.size, sizeOrder: v.sizeOrder, inStock: v.stock > 0, variantId: v.id });
       } else if (v.stock > 0) {
         sizeMap.get(v.size)!.inStock = true;
       }
