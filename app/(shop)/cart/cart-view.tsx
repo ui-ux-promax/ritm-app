@@ -10,7 +10,7 @@ import { FREE_SHIPPING_THRESHOLD } from '@/constants/config';
 import type { ProductCardData } from '@/lib/product-summary';
 import { CartRelatedGrid } from '@/components/shared/cart/cart-related-grid';
 
-export function CartView({ related }: { related: ProductCardData[] }) {
+export function CartView({ related, wishlistedIds }: { related: ProductCardData[]; wishlistedIds: Set<string> }) {
   const { items, totalAmount, loading } = useCart();
   const count = items.reduce((a, i) => a + i.quantity, 0);
 
@@ -67,7 +67,7 @@ export function CartView({ related }: { related: ProductCardData[] }) {
         <div className="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-6 mt-6 items-start">
           {/* Line items */}
           <div className="grid gap-3.5">
-            {items.map((it) => <CartLineItem key={it.id} item={it} />)}
+            {items.map((it) => <CartLineItem key={it.id} item={it} wishlisted={wishlistedIds.has(it.productId)} />)}
           </div>
           {/* Summary */}
           <div className="self-stretch">

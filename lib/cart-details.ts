@@ -39,6 +39,7 @@ export function getCartDetails(cart: CartWithItems): CartDetails {
     const unitPrice = v.price;
     return {
       id: item.id,
+      productId: cw.product.id,
       quantity: item.quantity,
       name: cw.product.name,
       productSlug: cw.product.slug,

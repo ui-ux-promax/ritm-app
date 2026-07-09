@@ -3,9 +3,10 @@ import Image from 'next/image';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { useCartStore } from '@/store';
+import { WishlistHeart } from '@/components/shared/wishlist/wishlist-heart';
 import type { CartStateItem } from '@/services/dto/cart.dto';
 
-export function CartLineItem({ item }: { item: CartStateItem }) {
+export function CartLineItem({ item, wishlisted = false }: { item: CartStateItem; wishlisted?: boolean }) {
   const updateItemQuantity = useCartStore((s) => s.updateItemQuantity);
   const removeCartItem = useCartStore((s) => s.removeCartItem);
 
@@ -63,9 +64,7 @@ export function CartLineItem({ item }: { item: CartStateItem }) {
 
       {/* Actions */}
       <div className="flex items-center gap-1">
-        <button type="button" aria-label="В избранное" className="w-[34px] h-[34px] grid place-items-center rounded-full border border-transparent text-ink-muted hover:text-ink hover:bg-surface-soft transition-colors">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 20.5s-7.25-4.45-7.25-10.2A4.35 4.35 0 0 1 12 7.25a4.35 4.35 0 0 1 7.25 3.05C19.25 16.05 12 20.5 12 20.5Z"/></svg>
-        </button>
+        <WishlistHeart productId={item.productId} initialActive={wishlisted} variant="card" />
         <button type="button" aria-label="Удалить" onClick={() => removeCartItem(item.id)} className="w-[34px] h-[34px] grid place-items-center rounded-full border border-transparent text-ink-muted hover:text-danger hover:border-danger/40 transition-colors">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/></svg>
         </button>
