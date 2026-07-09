@@ -85,9 +85,9 @@ export function ProductForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-8 max-w-4xl">
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-[22px]">
       {/* Скаляры */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <Field label="Название" error={errors.name?.message}>
           <Input {...register('name', { onChange: onNameChange })} placeholder="Air Max 90" />
         </Field>
@@ -120,22 +120,22 @@ export function ProductForm({
       </div>
 
       <Field label="Описание" error={errors.description?.message}>
-        <textarea {...register('description')} rows={4} className="w-full rounded-lg border border-admin-outline-variant bg-admin-surface px-3 py-2 text-sm" />
+        <textarea {...register('description')} rows={4} className="w-full rounded-[18px] border border-admin-outline-variant bg-admin-surface px-4 py-3 text-sm outline-none transition-colors focus:border-admin-on-surface" />
       </Field>
       <Field label="Примечание по посадке" error={errors.fitNote?.message}>
         <Input {...register('fitNote')} placeholder="Маломерит на полразмера" />
       </Field>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-admin-on-surface">Характеристики</label>
+      <div className="space-y-2 rounded-[20px] border border-admin-outline-variant bg-admin-surface-low p-4">
+        <label className="text-sm font-bold text-admin-on-surface">Характеристики</label>
         <SpecsEditor control={anyControl} register={register} />
       </div>
 
-      <div className="flex gap-6">
-        <label className="flex items-center gap-2 text-sm">
+      <div className="flex flex-wrap gap-6 rounded-[20px] border border-admin-outline-variant bg-admin-surface-low p-4">
+        <label className="flex items-center gap-2 text-sm font-bold">
           <Switch checked={watch('isBestseller')} onCheckedChange={(c) => setValue('isBestseller', c)} /> Хит продаж
         </label>
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 text-sm font-bold">
           <Switch checked={watch('active')} onCheckedChange={(c) => setValue('active', c)} /> Активен (виден на витрине)
         </label>
       </div>
@@ -143,7 +143,7 @@ export function ProductForm({
       {/* Расцветки */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-admin-head text-lg text-admin-on-surface">Расцветки</h3>
+          <h3 className="font-admin-head text-[22px] font-extrabold tracking-[-.035em] text-admin-on-surface">Расцветки</h3>
           <Button type="button" variant="outline" size="sm" onClick={addColorway}>Добавить расцветку</Button>
         </div>
         {colorways.fields.map((f, ci) => (
@@ -167,7 +167,7 @@ export function ProductForm({
 
       {serverError && <p className="text-sm text-admin-error">{serverError}</p>}
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3 border-t border-admin-outline-variant pt-[22px]">
         <Button type="submit" loading={isSubmitting}>{initial ? 'Сохранить' : 'Создать'}</Button>
         <Button type="button" variant="ghost" onClick={() => router.push('/admin/catalog/products')}>Отмена</Button>
       </div>
@@ -178,7 +178,7 @@ export function ProductForm({
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1">
-      <label className="text-sm font-medium text-admin-on-surface">{label}</label>
+      <label className="text-[12px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">{label}</label>
       {children}
       {error && <p className="text-sm text-admin-error">{error}</p>}
     </div>

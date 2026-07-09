@@ -70,7 +70,7 @@ export function CategoryTable({ rows }: { rows: CategoryRow[] }) {
 
   return (
     <div className="space-y-3">
-      <div className="bg-admin-surface border border-admin-outline-variant rounded-xl overflow-hidden">
+      <div className="overflow-hidden rounded-[20px] border border-admin-outline-variant bg-admin-surface">
         <div className="hidden md:block">
           <Table>
           <TableHeader>
@@ -89,14 +89,14 @@ export function CategoryTable({ rows }: { rows: CategoryRow[] }) {
                 <TableCell>
                   {row.coverImage ? (
                     /* eslint-disable-next-line @next/next/no-img-element -- admin thumb */
-                    <img src={row.coverImage} alt="" className="h-10 w-10 rounded object-cover bg-admin-surface-high" />
-                  ) : (
-                    <div className="h-10 w-10 rounded bg-admin-surface-high" />
+                  <img src={row.coverImage} alt="" className="h-12 w-12 rounded-[14px] object-cover bg-admin-surface-low" />
+                ) : (
+                    <div className="h-12 w-12 rounded-[14px] bg-admin-surface-low" />
                   )}
                 </TableCell>
-                <TableCell className="font-medium">{row.name}</TableCell>
+                <TableCell className="font-bold">{row.name}</TableCell>
                 <TableCell className="text-admin-on-surface-variant">{row.slug}</TableCell>
-                <TableCell>{row.productCount}</TableCell>
+                <TableCell className="font-mono font-bold tabular-nums">{row.productCount}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <button
@@ -104,7 +104,7 @@ export function CategoryTable({ rows }: { rows: CategoryRow[] }) {
                       aria-label="Вверх"
                       disabled={i === 0 || pending === row.id}
                       onClick={() => handleMove(row.id, 'up')}
-                      className="text-admin-on-surface-variant hover:text-admin-on-surface disabled:opacity-30"
+                      className="grid h-9 w-9 place-items-center rounded-full text-admin-on-surface-variant hover:bg-admin-surface-low hover:text-admin-on-surface disabled:opacity-30"
                     >
                       <Icon name="arrow_upward" />
                     </button>
@@ -113,7 +113,7 @@ export function CategoryTable({ rows }: { rows: CategoryRow[] }) {
                       aria-label="Вниз"
                       disabled={i === rows.length - 1 || pending === row.id}
                       onClick={() => handleMove(row.id, 'down')}
-                      className="text-admin-on-surface-variant hover:text-admin-on-surface disabled:opacity-30"
+                      className="grid h-9 w-9 place-items-center rounded-full text-admin-on-surface-variant hover:bg-admin-surface-low hover:text-admin-on-surface disabled:opacity-30"
                     >
                       <Icon name="arrow_downward" />
                     </button>
@@ -141,12 +141,12 @@ export function CategoryTable({ rows }: { rows: CategoryRow[] }) {
               <div className="flex items-start gap-3">
                 {row.coverImage ? (
                   /* eslint-disable-next-line @next/next/no-img-element -- admin thumb */
-                  <img src={row.coverImage} alt="" className="h-10 w-10 rounded object-cover bg-admin-surface-high shrink-0" />
+                  <img src={row.coverImage} alt="" className="h-12 w-12 shrink-0 rounded-[14px] bg-admin-surface-low object-cover" />
                 ) : (
-                  <div className="h-10 w-10 rounded bg-admin-surface-high shrink-0" />
+                  <div className="h-12 w-12 shrink-0 rounded-[14px] bg-admin-surface-low" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <div className="font-medium text-admin-on-surface truncate">{row.name}</div>
+                  <div className="truncate font-bold text-admin-on-surface">{row.name}</div>
                   <div className="text-admin-on-surface-variant text-xs truncate">{row.slug}</div>
                 </div>
                 <span className="text-xs text-admin-on-surface-variant tabular-nums shrink-0">{row.productCount} тов.</span>
@@ -159,7 +159,7 @@ export function CategoryTable({ rows }: { rows: CategoryRow[] }) {
                     aria-label="Вверх"
                     disabled={i === 0 || pending === row.id}
                     onClick={() => handleMove(row.id, 'up')}
-                    className="text-admin-on-surface-variant hover:text-admin-on-surface disabled:opacity-30"
+                    className="grid h-9 w-9 place-items-center rounded-full text-admin-on-surface-variant hover:bg-admin-surface-low hover:text-admin-on-surface disabled:opacity-30"
                   >
                     <Icon name="arrow_upward" />
                   </button>
@@ -168,7 +168,7 @@ export function CategoryTable({ rows }: { rows: CategoryRow[] }) {
                     aria-label="Вниз"
                     disabled={i === rows.length - 1 || pending === row.id}
                     onClick={() => handleMove(row.id, 'down')}
-                    className="text-admin-on-surface-variant hover:text-admin-on-surface disabled:opacity-30"
+                    className="grid h-9 w-9 place-items-center rounded-full text-admin-on-surface-variant hover:bg-admin-surface-low hover:text-admin-on-surface disabled:opacity-30"
                   >
                     <Icon name="arrow_downward" />
                   </button>

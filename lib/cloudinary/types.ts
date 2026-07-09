@@ -7,6 +7,8 @@ export interface UploadedImage {
   format: string;
   bytes: number;
   alt?: string;
+  /** True when image already exists in DB and should only be deleted after successful save/delete. */
+  persisted?: boolean;
 }
 
 /** Named delivery transforms used by the URL builder. */

@@ -60,10 +60,10 @@ export function AdminMobileMenu({ user, initialTheme }: AdminMobileMenuProps) {
         </div>
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <DropdownMenuItem aria-disabled="true" className="text-admin-on-surface-variant opacity-55" onSelect={(e) => e.preventDefault()}>
           <Icon name="help" className="text-[18px]" /> Помощь
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <DropdownMenuItem aria-disabled="true" className="text-admin-on-surface-variant opacity-55" onSelect={(e) => e.preventDefault()}>
           <Icon name="settings" className="text-[18px]" /> Настройки
         </DropdownMenuItem>
         <DropdownMenuSeparator />

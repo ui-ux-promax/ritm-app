@@ -128,7 +128,7 @@ export async function updateProduct(id: string, raw: unknown): Promise<ProductAc
     select: {
       id: true,
       colorways: {
-        select: { id: true, images: { select: { id: true } }, variants: { select: { id: true } } },
+        select: { id: true, images: { select: { publicId: true } }, variants: { select: { id: true } } },
       },
     },
   });
@@ -143,6 +143,13 @@ export async function updateProduct(id: string, raw: unknown): Promise<ProductAc
 
   const removedColorwayIds = [...existingColorwayIds].filter((cid) => !incomingColorwayIds.has(cid));
   const removedVariantIds = [...existingVariantIds].filter((vid) => !incomingVariantIds.has(vid));
+  const existingPublicIds = existing.colorways.flatMap((c) =>
+    c.images.map((image) => image.publicId).filter(Boolean) as string[],
+  );
+  const incomingPublicIds = new Set(
+    v.colorways.flatMap((c) => c.images.map((image) => image.publicId).filter(Boolean) as string[]),
+  );
+  const removedPublicIds = existingPublicIds.filter((publicId) => !incomingPublicIds.has(publicId));
 
   // Guard: нельзя удалить variant, на который ссылается заказ.
   if (removedVariantIds.length > 0) {
@@ -218,6 +225,13 @@ export async function updateProduct(id: string, raw: unknown): Promise<ProductAc
         }
       }
     });
+    for (const publicId of removedPublicIds) {
+      try {
+        await deleteAsset(publicId);
+      } catch {
+        /* best-effort */
+      }
+    }
     revalidatePath(LIST_PATH);
     return { ok: true, id };
   } catch (e) {

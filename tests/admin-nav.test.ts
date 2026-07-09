@@ -1,15 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { ADMIN_NAV, resolveActiveIndex } from '@/lib/admin/nav';
+import { ADMIN_PRIMARY_ROUTE_ORDER } from '@/lib/admin/prototype-contract';
 
 describe('ADMIN_NAV', () => {
   it('has the 5 primary sections in order', () => {
-    expect(ADMIN_NAV.map((n) => n.href)).toEqual([
-      '/admin',
-      '/admin/catalog',
-      '/admin/orders',
-      '/admin/customers',
-      '/admin/marketing',
-    ]);
+    expect(ADMIN_NAV.map((n) => n.href)).toEqual([...ADMIN_PRIMARY_ROUTE_ORDER]);
   });
 });
 

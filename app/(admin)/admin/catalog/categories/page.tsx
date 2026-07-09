@@ -4,8 +4,11 @@
  */
 
 import Link from 'next/link';
-import { Heading } from '@/components/admin/heading';
+import { AdminKpiCard } from '@/components/admin/admin-kpi-card';
+import { AdminPageHeader } from '@/components/admin/admin-page-header';
+import { AdminPanel } from '@/components/admin/admin-panel';
 import { Button } from '@/components/admin/ui/button';
+import { Icon } from '@/components/admin/icon';
 import { prisma } from '@/lib/prisma-client';
 import { CategoryTable, type CategoryRow } from './_components/category-table';
 
@@ -29,22 +32,42 @@ export default async function CatalogPage() {
     ...c,
     productCount: _count.products,
   }));
+  const linkedProducts = rows.reduce((sum, row) => sum + row.productCount, 0);
+  const categoriesWithCovers = rows.filter((row) => row.coverImage).length;
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <Heading title="Категории" description="Управление категориями каталога" />
-        <Button asChild>
-          <Link href="/admin/catalog/categories/new">Добавить категорию</Link>
-        </Button>
+    <div className="space-y-[24px]">
+      <AdminPageHeader
+        kicker="Каталог"
+        title="Категории"
+        subtitle="Управление навигацией витрины, обложками и порядком вывода."
+        action={(
+          <Button asChild>
+            <Link href="/admin/catalog/categories/new">
+              <Icon name="add" className="text-[18px]" /> Добавить категорию
+            </Link>
+          </Button>
+        )}
+      />
+
+      <div className="grid grid-cols-1 gap-[18px] md:grid-cols-3">
+        <AdminKpiCard icon="category" label="Категорий" value={rows.length.toLocaleString('ru-RU')} tone="primary" />
+        <AdminKpiCard icon="inventory_2" label="Товаров в категориях" value={linkedProducts.toLocaleString('ru-RU')} />
+        <AdminKpiCard icon="image" label="С обложками" value={categoriesWithCovers.toLocaleString('ru-RU')} />
       </div>
-      {rows.length > 0 ? (
-        <CategoryTable rows={rows} />
-      ) : (
-        <div className="bg-admin-surface border border-admin-outline-variant rounded-xl p-8 text-admin-on-surface-variant text-sm">
-          Категорий пока нет. Нажмите «Добавить категорию».
-        </div>
-      )}
+
+      <AdminPanel
+        title="Список категорий"
+        note="Стрелки меняют порядок категорий на витрине. Удаление заблокировано, если внутри есть товары."
+      >
+        {rows.length > 0 ? (
+          <CategoryTable rows={rows} />
+        ) : (
+          <div className="rounded-[20px] border border-admin-outline-variant bg-admin-surface-low p-10 text-center text-sm font-bold text-admin-on-surface-variant">
+            Категорий пока нет. Нажмите «Добавить категорию».
+          </div>
+        )}
+      </AdminPanel>
     </div>
   );
 }

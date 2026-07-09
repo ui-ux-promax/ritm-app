@@ -58,7 +58,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-manrope)', 'sans-serif'],
         display: ['var(--font-unbounded)', 'sans-serif'],
-        'admin-head': ['var(--font-anybody)', 'sans-serif'],
+        'admin-head': ['var(--font-manrope)', 'sans-serif'],
         'admin-body': ['var(--font-manrope)', 'sans-serif'],
       },
       borderRadius: {

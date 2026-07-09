@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { Heading } from '@/components/admin/heading';
+import { AdminPageHeader } from '@/components/admin/admin-page-header';
+import { AdminPanel } from '@/components/admin/admin-panel';
 import { prisma } from '@/lib/prisma-client';
 import { CategoryForm } from '../../_components/category-form';
 
@@ -15,9 +16,11 @@ export default async function EditCategoryPage({ params }: { params: Promise<{ i
   if (!category) notFound();
 
   return (
-    <div className="space-y-8">
-      <Heading title="Редактирование категории" description={category.name} />
-      <CategoryForm initial={category} />
+    <div className="space-y-[24px]">
+      <AdminPageHeader kicker="Каталог" title="Редактирование категории" subtitle={category.name} />
+      <AdminPanel title="Данные категории">
+        <CategoryForm initial={category} />
+      </AdminPanel>
     </div>
   );
 }

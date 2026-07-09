@@ -19,18 +19,15 @@ export function AdminTabBar() {
   return (
     <nav
       aria-label="Основная навигация"
-      className={cn(
-        'md:hidden fixed bottom-0 left-0 right-0 z-30',
-        'bg-admin-surface border-t border-admin-outline-variant',
-      )}
+      className="fixed inset-x-3 bottom-3 z-40 rounded-[24px] border border-admin-outline-variant bg-admin-surface/95 p-2 shadow-[var(--admin-shadow-soft)] backdrop-blur-lg md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="relative flex items-stretch h-16 p-1.5 isolate">
+      <div className="relative isolate flex h-14 items-stretch">
         {/* Скользящая лайм-пилюля (декоративная) */}
         <span
           aria-hidden="true"
           className={cn(
-            'pointer-events-none absolute top-1.5 bottom-1.5 left-1.5 z-0 w-[calc((100%-0.75rem)/5)] rounded-full',
+            'pointer-events-none absolute inset-y-0 left-0 z-0 w-1/5 rounded-[18px]',
             'bg-admin-primary shadow-[var(--pill-shadow)]',
             'transition-[transform,opacity] duration-[420ms] ease-[cubic-bezier(.34,1.56,.64,1)]',
             active < 0 && 'opacity-0',
@@ -47,7 +44,7 @@ export function AdminTabBar() {
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'relative z-10 flex-1 flex items-center justify-center min-h-[44px] rounded-full',
+                'relative z-10 flex min-h-[44px] flex-1 items-center justify-center rounded-[18px]',
                 'transition-colors duration-200',
                 isActive ? 'text-admin-on-primary' : 'text-admin-on-surface-variant',
               )}

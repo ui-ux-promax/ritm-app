@@ -205,29 +205,36 @@ html body[data-scroll-locked] {
 @layer base {
   .admin-root {
     /* light (admin-main.html) */
-    --admin-bg: #f7f8f4;
+    --admin-bg: hsl(42 30% 97%);
     --admin-surface: #ffffff;
-    --admin-surface-low: #f8f9fb;
-    --admin-surface-container: #f3f4f6;
-    --admin-surface-high: #e5e7eb;
-    --admin-on-bg: #111827;
-    --admin-on-surface: #111827;
-    --admin-on-surface-variant: #6b7280;
-    --admin-primary: #b2f700;          /* electric-lime accent */
-    --admin-on-primary: #131f00;
-    --admin-secondary-container: #f3e8ff;
-    --admin-on-secondary-container: #3b0764;
-    --admin-error: #ef4444;
+    --admin-surface-low: hsl(42 20% 94%);
+    --admin-surface-container: hsl(42 20% 94%);
+    --admin-surface-high: hsl(42 20% 94%);
+    --admin-on-bg: hsl(220 12% 10%);
+    --admin-on-surface: hsl(220 12% 10%);
+    --admin-on-surface-variant: hsl(220 7% 42%);
+    --admin-primary: hsl(220 12% 10%);
+    --admin-on-primary: hsl(0 0% 100%);
+    --admin-secondary-container: hsl(151 35% 38% / 0.12);
+    --admin-on-secondary-container: hsl(151 35% 38%);
+    --admin-error: hsl(4 70% 52%);
     --admin-on-error: #ffffff;
-    --admin-outline: #d1d5db;
-    --admin-outline-variant: #e5e7eb;
+    --admin-outline: hsl(42 15% 88%);
+    --admin-outline-variant: hsl(42 15% 88%);
     /* блик для shimmer-скелетонов (light) */
     --admin-shimmer: rgba(255, 255, 255, 0.65);
     /* мягкая тень скользящей таблетки тоггла (light) */
-    --pill-shadow: 0 2px 8px rgba(17, 24, 39, 0.10), 0 1px 2px rgba(17, 24, 39, 0.06);
+    --admin-sidebar: hsl(220 16% 9%);
+    --admin-money: hsl(151 35% 38%);
+    --admin-warning: hsl(42 92% 50%);
+    --admin-info: hsl(205 72% 48%);
+    --admin-shadow-soft: 0 22px 70px hsl(220 12% 10% / .08);
+    --admin-shadow-tight: 0 12px 36px hsl(220 12% 10% / .06);
+    --pill-shadow: 0 12px 36px hsl(220 12% 10% / .08);
 
     background: var(--admin-bg);   /* перекрывает lime-градиент body */
     color: var(--admin-on-bg);
+    background: radial-gradient(circle at 16% -8%, hsl(42 20% 94%) 0, transparent 330px), var(--admin-bg);
     min-height: 100vh;
   }
   /* На admin-страницах скроллит main, а не документ (модель прототипа): глушим скролл
@@ -240,28 +247,46 @@ html body[data-scroll-locked] {
   }
   .admin-root.dark {
     /* dark (admin-main-dark.html) */
-    --admin-bg: #131313;
-    --admin-surface: #131313;
-    --admin-surface-low: #1c1b1b;
-    --admin-surface-container: #201f1f;
-    --admin-surface-high: #2a2a2a;
-    --admin-on-bg: #e5e2e1;
-    --admin-on-surface: #e5e2e1;
-    --admin-on-surface-variant: #c2caad;
-    --admin-primary: #b2f700;
-    --admin-on-primary: #243600;
-    --admin-secondary-container: #563f71;
-    --admin-on-secondary-container: #c9ade7;
-    --admin-error: #ffb4ab;
-    --admin-on-error: #690005;
-    --admin-outline: #8c9479;
-    --admin-outline-variant: #424a33;
+    --admin-bg: hsl(220 16% 9%);
+    --admin-surface: hsl(220 14% 12%);
+    --admin-surface-low: hsl(220 12% 16%);
+    --admin-surface-container: hsl(220 12% 16%);
+    --admin-surface-high: hsl(220 10% 20%);
+    --admin-on-bg: hsl(42 30% 97%);
+    --admin-on-surface: hsl(42 30% 97%);
+    --admin-on-surface-variant: hsl(42 12% 72%);
+    --admin-primary: hsl(42 30% 97%);
+    --admin-on-primary: hsl(220 16% 9%);
+    --admin-secondary-container: hsl(151 35% 38% / 0.24);
+    --admin-on-secondary-container: hsl(151 42% 68%);
+    --admin-error: hsl(4 70% 62%);
+    --admin-on-error: hsl(0 0% 100%);
+    --admin-outline: hsl(220 10% 24%);
+    --admin-outline-variant: hsl(220 10% 24%);
     /* блик для shimmer-скелетонов (dark) */
     --admin-shimmer: rgba(255, 255, 255, 0.10);
     /* тень скользящей таблетки тоггла (dark) — лайм-glow вместо drop-shadow */
-    --pill-shadow: 0 0 0 1px rgba(178, 247, 0, 0.20), 0 4px 14px rgba(178, 247, 0, 0.18);
+    --admin-sidebar: hsl(220 16% 9%);
+    --admin-money: hsl(151 42% 68%);
+    --admin-warning: hsl(42 92% 60%);
+    --admin-info: hsl(205 72% 62%);
+    --admin-shadow-soft: 0 22px 70px hsl(0 0% 0% / .24);
+    --admin-shadow-tight: 0 12px 36px hsl(0 0% 0% / .22);
+    --pill-shadow: 0 12px 36px hsl(0 0% 0% / .24);
   }
   /* перебивает глобальный `* { border-color }` внутри админки */
+  .admin-root .admin-workspace {
+    width: min(100% - 56px, 1360px);
+    margin-inline: auto;
+    padding: 32px 0 52px;
+  }
+  @media (max-width: 640px) {
+    .admin-root .admin-workspace {
+      width: min(100% - 32px, 1360px);
+      padding-top: 22px;
+      padding-bottom: 104px;
+    }
+  }
   .admin-root *, .admin-root *::before, .admin-root *::after {
     border-color: var(--admin-outline-variant);
   }

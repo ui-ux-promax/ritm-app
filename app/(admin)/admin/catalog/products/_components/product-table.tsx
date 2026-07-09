@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/admin/icon';
@@ -65,28 +66,28 @@ export function ProductTable({ rows, page, totalPages, total, limit }: ProductTa
   const to = Math.min(page * limit, total);
 
   return (
-    <div className="bg-admin-surface border border-admin-outline-variant rounded-xl overflow-hidden">
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-admin-surface-high">
+    <div className="mt-[18px] overflow-hidden rounded-[20px] border border-admin-outline-variant bg-admin-surface">
+      <div className="hidden overflow-x-auto md:block">
+        <table className="w-full min-w-[980px] border-collapse text-left text-[14px]">
+          <thead className="bg-admin-surface-low">
             <tr>
               {['Товар', 'Бренд', 'Категория', 'Остаток', 'Цена', 'Статус'].map((h) => (
-                <th key={h} className="px-6 py-4 text-[12px] font-semibold uppercase tracking-widest text-admin-on-surface-variant">
+                <th key={h} className="border-b border-admin-outline-variant px-4 py-[14px] text-[11px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">
                   {h}
                 </th>
               ))}
-              <th className="px-6 py-4 text-[12px] font-semibold uppercase tracking-widest text-admin-on-surface-variant text-right">
+              <th className="border-b border-admin-outline-variant px-4 py-[14px] text-right text-[11px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">
                 Действия
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-admin-outline-variant">
+          <tbody>
             {rows.map((row) => (
-              <tr key={row.id} className="group hover:bg-admin-surface-high transition-colors">
+              <tr key={row.id} className="group transition-colors hover:bg-admin-surface-low">
                 {/* Товар */}
-                <td className="px-6 py-4">
+                <td className="border-b border-admin-outline-variant px-4 py-[14px]">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-admin-surface-high border border-admin-outline-variant p-1 overflow-hidden flex items-center justify-center shrink-0">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-admin-outline-variant bg-admin-surface-low p-1">
                       {row.coverImage ? (
                         /* eslint-disable-next-line @next/next/no-img-element -- admin thumb */
                         <img
@@ -99,26 +100,26 @@ export function ProductTable({ rows, page, totalPages, total, limit }: ProductTa
                       )}
                     </div>
                     <div className="min-w-0">
-                      <a
+                      <Link
                         href={`/admin/catalog/products/${row.id}/edit`}
                         className="font-bold text-admin-on-surface hover:underline block truncate"
                       >
                         {row.name}
-                      </a>
+                      </Link>
                       <div className="text-xs text-admin-on-surface-variant">{row.addedAgo}</div>
                     </div>
                   </div>
                 </td>
                 {/* Бренд */}
-                <td className="px-6 py-4 text-admin-on-surface-variant">{row.brand}</td>
+                <td className="border-b border-admin-outline-variant px-4 py-[14px] text-admin-on-surface-variant">{row.brand}</td>
                 {/* Категория */}
-                <td className="px-6 py-4">
-                  <span className="px-3 py-1 bg-admin-surface-high rounded-full text-xs font-bold text-admin-on-surface">
+                <td className="border-b border-admin-outline-variant px-4 py-[14px]">
+                  <span className="rounded-full bg-admin-surface-low px-3 py-1 text-xs font-bold text-admin-on-surface">
                     {row.categoryName}
                   </span>
                 </td>
                 {/* Остаток */}
-                <td className="px-6 py-4">
+                <td className="border-b border-admin-outline-variant px-4 py-[14px]">
                   {row.totalStock === 0 ? (
                     <div className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-admin-error" />
@@ -137,13 +138,13 @@ export function ProductTable({ rows, page, totalPages, total, limit }: ProductTa
                   )}
                 </td>
                 {/* Цена */}
-                <td className="px-6 py-4 font-bold text-admin-on-surface tabular-nums whitespace-nowrap">{formatPrice(row.minPrice)}</td>
+                <td className="whitespace-nowrap border-b border-admin-outline-variant px-4 py-[14px] font-bold tabular-nums text-admin-on-surface">{formatPrice(row.minPrice)}</td>
                 {/* Статус */}
-                <td className="px-6 py-4">
+                <td className="border-b border-admin-outline-variant px-4 py-[14px]">
                   <StatusPill active={row.active} discountPct={row.discountPct} />
                 </td>
                 {/* Действия */}
-                <td className="px-6 py-4 text-right">
+                <td className="border-b border-admin-outline-variant px-4 py-[14px] text-right">
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                       <button
@@ -175,7 +176,7 @@ export function ProductTable({ rows, page, totalPages, total, limit }: ProductTa
       </div>
 
       {/* Мобильная раскладка: карточки вместо таблицы (<md) */}
-      <div className="md:hidden divide-y divide-admin-outline-variant">
+      <div className="divide-y divide-admin-outline-variant md:hidden">
         {rows.map((row) => (
           <div key={row.id} className="p-4">
             <div className="flex items-start gap-3">
@@ -189,12 +190,12 @@ export function ProductTable({ rows, page, totalPages, total, limit }: ProductTa
               </div>
 
               <div className="min-w-0 flex-1">
-                <a
+                <Link
                   href={`/admin/catalog/products/${row.id}/edit`}
                   className="font-bold text-admin-on-surface hover:underline block truncate"
                 >
                   {row.name}
-                </a>
+                </Link>
                 <div className="text-xs text-admin-on-surface-variant truncate">
                   {row.brand} · {row.categoryName}
                 </div>
@@ -250,7 +251,7 @@ export function ProductTable({ rows, page, totalPages, total, limit }: ProductTa
       </div>
 
       {/* Пагинация (в подвале карточки, как в прототипе) */}
-      <div className="px-6 py-4 border-t border-admin-outline-variant flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 border-t border-admin-outline-variant px-6 py-4 max-[640px]:justify-center">
         <p className="text-xs text-admin-on-surface-variant">
           Показано {from}–{to} из {total}
         </p>
@@ -266,10 +267,10 @@ export function ProductTable({ rows, page, totalPages, total, limit }: ProductTa
                   type="button"
                   onClick={() => goPage(it)}
                   className={cn(
-                    'w-8 h-8 flex items-center justify-center rounded-lg font-bold transition-colors',
+                    'flex h-10 w-10 items-center justify-center rounded-[12px] font-bold transition-colors',
                     it === page
-                      ? 'bg-admin-primary text-admin-on-primary'
-                      : 'text-admin-on-surface-variant hover:bg-admin-surface-high',
+                      ? 'bg-[var(--admin-sidebar)] text-white'
+                      : 'border border-admin-outline-variant text-admin-on-surface-variant hover:bg-admin-surface-low',
                   )}
                 >
                   {it}
@@ -308,21 +309,21 @@ export function ProductTable({ rows, page, totalPages, total, limit }: ProductTa
 function StatusPill({ active, discountPct }: { active: boolean; discountPct: number }) {
   if (active && discountPct > 0) {
     return (
-      <span className="px-3 py-1 bg-admin-secondary-container text-admin-on-secondary-container rounded-full text-xs font-bold flex items-center gap-1 w-fit">
-        <Icon name="sell" className="text-[14px]" /> Скидка
+      <span className="flex min-h-[29px] w-fit items-center gap-1 rounded-full border border-[hsl(var(--color-warning)/.38)] bg-[hsl(var(--color-warning)/.18)] px-[10px] text-xs font-extrabold text-[hsl(42_78%_28%)]">
+        <span className="h-[7px] w-[7px] rounded-full bg-current" /> Скидка
       </span>
     );
   }
   if (active) {
     return (
-      <span className="px-3 py-1 bg-admin-primary text-admin-on-primary rounded-full text-xs font-bold flex items-center gap-1 w-fit">
-        <Icon name="check_circle" filled className="text-[14px]" /> Активен
+      <span className="flex min-h-[29px] w-fit items-center gap-1 rounded-full border border-[hsl(var(--color-success)/.22)] bg-[hsl(var(--color-success)/.12)] px-[10px] text-xs font-extrabold text-[var(--admin-money)]">
+        <span className="h-[7px] w-[7px] rounded-full bg-current" /> Активен
       </span>
     );
   }
   return (
-    <span className="px-3 py-1 bg-admin-surface-high text-admin-on-surface-variant border border-admin-outline-variant rounded-full text-xs font-bold flex items-center gap-1 w-fit">
-      <Icon name="archive" className="text-[14px]" /> Черновик
+    <span className="flex min-h-[29px] w-fit items-center gap-1 rounded-full border border-admin-outline-variant bg-admin-surface-low px-[10px] text-xs font-extrabold text-admin-on-surface-variant">
+      <span className="h-[7px] w-[7px] rounded-full bg-current" /> Черновик
     </span>
   );
 }
@@ -333,7 +334,7 @@ function PagerBtn({ disabled, onClick, icon }: { disabled: boolean; onClick: () 
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="w-8 h-8 flex items-center justify-center rounded-lg border border-admin-outline-variant text-admin-on-surface-variant hover:bg-admin-surface-high transition-colors disabled:opacity-30"
+      className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-admin-outline-variant text-admin-on-surface-variant transition-colors hover:bg-admin-surface-low disabled:opacity-30"
     >
       <Icon name={icon} />
     </button>

@@ -5,6 +5,7 @@ import { Button } from '@/components/admin/ui/button';
 import { Icon } from '@/components/admin/icon';
 import { validateImageFile } from '@/lib/cloudinary/validate';
 import type { UploadedImage } from '@/lib/cloudinary/types';
+import { shouldDeleteImmediately } from '@/lib/cloudinary/admin-media';
 import { ImagePreviewCard } from './image-preview-card';
 
 interface ImageUploaderProps {
@@ -64,6 +65,7 @@ export function ImageUploader({
       height: data.height,
       format: data.format,
       bytes: data.bytes,
+      persisted: false,
     };
   }
 
@@ -99,12 +101,13 @@ export function ImageUploader({
   function handleRemove(index: number) {
     const img = value[index];
     onChange(value.filter((_, i) => i !== index));
-    // Best-effort delete from Cloudinary; ignore the outcome (covers the basic orphan case).
-    void fetch('/api/admin/media/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ publicId: img.publicId }),
-    }).catch(() => {});
+    if (shouldDeleteImmediately(img)) {
+      void fetch('/api/admin/media/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publicId: img.publicId }),
+      }).catch(() => {});
+    }
   }
 
   function handleMove(index: number, dir: -1 | 1) {

@@ -18,8 +18,10 @@ vi.mock('@/lib/prisma-client', () => {
 import { createProduct, updateProduct, deleteProduct } from '@/app/actions/admin/products';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma-client';
+import { deleteAsset } from '@/lib/cloudinary/server';
 
 const authMock = auth as unknown as ReturnType<typeof vi.fn>;
+const deleteAssetMock = deleteAsset as unknown as ReturnType<typeof vi.fn>;
 const p = prisma as unknown as {
   product: Record<string, ReturnType<typeof vi.fn>>;
   productColorway: Record<string, ReturnType<typeof vi.fn>>;
@@ -39,6 +41,7 @@ const fullProduct = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.stubEnv('NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME', 'ritm-cloud');
   authMock.mockResolvedValue({ user: { role: 'ADMIN' } });
   // Интерактивная транзакция: выполняем колбэк с тем же мок-клиентом.
   p.$transaction.mockImplementation(async (cb: (tx: typeof prisma) => unknown) => cb(prisma));
@@ -97,7 +100,7 @@ describe('updateProduct', () => {
   beforeEach(() => {
     p.product.findUnique.mockResolvedValue({
       id: 'pr1',
-      colorways: [{ id: 'cw1', images: [{ id: 'im1' }], variants: [{ id: 'v1' }] }],
+      colorways: [{ id: 'cw1', images: [{ publicId: 'im1' }], variants: [{ id: 'v1' }] }],
     });
     p.orderItem.findMany.mockResolvedValue([]);
   });
@@ -125,6 +128,42 @@ describe('updateProduct', () => {
       expect.objectContaining({ where: { id: 'pr1' }, data: expect.objectContaining({ minPrice: 12990 }) }),
     );
     expect(p.productVariant.update).toHaveBeenCalled();
+  });
+
+  it('deletes removed persisted Cloudinary images after successful update', async () => {
+    p.product.findUnique.mockResolvedValue({
+      id: 'pr1',
+      colorways: [
+        {
+          id: 'cw1',
+          images: [{ publicId: 'ritm/products/old' }, { publicId: 'ritm/products/keep' }],
+          variants: [{ id: 'v1' }],
+        },
+      ],
+    });
+
+    const next = {
+      ...fullProduct,
+      colorways: [
+        {
+          ...colorway,
+          id: 'cw1',
+          images: [
+            {
+              url: 'https://res.cloudinary.com/ritm-cloud/image/upload/v1700000000/ritm/products/keep',
+              publicId: 'ritm/products/keep',
+            },
+          ],
+          variants: [{ ...variant, id: 'v1' }],
+        },
+      ],
+    };
+
+    const r = await updateProduct('pr1', next);
+
+    expect(r).toEqual({ ok: true, id: 'pr1' });
+    expect(deleteAssetMock).toHaveBeenCalledWith('ritm/products/old');
+    expect(deleteAssetMock).not.toHaveBeenCalledWith('ritm/products/keep');
   });
 });
 
