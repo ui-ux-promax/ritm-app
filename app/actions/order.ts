@@ -181,6 +181,14 @@ export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
     logger.error('order_cart_cleanup_failed', e, { orderNumber });
   }
 
+  // Save address to user's address book (dedup by city+street)
+  try {
+    const { saveAddressFromOrder } = await import('@/app/actions/address');
+    await saveAddressFromOrder({ city: form.city ?? '', street: form.addressLine, comment: form.addressComment ?? null });
+  } catch {
+    // non-critical
+  }
+
   return { ok: true, orderNumber, paymentUrl };
 }
 

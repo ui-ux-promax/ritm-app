@@ -4,8 +4,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { useEffect, useMemo, useState, useTransition, type ReactNode } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { updateProfile } from '@/app/actions/profile';
 import { toggleWishlist } from '@/app/actions/wishlist';
+import { addAddress, deleteAddress, setDefaultAddress } from '@/app/actions/address';
 import { OrderStatusBadge } from '@/components/shared/orders/order-status-badge';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -16,7 +18,7 @@ import type { ProductCardData } from '@/lib/product-summary';
 // ── Types ──────────────────────────────────────────────────────────────────
 
 type OrderStatusKey = keyof typeof ORDER_STATUS_META;
-type PanelKey = 'overview' | 'orders' | 'favorites' | 'addresses' | 'payments' | 'settings';
+type PanelKey = 'overview' | 'orders' | 'favorites' | 'addresses' | 'settings';
 type FilterKey = 'all' | 'processing' | 'transit' | 'delivered' | 'returned' | 'cancelled';
 
 export interface ProfileOrderItem {
@@ -55,29 +57,21 @@ interface ProfileUser {
   createdAt: string;
 }
 
+interface SavedAddress {
+  id: string;
+  label: string;
+  city: string;
+  street: string;
+  comment: string | null;
+  isDefault: boolean;
+}
+
 interface ProfileViewProps {
   user: ProfileUser;
   initial: ProfileValues;
   orders: ProfileOrder[];
   wishlist: ProductCardData[];
-}
-
-interface SavedAddress {
-  id: string;
-  name: string;
-  role: string;
-  city: string;
-  line: string;
-  note: string;
-  isDefault: boolean;
-}
-
-interface SavedCard {
-  id: string;
-  brand: string;
-  last4: string;
-  expiry: string;
-  isDefault: boolean;
+  addresses: SavedAddress[];
 }
 
 // ── Icons ──────────────────────────────────────────────────────────────────
@@ -87,7 +81,6 @@ const ICONS = {
   orders: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M5 7.5 12 4l7 3.5v9L12 20l-7-3.5z"/><path d="m5 7.5 7 3.5 7-3.5"/><path d="M12 11v9"/></svg>,
   favorites: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 20.5s-7.25-4.45-7.25-10.2A4.35 4.35 0 0 1 12 7.25a4.35 4.35 0 0 1 7.25 3.05C19.25 16.05 12 20.5 12 20.5Z"/></svg>,
   addresses: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>,
-  payments: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 9.5h18"/></svg>,
   settings: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 7.04 3.4l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>,
   logout: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M15 17l5-5-5-5"/><path d="M20 12H9"/><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/></svg>,
   star: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m12 3 2.4 5.1 5.6.7-4.1 3.9 1.05 5.5L12 16.9l-4.95 2.3L8.1 13.7 4 9.8l5.6-.7Z"/></svg>,
@@ -103,7 +96,6 @@ const PANELS: Array<{ key: PanelKey; label: string }> = [
   { key: 'orders', label: 'Заказы' },
   { key: 'favorites', label: 'Избранное' },
   { key: 'addresses', label: 'Адреса' },
-  { key: 'payments', label: 'Способы оплаты' },
   { key: 'settings', label: 'Настройки' },
 ];
 
@@ -116,30 +108,20 @@ const FILTERS: Array<{ key: FilterKey; label: string; dot: string }> = [
   { key: 'cancelled', label: 'Отменён', dot: 'bg-danger' },
 ];
 
-// TEMP: mock data until address/payment APIs exist.
-const ADDRESSES: SavedAddress[] = [
-  { id: 'home', name: 'Дом', role: 'Основной адрес', city: 'Москва', line: 'ул. Лесная, 8, кв. 42', note: 'Курьеру звонить за 20 минут', isDefault: true },
-  { id: 'work', name: 'Работа', role: 'Будние дни', city: 'Москва', line: 'БЦ Север, 12 этаж', note: 'Получение на ресепшене', isDefault: false },
-];
-
-const CARDS: SavedCard[] = [
-  { id: 'visa', brand: 'Visa', last4: '2482', expiry: '09/28', isDefault: true },
-  { id: 'mir', brand: 'Мир', last4: '7710', expiry: '03/27', isDefault: false },
-];
+// TEMP: mock card data removed — payments panel deleted
 
 const POINTS = 1240;
 const fmtDate = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
 
 // ── Main component ─────────────────────────────────────────────────────────
 
-export function ProfileView({ user, initial, orders, wishlist }: ProfileViewProps) {
+export function ProfileView({ user, initial, orders, wishlist, addresses }: ProfileViewProps) {
   const [panel, setPanel] = useState<PanelKey>('overview');
   const [filter, setFilter] = useState<FilterKey>('all');
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState<ReadonlySet<number>>(() => new Set());
   const [favorites, setFavorites] = useState<ProductCardData[]>(wishlist);
   const [toast, setToast] = useState<string | null>(null);
-  const [prefs, setPrefs] = useState({ orders: true, drops: true, sales: false });
 
   const name = user.name.trim() || user.email.split('@')[0] || 'Покупатель Ritm';
   const totalSpent = useMemo(
@@ -307,7 +289,7 @@ export function ProfileView({ user, initial, orders, wishlist }: ProfileViewProp
         {/* Panels */}
         <div className="min-w-0">
           <Panel id="overview" active={panel === 'overview'} title="Обзор" text="Главное по аккаунту, заказам и сохранённым данным.">
-            <Overview user={user} orders={orders} totalSpent={totalSpent} favs={favorites.length} go={go} />
+            <Overview user={user} orders={orders} totalSpent={totalSpent} favs={favorites.length} go={go} addresses={addresses} />
           </Panel>
 
           <Panel id="orders" active={panel === 'orders'} title="Заказы" text="История покупок, трекинг доставки и детали каждого заказа.">
@@ -329,15 +311,11 @@ export function ProfileView({ user, initial, orders, wishlist }: ProfileViewProp
           </Panel>
 
           <Panel id="addresses" active={panel === 'addresses'} title="Адреса" text="Адреса доставки для оформления заказов.">
-            <Tiles addresses />
-          </Panel>
-
-          <Panel id="payments" active={panel === 'payments'} title="Способы оплаты" text="Сохранённые карты и платёжные методы.">
-            <Tiles />
+            <Addresses addresses={addresses} />
           </Panel>
 
           <Panel id="settings" active={panel === 'settings'} title="Настройки" text="Личные данные, уведомления и безопасность аккаунта.">
-            <Settings user={user} initial={initial} prefs={prefs} setPrefs={setPrefs} toast={setToast} />
+            <Settings user={user} initial={initial} toast={setToast} />
           </Panel>
         </div>
       </div>
@@ -433,15 +411,15 @@ function Loyalty({ name, createdAt }: { name: string; createdAt: string }) {
 
 // ── Overview panel ────────────────────────────────────────────────────────
 
-function Overview({ user, orders, totalSpent, favs, go }: {
+function Overview({ user, orders, totalSpent, favs, go, addresses }: {
   user: ProfileUser;
   orders: ProfileOrder[];
   totalSpent: number;
   favs: number;
   go: (key: PanelKey) => void;
+  addresses: SavedAddress[];
 }) {
-  const a = ADDRESSES[0];
-  const c = CARDS[0];
+  const a = addresses[0] ?? { city: 'Не указан', street: '', label: '', id: '', comment: null, isDefault: false };
   return (
     <>
       {/* Stats */}
@@ -481,8 +459,7 @@ function Overview({ user, orders, totalSpent, favs, go }: {
           <Row k="Имя" v={user.name || 'Не указано'} />
           <Row k="E-mail" v={user.email} />
           <Row k="Телефон" v={user.phone || 'Не указан'} />
-          <Row k="Адрес" v={`${a.city}, ${a.line}`} />
-          <Row k="Карта" v={`${c.brand} •••• ${c.last4}`} />
+          <Row k="Адрес" v={a.city && a.street ? `${a.city}, ${a.street}` : 'Не указан'} />
         </Card>
       </div>
     </>
@@ -773,107 +750,95 @@ function Favorites({ favorites, onRemove }: {
   );
 }
 
-// ── Tiles (addresses / payments) ───────────────────────────────────────────
+// ── Addresses panel ───────────────────────────────────────────────────────
 
-function Tiles({ addresses }: { addresses?: boolean }) {
-  const addLabel = addresses ? 'Добавить адрес' : 'Добавить карту';
+function Addresses({ addresses }: { addresses: SavedAddress[] }) {
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ label: 'Дом', city: '', street: '', comment: '' });
+  const [pending, startAdd] = useTransition();
+
+  const handleAdd = (e: React.FormEvent) => {
+    e.preventDefault();
+    startAdd(async () => {
+      await addAddress(form);
+      setForm({ label: 'Дом', city: '', street: '', comment: '' });
+      setShowForm(false);
+    });
+  };
+
   return (
     <div className="grid grid-cols-2 gap-4 max-[560px]:grid-cols-1">
-      {addresses
-        ? ADDRESSES.map((a) => (
-            <Tile key={a.id} def={a.isDefault} title={a.name} sub={a.role}
-              icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9.5h14V10"/><path d="M9.5 19.5V14h5v5.5"/></svg>}
-              body={<><b className="text-ink">{a.city}</b><br />{a.line}<br />{a.note}</>} />
-          ))
-        : CARDS.map((c) => (
-            <Tile key={c.id} def={c.isDefault} title={c.brand} sub={`•••• ${c.last4}`}
-              icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 9.5h18"/></svg>}
-              body={<>Действует до <b className="text-ink">{c.expiry}</b></>} />
-          ))}
-      <button
-        type="button"
-        className="grid min-h-[150px] place-items-center gap-2.5 rounded-[24px] border border-dashed border-line text-[13.5px] font-bold text-ink-muted hover:bg-surface/50"
-      >
-        <span className="grid h-10 w-10 place-items-center rounded-full bg-surface-soft text-ink">
-          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
-        </span>
-        {addLabel}
-      </button>
-    </div>
-  );
-}
-
-function Tile({ def, title, sub, body, icon }: { def: boolean; title: string; sub: string; body: ReactNode; icon?: ReactNode }) {
-  return (
-    <div className={cn('relative grid gap-2 rounded-[24px] border border-line bg-surface p-5', def && 'border-accent/45 shadow-[inset_0_0_0_1px_hsl(var(--color-accent)/.2)]')}>
-      {def && (
-        <span className="absolute right-4 top-4 rounded-full border border-accent/30 bg-accent/12 px-[9px] py-[3px] text-[10.5px] font-bold uppercase tracking-[.04em] text-[hsl(151_48%_24%)]">
-          По умолчанию
-        </span>
-      )}
-      <div className="flex items-center gap-2.5">
-        {icon && (
-          <span className="grid h-9 w-9 place-items-center rounded-[11px] bg-surface-soft text-ink [&_svg]:h-[18px] [&_svg]:w-[18px]">
-            {icon}
-          </span>
-        )}
-        <div>
-          <div className="text-[14.5px] font-extrabold">{title}</div>
-          <div className="text-xs text-ink-muted">{sub}</div>
+      {addresses.map((a) => (
+        <div key={a.id} className={cn('relative grid gap-2 rounded-[24px] border border-line bg-surface p-5', a.isDefault && 'border-accent/45 shadow-[inset_0_0_0_1px_hsl(var(--color-accent)/.2)]')}>
+          {a.isDefault && (
+            <span className="absolute right-4 top-4 rounded-full border border-accent/30 bg-accent/12 px-[9px] py-[3px] text-[10.5px] font-bold uppercase tracking-[.04em] text-[hsl(151_48%_24%)]">
+              По умолчанию
+            </span>
+          )}
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-9 w-9 place-items-center rounded-[11px] bg-surface-soft text-ink [&_svg]:h-[18px] [&_svg]:w-[18px]">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9.5h14V10"/><path d="M9.5 19.5V14h5v5.5"/></svg>
+            </span>
+            <div>
+              <div className="text-[14.5px] font-extrabold">{a.label}</div>
+            </div>
+          </div>
+          <p className="text-[13px] leading-[1.55] text-ink-muted">
+            <b className="text-ink">{a.city}</b><br />{a.street}{a.comment && <><br />{a.comment}</>}
+          </p>
+          <div className="mt-1.5 flex flex-wrap gap-2">
+            {!a.isDefault && (
+              <button type="button" onClick={() => setDefaultAddress(a.id)} className="h-9 rounded-full border border-line bg-surface px-3.5 text-[12.5px] font-bold hover:border-ink/30">
+                По умолчанию
+              </button>
+            )}
+            <button type="button" onClick={() => deleteAddress(a.id)} className="h-9 rounded-full border border-line bg-surface px-3.5 text-[12.5px] font-bold text-danger hover:border-danger/40">
+              Удалить
+            </button>
+          </div>
         </div>
-      </div>
-      <p className="text-[13px] leading-[1.55] text-ink-muted">{body}</p>
-      <div className="mt-1.5 flex flex-wrap gap-2">
-        {['Изменить', 'По умолчанию', 'Удалить'].map((a) => (
-          <button key={a} type="button" className="h-9 rounded-full border border-line bg-surface px-3.5 text-[12.5px] font-bold hover:border-ink/30">
-            {a}
-          </button>
-        ))}
-      </div>
+      ))}
+
+      {/* Add address tile or form */}
+      {showForm ? (
+        <form onSubmit={handleAdd} className="grid gap-3 rounded-[24px] border border-line bg-surface p-5">
+          <h3 className="text-base font-extrabold">Новый адрес</h3>
+          <input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="Название (Дом, Работа…)" className="h-12 rounded-[14px] border border-line bg-surface px-3.5 text-sm outline-none" />
+          <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Город" required className="h-12 rounded-[14px] border border-line bg-surface px-3.5 text-sm outline-none" />
+          <input value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} placeholder="Улица, дом, квартира" required className="h-12 rounded-[14px] border border-line bg-surface px-3.5 text-sm outline-none" />
+          <input value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} placeholder="Комментарий (необязательно)" className="h-12 rounded-[14px] border border-line bg-surface px-3.5 text-sm outline-none" />
+          <div className="flex gap-2">
+            <button type="submit" disabled={pending} className="h-[42px] rounded-full bg-primary px-5 text-[13px] font-bold text-primary-foreground disabled:opacity-60">
+              {pending ? 'Сохраняем…' : 'Сохранить'}
+            </button>
+            <button type="button" onClick={() => setShowForm(false)} className="h-[42px] rounded-full border border-line px-5 text-[13px] font-bold">
+              Отмена
+            </button>
+          </div>
+        </form>
+      ) : (
+        <button type="button" onClick={() => setShowForm(true)} className="grid min-h-[150px] place-items-center gap-2.5 rounded-[24px] border border-dashed border-line text-[13.5px] font-bold text-ink-muted hover:bg-surface/50">
+          <span className="grid h-10 w-10 place-items-center rounded-full bg-surface-soft text-ink">
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+          </span>
+          Добавить адрес
+        </button>
+      )}
     </div>
   );
 }
 
 // ── Settings panel ─────────────────────────────────────────────────────────
 
-function Settings({ user, initial, prefs, setPrefs, toast }: {
+function Settings({ user, initial, toast }: {
   user: ProfileUser;
   initial: ProfileValues;
-  prefs: { orders: boolean; drops: boolean; sales: boolean };
-  setPrefs: (p: { orders: boolean; drops: boolean; sales: boolean }) => void;
   toast: (s: string) => void;
 }) {
   return (
     <>
       <Personal user={user} initial={initial} toast={toast} />
       <Password toast={toast} />
-
-      {/* Notifications */}
-      <Card>
-        <h3 className="mb-1 text-base font-extrabold">Уведомления</h3>
-        <Pref title="Статусы заказов" text="Push и e-mail о сборке, отправке и доставке."
-          checked={prefs.orders} toggle={() => setPrefs({ ...prefs, orders: !prefs.orders })} />
-        <Pref title="Новые дропы и restock" text="Первыми узнавайте о новых капсулах и возврате размеров."
-          checked={prefs.drops} toggle={() => setPrefs({ ...prefs, drops: !prefs.drops })} />
-        <Pref title="Закрытые скидки" text="Промо для участников Ritm Club и персональные предложения."
-          checked={prefs.sales} toggle={() => setPrefs({ ...prefs, sales: !prefs.sales })} />
-      </Card>
-
-      {/* Danger zone */}
-      <div className="mt-[18px] flex flex-wrap items-center justify-between gap-[18px] rounded-[24px] border border-danger/30 bg-danger/5 px-[22px] py-5">
-        <div>
-          <h4 className="text-[14.5px] font-extrabold text-[hsl(4_64%_38%)]">Удаление аккаунта</h4>
-          <p className="mt-1 max-w-[52ch] text-[12.5px] text-ink-muted">
-            Аккаунт, история заказов и сохранённые данные будут удалены без возможности восстановления.
-          </p>
-        </div>
-        <button
-          type="button"
-          className="h-11 rounded-full border border-danger/50 bg-surface px-5 text-[13.5px] font-bold text-danger hover:bg-danger hover:text-primary-foreground"
-        >
-          Удалить аккаунт
-        </button>
-      </div>
     </>
   );
 }
@@ -1029,7 +994,7 @@ function Pass(p: {
           onClick={p.toggle}
           className="absolute right-2 grid h-[34px] w-[34px] place-items-center rounded-full text-ink-muted hover:bg-surface-soft"
         >
-          {p.show ? 'Скрыть' : 'Показать'}
+          {p.show ? <EyeOff className="h-[19px] w-[19px]" /> : <Eye className="h-[19px] w-[19px]" />}
         </button>
       </div>
       {p.error && <span className="text-xs font-semibold text-danger">Проверьте пароль</span>}
@@ -1043,32 +1008,6 @@ function LeadIcon() {
       <circle cx="12" cy="8" r="3.4" />
       <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
     </svg>
-  );
-}
-
-function Pref({ title, text, checked, toggle }: {
-  title: string;
-  text: string;
-  checked: boolean;
-  toggle: () => void;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 border-t border-line py-4 first:border-t-0">
-      <div>
-        <h4 className="text-sm font-bold">{title}</h4>
-        <p className="mt-[3px] max-w-[46ch] text-[12.5px] text-ink-muted">{text}</p>
-      </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={toggle}
-        className={cn(
-          'relative h-[27px] w-[46px] rounded-full bg-line after:absolute after:left-[3px] after:top-[3px] after:h-[21px] after:w-[21px] after:rounded-full after:bg-surface after:shadow-[0_1px_3px_hsl(var(--color-text)/.25)] after:transition-transform',
-          checked && 'bg-accent after:translate-x-[19px]',
-        )}
-      />
-    </div>
   );
 }
 

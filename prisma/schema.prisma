@@ -143,8 +143,23 @@ model User {
   orders        Order[]
   reviews       Review[]
   wishlists     Wishlist[]
+  addresses     Address[]
 
   @@index([role])
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String   @default("Дом")
+  city      String
+  street    String
+  comment   String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Account {

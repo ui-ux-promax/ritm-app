@@ -69,6 +69,10 @@ export default async function ProfilePage() {
             },
           },
         },
+        addresses: {
+          orderBy: { createdAt: 'desc' },
+          select: { id: true, label: true, city: true, street: true, comment: true, isDefault: true },
+        },
       },
     }),
     getWishlistItems(session, wishlistToken),
@@ -120,6 +124,14 @@ export default async function ProfilePage() {
       initial={initial}
       orders={orders}
       wishlist={wishlistProducts}
+      addresses={user.addresses.map((a) => ({
+        id: a.id,
+        label: a.label,
+        city: a.city,
+        street: a.street,
+        comment: a.comment,
+        isDefault: a.isDefault,
+      }))}
     />
   );
 }
