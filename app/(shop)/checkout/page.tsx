@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma-client';
 import { cartInclude, getCartDetails } from '@/lib/cart-details';
 import { resolveOwnerCart } from '@/lib/cart';
 import { cartCookieName } from '@/lib/cart-cookie';
+import { buildCheckoutDefaults } from '@/lib/checkout-defaults';
 import { CheckoutForm } from '@/components/shared/checkout/checkout-form';
 import { Breadcrumbs } from '@/components/shared/product/breadcrumbs';
 
@@ -14,7 +15,19 @@ export const metadata = { title: 'Оформление заказа — Ritm' };
 export default async function CheckoutPage() {
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      name: true,
+      phone: true,
+      email: true,
+      addresses: {
+        orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
+        take: 1,
+        select: { city: true, street: true, comment: true },
+      },
+    },
+  });
   if (!user) redirect('/login');
 
   const store = await cookies();
@@ -43,7 +56,12 @@ export default async function CheckoutPage() {
 
       <CheckoutForm
         details={details}
-        defaults={{ contactName: user.name ?? '', contactPhone: user.phone ?? '', contactEmail: user.email }}
+        defaults={buildCheckoutDefaults({
+          name: user.name,
+          phone: user.phone,
+          email: user.email,
+          address: user.addresses[0] ?? null,
+        })}
       />
     </main>
   );

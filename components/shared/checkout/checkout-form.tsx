@@ -12,16 +12,15 @@ import { checkoutSchema, type CheckoutValues } from '@/services/dto/order.dto';
 import { placeOrder } from '@/app/actions/order';
 import { validateCoupon } from '@/app/actions/coupon';
 import { AddressSuggest } from './address-suggest';
+import type { CheckoutDefaults } from '@/lib/checkout-defaults';
 import type { CartDetails } from '@/services/dto/cart.dto';
-
-type Defaults = { contactName: string; contactPhone: string; contactEmail: string };
 
 const SHIP_INFO = {
   courier: { label: 'Курьер', desc: '2–4 дня, от 390 ₽' },
   pickup: { label: 'Пункт выдачи', desc: '2–5 дней', extra: `Бесплатно от ${formatPrice(FREE_SHIPPING_THRESHOLD)}` },
 } as const;
 
-export function CheckoutForm({ details, defaults }: { details: CartDetails; defaults: Defaults }) {
+export function CheckoutForm({ details, defaults }: { details: CartDetails; defaults: CheckoutDefaults }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [coupon, setCoupon] = useState<{ code: string; percent: number; discount: number } | null>(null);
@@ -31,9 +30,10 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
 
   const methods = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { ...defaults, shippingMethod: 'courier', paymentMethod: 'online', city: '', addressLine: '', addressComment: '' },
+    defaultValues: { ...defaults, shippingMethod: 'courier', paymentMethod: 'online' },
   });
   const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = methods;
+  const addressLineRegistration = register('addressLine');
 
   const shippingMethod = watch('shippingMethod');
   const paymentMethod = watch('paymentMethod');
@@ -65,6 +65,7 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <input type="hidden" {...register('couponCode')} />
+        <input type="hidden" {...register('city')} />
 
         <div className="grid lg:grid-cols-[minmax(0,1fr)_400px] gap-7 mt-[22px] items-start">
           {/* LEFT — form sections */}
@@ -109,7 +110,11 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
               <div className="grid gap-2 relative">
                 <label className="text-ink-muted text-xs font-bold uppercase tracking-wider" htmlFor="addressLine">Адрес</label>
                 <input id="addressLine" autoComplete="off" placeholder="Город, улица, дом, квартира"
-                  {...register('addressLine')}
+                  {...addressLineRegistration}
+                  onChange={(e) => {
+                    void addressLineRegistration.onChange(e);
+                    if (e.target.value !== defaults.addressLine) setValue('city', '');
+                  }}
                   className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
                 <AddressSuggest />
                 {errors.addressLine && <span className="text-danger text-xs font-semibold">{errors.addressLine.message}</span>}
