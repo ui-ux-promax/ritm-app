@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -55,13 +56,8 @@ export function AdminShell({ user, children, initialTheme }: AdminShellProps) {
         <SidebarSkeletonGate />
 
         <div className="flex items-center gap-3 px-1 pb-1">
-          <div className="grid h-[45px] w-[45px] shrink-0 place-items-center rounded-[15px] bg-admin-on-primary text-[var(--admin-sidebar)]">
-            <Icon name="bolt" filled className="text-[23px]" />
-          </div>
           <div>
-            <p className="font-admin-head text-[29px] font-extrabold leading-[.9] tracking-[-.08em] text-admin-on-primary">
-              RITM
-            </p>
+            <Image src="/ritm-logo-light.svg" alt="Ritm" width={112} height={40} priority className="h-auto w-28" />
             <p className="mt-0.5 text-xs font-bold text-white/50">админка магазина</p>
           </div>
         </div>
@@ -103,22 +99,13 @@ export function AdminShell({ user, children, initialTheme }: AdminShellProps) {
 
         <div className="relative mt-auto overflow-hidden rounded-[18px] border border-white/10 bg-white/10 p-4">
           <div className="pointer-events-none absolute -bottom-10 -right-8 h-[132px] w-[132px] rounded-full bg-[var(--admin-money)]/30 blur-md" />
-          <h3 className="relative font-admin-head text-base font-extrabold tracking-[-.02em] text-admin-on-primary">
-            Операции
-          </h3>
+          <h3 className="relative font-admin-head text-base font-extrabold tracking-[-.02em] text-admin-on-primary">Нужна сверка смены?</h3>
           <p className="relative mt-1 text-xs text-white/60">
-            Быстрые отчёты и настройки появятся после базового запуска.
+            Соберите отчёт по заказам, остаткам и возвратам за день.
           </p>
-          <div className="relative mt-4 grid gap-1 border-t border-white/10 pt-3">
-            <button type="button" disabled className="flex items-center gap-3 rounded-xl px-2 py-2 text-sm text-white/45">
-              <Icon name="help" />
-              <span>Помощь</span>
-            </button>
-            <button type="button" disabled className="flex items-center gap-3 rounded-xl px-2 py-2 text-sm text-white/45">
-              <Icon name="settings" />
-              <span>Настройки</span>
-            </button>
-          </div>
+          <button type="button" disabled className="relative mt-4 flex min-h-[42px] w-full items-center justify-center rounded-full border border-white/10 bg-white/15 px-4 text-sm font-extrabold text-white">
+            Собрать отчёт
+          </button>
         </div>
 
         <div className="rounded-[18px] bg-white/10 p-3">

@@ -8,8 +8,8 @@ export const ADMIN_PROTOTYPES = [
 
 export const ADMIN_PRIMARY_ROUTE_ORDER = [
   '/admin',
-  '/admin/catalog',
   '/admin/orders',
+  '/admin/catalog',
   '/admin/customers',
   '/admin/marketing',
 ] as const;

@@ -4,7 +4,6 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/admin/icon';
 import { formatPrice, formatDate } from '@/lib/format';
-import { orderStatusView } from '@/lib/order';
 import type { RecentOrderRow } from '@/lib/admin/analytics';
 
 const FILTERS = [
@@ -78,7 +77,7 @@ export function RecentOrders({ rows }: { rows: RecentOrderRow[] }) {
             </thead>
             <tbody>
               {filtered.map((row) => {
-                const status = orderStatusView(row.status, row.paymentStatus);
+                const status = dashboardStatus(row);
                 return (
                   <tr key={row.id} className="transition-colors hover:bg-admin-surface-low">
                     <td className="border-b border-admin-outline-variant px-4 py-[15px] font-mono font-extrabold tabular-nums">
@@ -101,7 +100,11 @@ export function RecentOrders({ rows }: { rows: RecentOrderRow[] }) {
                       </div>
                     </td>
                     <td className="border-b border-admin-outline-variant px-4 py-[15px] text-admin-on-surface-variant">{formatDate(row.createdAt)}</td>
-                    <td className="border-b border-admin-outline-variant px-4 py-[15px]"><span className={status.badge}>{status.label}</span></td>
+                    <td className="border-b border-admin-outline-variant px-4 py-[15px]">
+                      <span className={`inline-flex min-h-[29px] items-center rounded-full border px-[10px] text-[12px] font-extrabold ${status.className}`}>
+                        {status.label}
+                      </span>
+                    </td>
                     <td className="border-b border-admin-outline-variant px-4 py-[15px] text-right font-mono font-extrabold tabular-nums text-admin-on-surface">{formatPrice(row.totalAmount)}</td>
                     <td className="border-b border-admin-outline-variant px-4 py-[15px]">{row.contactName}</td>
                   </tr>
@@ -113,4 +116,29 @@ export function RecentOrders({ rows }: { rows: RecentOrderRow[] }) {
       )}
     </article>
   );
+}
+
+function dashboardStatus(row: RecentOrderRow): { label: string; className: string } {
+  if (row.status === 'CANCELLED') {
+    return {
+      label: 'Возврат',
+      className: 'border-[hsl(var(--color-danger)/.18)] bg-[hsl(var(--color-danger)/.1)] text-admin-error',
+    };
+  }
+  if (row.status === 'PROCESSING') {
+    return {
+      label: 'В сборке',
+      className: 'border-[hsl(var(--color-info)/.2)] bg-[hsl(var(--color-info)/.11)] text-[hsl(var(--color-info))]',
+    };
+  }
+  if (row.paymentStatus === 'succeeded' || row.status === 'DELIVERED') {
+    return {
+      label: 'Оплачен',
+      className: 'border-[hsl(var(--color-success)/.22)] bg-[hsl(var(--color-success)/.12)] text-[var(--admin-money)]',
+    };
+  }
+  return {
+    label: 'Ожидает',
+    className: 'border-[hsl(var(--color-warning)/.38)] bg-[hsl(var(--color-warning)/.18)] text-[hsl(42_78%_28%)]',
+  };
 }

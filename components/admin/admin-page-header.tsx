@@ -8,6 +8,7 @@ interface AdminPageHeaderProps {
   subtitle: string;
   searchPlaceholder?: string;
   action?: ReactNode;
+  afterSearch?: ReactNode;
   className?: string;
 }
 
@@ -17,6 +18,7 @@ export function AdminPageHeader({
   subtitle,
   searchPlaceholder,
   action,
+  afterSearch,
   className,
 }: AdminPageHeaderProps) {
   return (
@@ -40,6 +42,7 @@ export function AdminPageHeader({
             />
           </label>
         )}
+        {afterSearch}
         {action}
       </div>
     </header>

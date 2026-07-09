@@ -13,12 +13,12 @@ describe('resolveActiveIndex', () => {
     expect(resolveActiveIndex('/admin')).toBe(0);
   });
   it('does not match dashboard for deeper paths', () => {
-    expect(resolveActiveIndex('/admin/catalog')).toBe(1);
-    expect(resolveActiveIndex('/admin/catalog/products')).toBe(1);
-    expect(resolveActiveIndex('/admin/catalog/products/abc/edit')).toBe(1);
+    expect(resolveActiveIndex('/admin/catalog')).toBe(2);
+    expect(resolveActiveIndex('/admin/catalog/products')).toBe(2);
+    expect(resolveActiveIndex('/admin/catalog/products/abc/edit')).toBe(2);
   });
   it('matches orders / customers / marketing by prefix', () => {
-    expect(resolveActiveIndex('/admin/orders/123')).toBe(2);
+    expect(resolveActiveIndex('/admin/orders/123')).toBe(1);
     expect(resolveActiveIndex('/admin/customers')).toBe(3);
     expect(resolveActiveIndex('/admin/marketing/new')).toBe(4);
   });
