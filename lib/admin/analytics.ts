@@ -310,6 +310,9 @@ export type RecentOrderRow = {
   createdAt: Date;
   contactName: string;
   email: string | null;
+  itemCount: number;
+  productName: string | null;
+  imageUrl: string | null;
 };
 
 export async function getRecentOrders(db: Db = defaultPrisma): Promise<RecentOrderRow[]> {
@@ -325,6 +328,10 @@ export async function getRecentOrders(db: Db = defaultPrisma): Promise<RecentOrd
       contactName: true,
       payment: { select: { status: true } },
       user: { select: { email: true } },
+      items: {
+        orderBy: { id: 'asc' },
+        select: { productName: true, imageUrl: true, quantity: true },
+      },
     },
   });
   return orders.map((o) => ({
@@ -336,5 +343,8 @@ export async function getRecentOrders(db: Db = defaultPrisma): Promise<RecentOrd
     createdAt: o.createdAt,
     contactName: o.contactName,
     email: o.user?.email ?? null,
+    itemCount: o.items.reduce((sum, item) => sum + item.quantity, 0),
+    productName: o.items[0]?.productName ?? null,
+    imageUrl: o.items.find((item) => item.imageUrl)?.imageUrl ?? null,
   }));
 }

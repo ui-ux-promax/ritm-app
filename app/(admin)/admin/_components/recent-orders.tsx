@@ -1,83 +1,116 @@
+'use client';
+
+import * as React from 'react';
 import Link from 'next/link';
-import { formatPrice, formatDateTime } from '@/lib/format';
+import { Icon } from '@/components/admin/icon';
+import { formatPrice, formatDate } from '@/lib/format';
 import { orderStatusView } from '@/lib/order';
 import type { RecentOrderRow } from '@/lib/admin/analytics';
 
+const FILTERS = [
+  { value: 'all', label: 'Все' },
+  { value: 'paid', label: 'Оплачен' },
+  { value: 'ready', label: 'В сборке' },
+  { value: 'return', label: 'Отменен' },
+] as const;
+
+type Filter = (typeof FILTERS)[number]['value'];
+
 export function RecentOrders({ rows }: { rows: RecentOrderRow[] }) {
+  const [filter, setFilter] = React.useState<Filter>('all');
+  const filtered = rows.filter((row) => {
+    if (filter === 'all') return true;
+    if (filter === 'paid') return row.paymentStatus === 'succeeded';
+    if (filter === 'ready') return row.status === 'PROCESSING';
+    return row.status === 'CANCELLED';
+  });
+
   return (
-    <div className="bg-admin-surface border border-admin-outline-variant rounded-xl overflow-hidden">
-      <div className="p-6 pb-3">
-        <h3 className="font-admin-head text-lg font-bold text-admin-on-surface">Последние заказы</h3>
+    <article className="rounded-[32px] border border-admin-outline-variant bg-admin-surface p-6 shadow-[var(--admin-shadow-tight)]">
+      <div className="mb-[22px] flex items-start justify-between gap-[18px] max-[760px]:grid">
+        <div>
+          <h2 className="font-admin-head text-[clamp(22px,1.7vw,30px)] font-extrabold leading-[1.05] tracking-[-.035em] text-admin-on-surface">
+            Последние заказы
+          </h2>
+          <p className="mt-1.5 text-[13px] text-admin-on-surface-variant">Свежие операции магазина</p>
+        </div>
+        <Link href="/admin/orders" className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-full border border-admin-outline-variant bg-admin-surface px-4 text-[13px] font-bold text-admin-on-surface hover:bg-admin-surface-low">
+          <Icon name="filter_list" className="text-[18px]" /> Открыть все
+        </Link>
       </div>
-      {rows.length === 0 ? (
-        <p className="px-6 pb-6 text-sm text-admin-on-surface-variant">Заказов нет.</p>
+
+      <div className="mb-[14px] flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-[7px] max-[640px]:flex-nowrap max-[640px]:overflow-x-auto max-[640px]:pb-1">
+          {FILTERS.map((item) => (
+            <button
+              key={item.value}
+              type="button"
+              onClick={() => setFilter(item.value)}
+              className={
+                'min-h-[35px] shrink-0 rounded-full border px-[13px] text-[13px] font-bold transition-colors ' +
+                (filter === item.value
+                  ? 'border-[var(--admin-sidebar)] bg-[var(--admin-sidebar)] text-white'
+                  : 'border-admin-outline-variant bg-admin-surface text-admin-on-surface hover:bg-admin-surface-low')
+              }
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+        <div className="text-[13px] font-bold text-admin-on-surface-variant">Показано {filtered.length} заказов</div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="rounded-[20px] border border-admin-outline-variant bg-admin-surface-low p-8 text-center text-sm font-bold text-admin-on-surface-variant">
+          Ничего не найдено. Измените статус.
+        </div>
       ) : (
-        <>
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-admin-surface-high border-y border-admin-outline-variant">
+        <div className="overflow-x-auto rounded-[20px] border border-admin-outline-variant">
+          <table className="w-full min-w-[900px] border-collapse text-left text-[14px]">
+            <thead className="bg-admin-surface-low">
               <tr>
-                {['Заказ', 'Клиент', 'Статус', 'Сумма'].map((h) => (
-                  <th key={h} className="px-6 py-3 text-[11px] font-semibold uppercase tracking-widest text-admin-on-surface-variant">
-                    {h}
+                {['Заказ', 'Товар', 'Дата', 'Статус', 'Сумма', 'Клиент'].map((head) => (
+                  <th key={head} className="border-b border-admin-outline-variant px-4 py-[15px] text-[11px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">
+                    {head}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-admin-outline-variant">
-              {rows.map((row) => {
-                const sv = orderStatusView(row.status, row.paymentStatus);
+            <tbody>
+              {filtered.map((row) => {
+                const status = orderStatusView(row.status, row.paymentStatus);
                 return (
-                  <tr key={row.id} className="hover:bg-admin-surface-high transition-colors">
-                    <td className="px-6 py-3">
-                      <Link href={`/admin/orders/${row.id}`} className="font-bold text-admin-on-surface hover:underline tabular-nums">
-                        #{row.orderNumber}
-                      </Link>
-                      <div className="text-[11px] text-admin-on-surface-variant tabular-nums">{formatDateTime(row.createdAt)}</div>
+                  <tr key={row.id} className="transition-colors hover:bg-admin-surface-low">
+                    <td className="border-b border-admin-outline-variant px-4 py-[15px] font-mono font-extrabold tabular-nums">
+                      <Link href={`/admin/orders/${row.id}`} className="hover:underline">ORD-{row.orderNumber}</Link>
                     </td>
-                    <td className="px-6 py-3">
-                      <div className="text-admin-on-surface truncate max-w-[160px]">{row.contactName}</div>
-                      {row.email && <div className="text-[11px] text-admin-on-surface-variant truncate max-w-[160px]">{row.email}</div>}
+                    <td className="border-b border-admin-outline-variant px-4 py-[15px]">
+                      <div className="flex min-w-[200px] items-center gap-[10px]">
+                        <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center overflow-hidden rounded-[13px] bg-admin-surface-low">
+                          {row.imageUrl ? (
+                            /* eslint-disable-next-line @next/next/no-img-element -- admin thumb */
+                            <img src={row.imageUrl} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <Icon name="image" className="text-admin-on-surface-variant" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <strong className="block truncate font-extrabold text-admin-on-surface">{row.productName ?? 'Заказ'}</strong>
+                          <span className="mt-0.5 block text-[12px] text-admin-on-surface-variant">{row.itemCount} поз.</span>
+                        </div>
+                      </div>
                     </td>
-                    <td className="px-6 py-3"><span className={sv.badge}>{sv.label}</span></td>
-                    <td className="px-6 py-3 font-bold text-admin-on-surface tabular-nums">{formatPrice(row.totalAmount)}</td>
+                    <td className="border-b border-admin-outline-variant px-4 py-[15px] text-admin-on-surface-variant">{formatDate(row.createdAt)}</td>
+                    <td className="border-b border-admin-outline-variant px-4 py-[15px]"><span className={status.badge}>{status.label}</span></td>
+                    <td className="border-b border-admin-outline-variant px-4 py-[15px] text-right font-mono font-extrabold tabular-nums text-admin-on-surface">{formatPrice(row.totalAmount)}</td>
+                    <td className="border-b border-admin-outline-variant px-4 py-[15px]">{row.contactName}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
-
-        {/* Мобильная раскладка: карточки как на /admin/orders (<md) */}
-        <div className="md:hidden divide-y divide-admin-outline-variant border-t border-admin-outline-variant">
-          {rows.map((row) => {
-            const sv = orderStatusView(row.status, row.paymentStatus);
-            return (
-              <Link
-                key={row.id}
-                href={`/admin/orders/${row.id}`}
-                className="block p-4 hover:bg-admin-surface-high transition-colors"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <span className="font-bold text-admin-on-surface tabular-nums">#{row.orderNumber}</span>
-                    <div className="text-[11px] text-admin-on-surface-variant tabular-nums">{formatDateTime(row.createdAt)}</div>
-                  </div>
-                  <span className="font-bold text-admin-on-surface tabular-nums whitespace-nowrap">{formatPrice(row.totalAmount)}</span>
-                </div>
-                <div className="mt-2 flex items-end justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="text-admin-on-surface truncate">{row.contactName}</div>
-                    {row.email && <div className="text-[11px] text-admin-on-surface-variant truncate">{row.email}</div>}
-                  </div>
-                  <span className={`shrink-0 ${sv.badge}`}>{sv.label}</span>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-        </>
       )}
-    </div>
+    </article>
   );
 }
