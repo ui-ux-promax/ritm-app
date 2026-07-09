@@ -10,6 +10,7 @@ import { toggleWishlist } from '@/app/actions/wishlist';
 import { addAddress, deleteAddress, setDefaultAddress } from '@/app/actions/address';
 import { OrderStatusBadge } from '@/components/shared/orders/order-status-badge';
 import { formatPrice } from '@/lib/format';
+import { getOrderDetailHref, getProfileOrderPaymentHref } from '@/lib/order-links';
 import { cn } from '@/lib/utils';
 import { ORDER_STATUS_META } from '@/lib/order';
 import { profileSchema, type ProfileValues } from '@/services/dto/auth.dto';
@@ -541,6 +542,8 @@ function OrderCard({ order, open, toggle }: {
   toggle: () => void;
 }) {
   const thumbs = order.items.slice(0, 3);
+  const detailHref = getOrderDetailHref(order.orderNumber);
+  const paymentHref = getProfileOrderPaymentHref(order);
   return (
     <article className="overflow-hidden rounded-[24px] border border-line bg-surface">
       {/* Summary row (clickable) */}
@@ -626,11 +629,21 @@ function OrderCard({ order, open, toggle }: {
 
               {/* Actions */}
               <div className="mt-[18px] flex flex-wrap gap-2.5">
-                <button type="button" className="inline-flex h-[42px] items-center gap-2 rounded-full bg-primary px-[18px] text-[13px] font-bold text-primary-foreground">
+                <Link href={detailHref} className="inline-flex h-[42px] items-center gap-2 rounded-full bg-primary px-[18px] text-[13px] font-bold text-primary-foreground">
+                  <svg className="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><path d="M14 3h7v7"/><path d="M21 3 10 14"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+                  Открыть заказ
+                </Link>
+                {paymentHref && (
+                  <Link href={paymentHref} className="inline-flex h-[42px] items-center gap-2 rounded-full border border-line bg-surface px-[18px] text-[13px] font-bold">
+                    <svg className="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>
+                    Продолжить оплату
+                  </Link>
+                )}
+                <button type="button" disabled className="inline-flex h-[42px] items-center gap-2 rounded-full border border-line bg-surface-soft px-[18px] text-[13px] font-bold text-ink-muted opacity-70">
                   <svg className="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 4v4h4"/></svg>
                   Повторить заказ
                 </button>
-                <button type="button" className="inline-flex h-[42px] items-center gap-2 rounded-full border border-line bg-surface px-[18px] text-[13px] font-bold">
+                <button type="button" disabled className="inline-flex h-[42px] items-center gap-2 rounded-full border border-line bg-surface-soft px-[18px] text-[13px] font-bold text-ink-muted opacity-70">
                   <svg className="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><path d="M14 3h7v7"/><path d="M21 3 10 14"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
                   Накладная
                 </button>
