@@ -19,7 +19,7 @@ const PAYMENT_FILTER_VALUES = [...PAYMENT_STATUS_VALUES, 'none'] as const;
 
 export default async function OrdersPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
-  const { page, limit, skip } = parsePaginationParams(sp, { limit: 20 });
+  const { page, limit, skip } = parsePaginationParams(sp, { limit: 10 });
   const q = readSearchQuery(sp);
   const status = readEnumParam(sp, 'status', ORDER_STATUS_VALUES);
   const payment = readEnumParam(sp, 'payment', PAYMENT_FILTER_VALUES);
