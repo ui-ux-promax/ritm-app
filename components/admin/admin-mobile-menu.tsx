@@ -2,7 +2,6 @@
 
 import { signOut } from 'next-auth/react';
 import { Icon } from '@/components/admin/icon';
-import { ThemeToggle } from '@/components/admin/theme-toggle';
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
@@ -10,7 +9,6 @@ import {
 
 interface AdminMobileMenuProps {
   user: { name?: string | null; email?: string | null; role: string; image?: string | null };
-  initialTheme: 'light' | 'dark';
 }
 
 const ROLE_LABELS: Record<string, string> = { ADMIN: 'Администратор', CUSTOMER: 'Клиент' };
@@ -20,8 +18,8 @@ function getInitials(name?: string | null, email?: string | null): string {
   return (email?.[0] ?? '?').toUpperCase();
 }
 
-/** Аватар в топбаре (только <md): тема + служебные ссылки + профиль + выход. */
-export function AdminMobileMenu({ user, initialTheme }: AdminMobileMenuProps) {
+/** Mobile profile menu. */
+export function AdminMobileMenu({ user }: AdminMobileMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -54,12 +52,6 @@ export function AdminMobileMenu({ user, initialTheme }: AdminMobileMenuProps) {
           </span>
         </DropdownMenuLabel>
 
-        <div className="px-2 py-2">
-          <p className="text-[10px] uppercase tracking-widest text-admin-on-surface-variant mb-2">Оформление</p>
-          <ThemeToggle initialTheme={initialTheme} />
-        </div>
-
-        <DropdownMenuSeparator />
         <DropdownMenuItem aria-disabled="true" className="text-admin-on-surface-variant opacity-55" onSelect={(e) => e.preventDefault()}>
           <Icon name="help" className="text-[18px]" /> Помощь
         </DropdownMenuItem>

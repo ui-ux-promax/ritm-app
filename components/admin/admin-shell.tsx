@@ -7,7 +7,6 @@ import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/admin/icon';
-import { ThemeToggle } from '@/components/admin/theme-toggle';
 import SidebarSkeletonGate from '@/components/admin/sidebar-skeleton-gate';
 import { ContentReadyGate } from '@/components/admin/content-ready-gate';
 import { ADMIN_NAV, isNavActive } from '@/lib/admin/nav';
@@ -22,7 +21,6 @@ interface AdminShellProps {
     image?: string | null;
   };
   children: ReactNode;
-  initialTheme: 'light' | 'dark';
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -42,7 +40,7 @@ function getInitials(name?: string | null, email?: string | null): string {
   return (email?.[0] ?? '?').toUpperCase();
 }
 
-export function AdminShell({ user, children, initialTheme }: AdminShellProps) {
+export function AdminShell({ user, children }: AdminShellProps) {
   const pathname = usePathname();
 
   return (
@@ -97,23 +95,9 @@ export function AdminShell({ user, children, initialTheme }: AdminShellProps) {
           })}
         </nav>
 
-        <div className="relative mt-auto overflow-hidden rounded-[18px] border border-white/10 bg-white/10 p-4">
-          <div className="pointer-events-none absolute -bottom-10 -right-8 h-[132px] w-[132px] rounded-full bg-[var(--admin-money)]/30 blur-md" />
-          <h3 className="relative font-admin-head text-base font-extrabold tracking-[-.02em] text-admin-on-primary">Нужна сверка смены?</h3>
-          <p className="relative mt-1 text-xs text-white/60">
-            Соберите отчёт по заказам, остаткам и возвратам за день.
-          </p>
-          <button type="button" disabled className="relative mt-4 flex min-h-[42px] w-full items-center justify-center rounded-full border border-white/10 bg-white/15 px-4 text-sm font-extrabold text-white">
-            Собрать отчёт
-          </button>
-        </div>
 
         <div className="rounded-[18px] bg-white/10 p-3">
-          <div className="mb-3">
-            <p className="mb-2 text-[10px] font-extrabold uppercase tracking-widest text-white/45">Оформление</p>
-            <ThemeToggle initialTheme={initialTheme} />
-          </div>
-          <div className="flex items-center gap-3 border-t border-white/10 pt-3">
+          <div className="flex items-center gap-3">
             {user.image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={user.image} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
@@ -146,7 +130,7 @@ export function AdminShell({ user, children, initialTheme }: AdminShellProps) {
           <span className="font-admin-head text-xl font-extrabold tracking-[-.06em] text-admin-on-surface">RITM</span>
         </div>
         <div className="ml-auto">
-          <AdminMobileMenu user={user} initialTheme={initialTheme} />
+          <AdminMobileMenu user={user} />
         </div>
       </header>
 
