@@ -95,6 +95,13 @@ export function AdminShell({ user, children }: AdminShellProps) {
           })}
         </nav>
 
+        <Link
+          href="/"
+          className="flex min-h-[43px] items-center gap-3 rounded-[13px] px-[13px] text-sm font-bold text-white/65 transition-colors hover:bg-white/10 hover:text-admin-on-primary"
+        >
+          <Icon name="storefront" className="text-[21px]" />
+          <span>Открыть магазин</span>
+        </Link>
 
         <div className="rounded-[18px] bg-white/10 p-3">
           <div className="flex items-center gap-3">

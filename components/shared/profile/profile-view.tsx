@@ -70,6 +70,7 @@ interface SavedAddress {
 interface ProfileViewProps {
   user: ProfileUser;
   initial: ProfileValues;
+  isAdmin: boolean;
   orders: ProfileOrder[];
   wishlist: ProductCardData[];
   addresses: SavedAddress[];
@@ -116,7 +117,7 @@ const fmtDate = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long'
 
 // ── Main component ─────────────────────────────────────────────────────────
 
-export function ProfileView({ user, initial, orders, wishlist, addresses }: ProfileViewProps) {
+export function ProfileView({ user, initial, isAdmin, orders, wishlist, addresses }: ProfileViewProps) {
   const [panel, setPanel] = useState<PanelKey>('overview');
   const [filter, setFilter] = useState<FilterKey>('all');
   const [query, setQuery] = useState('');
@@ -220,14 +221,25 @@ export function ProfileView({ user, initial, orders, wishlist, addresses }: Prof
               <span className="h-[3px] w-[3px] rounded-full bg-ink-muted/55" />
               <span>С нами с {fmtDate.format(new Date(user.createdAt))}</span>
             </div>
-            <button
-              type="button"
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className="mt-3.5 inline-flex h-[38px] items-center gap-2 rounded-full border border-line bg-surface px-4 text-[13px] font-bold text-ink-muted hover:border-danger/40 hover:text-danger"
-            >
-              <span className="[&>svg]:h-4 [&>svg]:w-4">{ICONS.logout}</span>
-              Выйти
-            </button>
+            <div className="mt-3.5 flex flex-wrap items-center gap-2">
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="inline-flex h-[38px] items-center gap-2 rounded-full bg-primary px-4 text-[13px] font-bold text-primary-foreground hover:bg-primary/90"
+                >
+                  <span className="[&>svg]:h-4 [&>svg]:w-4">{ICONS.overview}</span>
+                  Админка
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="inline-flex h-[38px] items-center gap-2 rounded-full border border-line bg-surface px-4 text-[13px] font-bold text-ink-muted hover:border-danger/40 hover:text-danger"
+              >
+                <span className="[&>svg]:h-4 [&>svg]:w-4">{ICONS.logout}</span>
+                Выйти
+              </button>
+            </div>
           </div>
         </div>
 
