@@ -79,18 +79,10 @@ export default async function MarketingPage({ searchParams }: { searchParams: Pr
         note="Коды нормализуются в верхний регистр. Истекшие промокоды остаются в истории."
         actions={<div className="text-[13px] font-bold text-admin-on-surface-variant">Показано <b className="font-mono text-admin-on-surface">{rows.length}</b> кодов</div>}
       >
-        <div className="mb-[18px] grid gap-[18px] xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,.55fr)]">
-          <div>
-            <div className="flex h-16 gap-[6px] max-[640px]:h-12">
-              <Stage label="Активные" value={activeCount} className="flex-[54] bg-[hsl(var(--color-success))] text-white" />
-              <Stage label="Выключены" value={inactiveCount} className="flex-[18] bg-[hsl(220_7%_52%)] text-white" />
-              <Stage label="Истекли" value={expiredCount} className="flex-[11] bg-[hsl(var(--color-warning))] text-[hsl(42_78%_20%)]" />
-            </div>
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-4 text-[13px] font-bold text-admin-on-surface-variant">
-              <span>Сегменты по текущей выборке</span>
-              <strong className="font-admin-head text-[18px] tracking-[-.03em] text-admin-on-surface">{rows.length} всего</strong>
-            </div>
-          </div>
+        <div className="mb-[18px] flex flex-wrap gap-[10px]">
+          <CouponStatusPill label="Активные" value={activeCount} className="bg-[#dff1e8] text-[#20724f]" />
+          <CouponStatusPill label="Выключены" value={inactiveCount} className="bg-admin-surface-low text-admin-on-surface-variant" />
+          <CouponStatusPill label="Истекли" value={expiredCount} className="bg-[#fee6e5] text-[#c64238]" />
         </div>
 
         <CouponFilters />
@@ -107,11 +99,15 @@ export default async function MarketingPage({ searchParams }: { searchParams: Pr
   );
 }
 
-function Stage({ label, value, className }: { label: string; value: number; className: string }) {
+function CouponStatusPill({ label, value, className }: { label: string; value: number; className: string }) {
   return (
-    <div className={`flex min-w-0 flex-col justify-center overflow-hidden rounded-[18px] px-4 ${className}`}>
-      <small className="truncate text-[11px] font-bold uppercase tracking-[.04em] opacity-85 max-[920px]:hidden">{label}</small>
-      <b className="font-admin-head text-[20px] font-extrabold leading-none tracking-[-.04em]">{value}</b>
+    <div className="inline-flex min-h-[48px] items-center gap-2 rounded-full border border-admin-outline-variant bg-admin-surface px-[10px] py-1.5 shadow-[var(--admin-shadow-tight)]">
+      <span className={`inline-flex min-h-[32px] items-center rounded-full px-3 text-[13px] font-bold ${className}`}>
+        {label}
+      </span>
+      <b className="pr-1 font-admin-head text-[18px] font-extrabold leading-none tracking-[-.04em] text-admin-on-surface tabular-nums">
+        {value}
+      </b>
     </div>
   );
 }
