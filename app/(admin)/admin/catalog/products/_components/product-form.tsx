@@ -89,13 +89,13 @@ export function ProductForm({
       {/* Скаляры */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <Field label="Название" error={errors.name?.message}>
-          <Input {...register('name', { onChange: onNameChange })} placeholder="Air Max 90" />
+          <Input {...register('name', { onChange: onNameChange })} placeholder="Название товара" />
         </Field>
         <Field label="Slug" error={errors.slug?.message}>
-          <Input {...register('slug', { onChange: () => { slugDirty.current = true; } })} placeholder="air-max-90" />
+          <Input {...register('slug', { onChange: () => { slugDirty.current = true; } })} placeholder="nazvanie-tovara" />
         </Field>
         <Field label="Бренд" error={errors.brand?.message}>
-          <Input list="brand-list" {...register('brand')} placeholder="Nike" />
+          <Input list="brand-list" {...register('brand')} placeholder="Бренд" />
           <datalist id="brand-list">{brands.map((b) => <option key={b} value={b} />)}</datalist>
         </Field>
         <Field label="Пол" error={errors.gender?.message}>
