@@ -28,7 +28,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const sp = await searchParams;
   const range = resolvePeriod(sp, new Date());
 
-  const [session, kpis, revenueSeries, statusDist, bestSellers, lowStock, recentOrders, stockAgg, pendingPayments] = await Promise.all([
+  const [session, kpis, revenueSeries, statusDist, bestSellers, lowStock, recentOrders, pendingPayments] = await Promise.all([
     requireAdminPage(),
     getKpis(prisma, range),
     getRevenueSeries(prisma, range),
@@ -36,7 +36,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     getBestSellers(prisma, range),
     getLowStock(prisma),
     getRecentOrders(prisma),
-    prisma.productVariant.aggregate({ _sum: { stock: true }, where: { active: true, colorway: { product: { active: true } } } }),
     prisma.order.count({ where: { payment: { is: { status: 'pending' } }, status: 'PENDING' } }),
   ]);
   const statusCount = (status: string) => statusDist.segments.find((segment) => segment.status === status)?.count ?? 0;
@@ -45,10 +44,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     revenueTrend: kpis.revenue.trend,
     orders: kpis.orders.value,
     ordersTrend: kpis.orders.trend,
-    stock: stockAgg._sum.stock ?? 0,
-    stockTrend: { pct: lowStock.length > 0 ? -lowStock.length : 0, dir: lowStock.length > 0 ? 'down' : 'flat' } as const,
-    newCustomers: kpis.newCustomers.value,
-    newCustomersTrend: kpis.newCustomers.trend,
+    avgOrder: kpis.avgOrder.value,
+    avgOrderTrend: kpis.avgOrder.trend,
     revenueSeries,
     statusDist,
     bestSellers,
@@ -73,15 +70,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       />
 
       {/* KPI */}
-      <div className="grid grid-cols-1 gap-[18px] md:grid-cols-2 xl:grid-cols-4">
-        <KpiCard primary icon="attach_money" label="Выручка сегодня" value={formatPrice(view.revenue)} trend={view.revenueTrend} spark="M4 36 C20 30, 25 22, 42 24 S58 15, 70 18 86 9, 116 13" />
-        <KpiCard icon="shopping_cart" label="Заказы" value={String(view.orders)} trend={view.ordersTrend} spark="M4 38 C20 34, 24 20, 37 22 S55 10, 70 17 83 31, 116 18" />
-        <KpiCard icon="deployed_code" label="Товаров в наличии" value={view.stock.toLocaleString('ru-RU')} trend={view.stockTrend} spark="M4 20 C19 15, 27 30, 42 24 S58 9, 71 18 90 35, 116 27" />
-        <KpiCard icon="person_add" label="Новых клиентов" value={String(view.newCustomers)} trend={view.newCustomersTrend} spark="M4 38 C15 26, 27 30, 37 20 S54 9, 66 18 81 34, 116 10" />
+      <div className="grid grid-cols-1 gap-[18px] md:grid-cols-2 xl:grid-cols-3">
+        <KpiCard tone="revenue" label="Выручка за период" value={formatPrice(view.revenue)} trend={view.revenueTrend} />
+        <KpiCard tone="orders" label="Заказы" value={String(view.orders)} trend={view.ordersTrend} />
+        <KpiCard tone="average" label="Средний чек" value={formatPrice(view.avgOrder)} trend={view.avgOrderTrend} />
       </div>
 
       <div className="grid items-start gap-[24px] xl:grid-cols-[minmax(0,1.62fr)_minmax(330px,.96fr)]">
-        <article className="grid min-h-[346px] grid-rows-[auto_1fr] rounded-[32px] border border-admin-outline-variant bg-admin-surface p-6 shadow-[var(--admin-shadow-tight)]">
+        <article className="grid min-h-[346px] grid-rows-[auto_1fr] rounded-[28px] border border-admin-outline-variant bg-admin-surface p-6 shadow-[var(--admin-shadow-tight)]">
           <div className="mb-[22px] flex items-start justify-between gap-[18px] max-[760px]:grid">
             <div>
               <h2 className="font-admin-head text-[clamp(22px,1.7vw,30px)] font-extrabold leading-[1.05] tracking-[-.035em] text-admin-on-surface">
@@ -98,14 +94,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             <div className="font-admin-head text-[clamp(36px,3vw,50px)] font-extrabold leading-none tracking-[-.06em] text-admin-on-surface tabular-nums">
               {formatPrice(view.revenue)}
             </div>
-            <span className="inline-flex min-h-8 items-center rounded-full bg-[hsl(var(--color-accent)/.12)] px-[11px] text-[13px] font-extrabold text-[var(--admin-money)]">
+            <span className="inline-flex min-h-8 items-center rounded-full bg-[#15d3a2]/15 px-[11px] text-[13px] font-extrabold text-[#138663]">
               {view.revenueTrend.pct === null ? 'новое' : `${view.revenueTrend.pct > 0 ? '+' : ''}${view.revenueTrend.pct}%`}
             </span>
           </div>
           <div className="relative">
             <RevenueChart data={view.revenueSeries} />
             {chartPeak.revenue > 0 && (
-              <div className="absolute left-[44%] top-[24%] inline-flex min-h-8 items-center rounded-full bg-[var(--admin-money)] px-3 text-[12px] font-extrabold text-white shadow-[0_14px_30px_hsl(var(--color-accent)/.22)] tabular-nums">
+              <div className="absolute left-[44%] top-[24%] inline-flex min-h-8 items-center rounded-full bg-[#15d3a2] px-3 text-[12px] font-extrabold text-[#10211c] shadow-[0_14px_30px_rgb(21_211_162_/_0.22)] tabular-nums">
                 {chartPeak.label} · {formatPrice(chartPeak.revenue)}
               </div>
             )}

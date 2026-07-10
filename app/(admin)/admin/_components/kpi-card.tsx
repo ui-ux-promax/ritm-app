@@ -1,67 +1,85 @@
-import { Icon } from '@/components/admin/icon';
 import { cn } from '@/lib/utils';
 import type { Trend } from '@/lib/admin/analytics';
 
+type KpiTone = 'revenue' | 'orders' | 'average';
+
+const TONE_STYLE: Record<KpiTone, { line: string; fill: string; path: string }> = {
+  revenue: {
+    line: '#ff8d6a',
+    fill: '#ff8d6a',
+    path: 'M4 51 C14 48, 15 41, 22 39 S33 24, 43 29 53 36, 61 23 77 8, 87 15 92 36, 104 38 109 45, 120 55 136 42',
+  },
+  orders: {
+    line: '#f2c94c',
+    fill: '#f2c94c',
+    path: 'M4 51 C14 48, 15 41, 22 39 S33 24, 43 29 53 36, 61 23 77 8, 87 15 92 36, 104 38 109 45, 120 55 136 42',
+  },
+  average: {
+    line: '#ff6d63',
+    fill: '#ff6d63',
+    path: 'M4 51 C14 48, 15 41, 22 39 S33 24, 43 29 53 36, 61 23 77 8, 87 15 92 36, 104 38 109 45, 120 55 136 42',
+  },
+};
+
 export function KpiCard({
-  icon,
   label,
   value,
   trend,
-  primary = false,
-  spark = 'M4 34 C20 24, 30 31, 42 20 S61 8, 73 18 86 34, 116 12',
+  tone,
 }: {
-  icon: string;
   label: string;
   value: string;
   trend: Trend;
-  primary?: boolean;
-  spark?: string;
+  tone: KpiTone;
 }) {
+  const style = TONE_STYLE[tone];
+  const gradientId = `kpi-${tone}-fill`;
+  const filterId = `kpi-${tone}-glow`;
+
   return (
     <article
-      className={cn(
-        'relative flex min-h-[166px] flex-col gap-[15px] overflow-hidden rounded-[24px] border p-5 shadow-[var(--admin-shadow-tight)]',
-        primary
-          ? 'border-[var(--admin-sidebar)] bg-[var(--admin-sidebar)] text-white'
-          : 'border-admin-outline-variant bg-admin-surface text-admin-on-surface',
-      )}
+      className="relative grid min-h-[154px] grid-cols-[minmax(0,1fr)_132px] items-center gap-[18px] overflow-hidden rounded-[28px] border border-white/[.055] p-[26px] pb-[22px] text-white shadow-[0_22px_60px_hsl(var(--color-text)/.26)] max-[520px]:grid-cols-1 max-[520px]:gap-3"
+      style={{
+        background: 'radial-gradient(circle at 92% 18%, hsl(var(--color-accent) / .18), transparent 122px), linear-gradient(180deg, hsl(var(--color-primary-foreground) / .045), transparent), hsl(224 9% 15%)',
+      }}
     >
-      <div className="flex items-center justify-between gap-3">
-        <div
-          className={cn(
-            'grid h-11 w-11 place-items-center rounded-full',
-            primary ? 'bg-white text-[var(--admin-sidebar)]' : 'bg-admin-surface-low text-admin-on-surface',
-          )}
-        >
-          <Icon name={icon} className="text-[21px]" />
-        </div>
-      </div>
-      <div>
-        <div className={cn('text-[13px] font-bold', primary ? 'text-white/70' : 'text-admin-on-surface-variant')}>{label}</div>
-        <div className="mt-2 font-admin-head text-[clamp(28px,2.3vw,38px)] font-extrabold leading-[.92] tracking-[-.055em] tabular-nums">
+      <div className="relative z-[1] min-w-0">
+        <span className="mb-2 block text-base font-bold tracking-[-.015em] text-white/[.84]">{label}</span>
+        <strong className="block font-admin-head text-[clamp(34px,3.6vw,46px)] font-extrabold leading-[.94] tracking-[-.055em] tabular-nums">
           {value}
-        </div>
+        </strong>
+        <TrendBadge trend={trend} />
       </div>
-      <TrendBadge trend={trend} primary={primary} />
-      <svg className={cn('absolute bottom-3 right-3 h-[45px] w-28 opacity-80', primary ? 'text-white/55' : 'text-[var(--admin-money)]')} viewBox="0 0 120 48" aria-hidden="true">
-        <path d={spark} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <svg className="relative z-[1] h-[62px] w-[132px] self-end max-[520px]:h-[68px] max-[520px]:w-full" viewBox="0 0 140 64" aria-hidden="true">
+        <defs>
+          <filter id={filterId} x="-20%" y="-40%" width="140%" height="180%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stopColor={style.fill} stopOpacity=".58" />
+            <stop offset="1" stopColor={style.fill} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={`${style.path} L136 60 L4 60 Z`} fill={`url(#${gradientId})`} opacity=".9" />
+        <path d={style.path} fill="none" stroke={style.line} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" filter={`url(#${filterId})`} />
+        <circle cx="77" cy="8" r="3.6" fill="white" opacity=".92" />
       </svg>
     </article>
   );
 }
 
-function TrendBadge({ trend, primary }: { trend: Trend; primary: boolean }) {
+function TrendBadge({ trend }: { trend: Trend }) {
   if (trend.pct === null) {
-    return <span className={cn('mt-auto text-[13px] font-extrabold', primary ? 'text-white' : 'text-[var(--admin-money)]')}>новое</span>;
+    return <span className="mt-3 inline-flex min-h-[26px] items-center rounded-full bg-[#15d3a2]/20 px-[10px] text-sm font-extrabold text-[#15d3a2]">Новое</span>;
   }
   if (trend.dir === 'flat') {
-    return <span className={cn('mt-auto text-[13px] font-extrabold', primary ? 'text-white/70' : 'text-admin-on-surface-variant')}>без изменений</span>;
+    return <span className="mt-3 inline-flex min-h-[26px] items-center rounded-full bg-white/10 px-[10px] text-sm font-extrabold text-white/70">Без изменений</span>;
   }
   const up = trend.dir === 'up';
   return (
-    <span className={cn('mt-auto inline-flex items-center gap-1 text-[13px] font-extrabold', primary ? 'text-white' : up ? 'text-[var(--admin-money)]' : 'text-admin-error')}>
-      <Icon name={up ? 'trending_up' : 'trending_down'} className="text-[16px]" />
-      {up ? '+' : ''}{trend.pct}%
+    <span className={cn('mt-3 inline-flex min-h-[26px] items-center rounded-full px-[10px] text-sm font-extrabold', up ? 'bg-[#15d3a2]/20 text-[#15d3a2]' : 'bg-[#ff6d63]/20 text-[#ff6d63]')}>
+      {up ? '↗ +' : '↘ '}{trend.pct}%
     </span>
   );
 }

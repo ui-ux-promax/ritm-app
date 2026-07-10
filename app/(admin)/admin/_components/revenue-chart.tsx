@@ -10,9 +10,15 @@ export function RevenueChart({ data }: { data: { label: string; revenue: number 
       <AreaChart data={data} margin={{ top: 10, right: 18, left: 8, bottom: 0 }}>
         <defs>
           <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--admin-money)" stopOpacity={0.18} />
-            <stop offset="100%" stopColor="var(--admin-money)" stopOpacity={0.02} />
+            <stop offset="0%" stopColor="#15d3a2" stopOpacity={0.34} />
+            <stop offset="48%" stopColor="#15d3a2" stopOpacity={0.16} />
+            <stop offset="100%" stopColor="#15d3a2" stopOpacity={0} />
           </linearGradient>
+          <filter id="salesChartGlow" x="-8%" y="-24%" width="116%" height="150%">
+            <feGaussianBlur stdDeviation="7" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.08 0 0 0 0 0.83 0 0 0 0 0.64 0 0 0 .72 0" result="glow" />
+            <feMerge><feMergeNode in="glow" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
         </defs>
         <CartesianGrid strokeDasharray="3 5" stroke="var(--admin-outline-variant)" vertical={false} />
         <XAxis
@@ -39,7 +45,7 @@ export function RevenueChart({ data }: { data: { label: string; revenue: number 
           }}
           labelStyle={{ color: 'var(--admin-on-surface-variant)' }}
         />
-        <Area type="monotone" dataKey="revenue" stroke="var(--admin-money)" strokeWidth={6} fill="url(#revFill)" dot={{ r: 0 }} activeDot={{ r: 8, fill: 'var(--admin-surface)', stroke: 'var(--admin-money)', strokeWidth: 5 }} />
+        <Area type="monotone" dataKey="revenue" stroke="#15d3a2" strokeWidth={6} fill="url(#revFill)" filter="url(#salesChartGlow)" dot={{ r: 0 }} activeDot={{ r: 8, fill: 'var(--admin-surface)', stroke: '#15d3a2', strokeWidth: 6 }} />
       </AreaChart>
     </ResponsiveContainer>
     </div>
