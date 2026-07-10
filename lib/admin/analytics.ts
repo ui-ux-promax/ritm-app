@@ -173,6 +173,65 @@ const MSK_DAY_LABEL = new Intl.DateTimeFormat('ru-RU', {
   month: '2-digit',
 }); // dd.mm
 
+export type KpiSeriesPoint = {
+  label: string;
+  revenue: number;
+  orders: number;
+  avgOrder: number;
+};
+
+export async function getKpiSeries(
+  db: Db = defaultPrisma,
+  range: ResolvedPeriod,
+): Promise<KpiSeriesPoint[]> {
+  const rows = await db.$queryRaw<
+    { day: string; revenue: number; orders: number }[]
+  >(Prisma.sql`
+    SELECT
+      to_char(
+        date_trunc('day', o."createdAt" AT TIME ZONE 'Europe/Moscow'),
+        'YYYY-MM-DD'
+      ) AS day,
+      COALESCE(SUM(o."totalAmount"), 0)::int AS revenue,
+      COUNT(*)::int AS orders
+    FROM "Order" o
+    WHERE o.status::text <> 'CANCELLED'
+      AND o."createdAt" >= ${range.current.gte}
+      AND o."createdAt" < ${range.current.lt}
+    GROUP BY day
+    ORDER BY day ASC
+  `);
+
+  const rowsByDay = new Map(rows.map((row) => [row.day, row]));
+  const points: KpiSeriesPoint[] = [];
+  const includedDays = new Set<string>();
+
+  for (
+    let timestamp = range.current.gte.getTime();
+    timestamp < range.current.lt.getTime();
+    timestamp += DAY_MS
+  ) {
+    const date = new Date(timestamp);
+    const day = MSK_DAY_KEY.format(date);
+
+    if (includedDays.has(day)) continue;
+
+    includedDays.add(day);
+    const row = rowsByDay.get(day);
+    const revenue = row?.revenue ?? 0;
+    const orders = row?.orders ?? 0;
+
+    points.push({
+      label: MSK_DAY_LABEL.format(date),
+      revenue,
+      orders,
+      avgOrder: orders > 0 ? Math.round(revenue / orders) : 0,
+    });
+  }
+
+  return points;
+}
+
 export async function getRevenueSeries(
   db: Db = defaultPrisma,
   range: ResolvedPeriod,

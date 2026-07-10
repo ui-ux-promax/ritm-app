@@ -6,7 +6,7 @@ import { requireAdminPage } from '@/lib/admin/require-admin';
 import {
   resolvePeriod,
   getKpis,
-  getRevenueSeries,
+  getKpiSeries,
   getStatusDistribution,
   getBestSellers,
   getLowStock,
@@ -28,10 +28,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const sp = await searchParams;
   const range = resolvePeriod(sp, new Date());
 
-  const [session, kpis, revenueSeries, statusDist, bestSellers, lowStock, recentOrders, pendingPayments] = await Promise.all([
+  const [session, kpis, kpiSeries, statusDist, bestSellers, lowStock, recentOrders, pendingPayments] = await Promise.all([
     requireAdminPage(),
     getKpis(prisma, range),
-    getRevenueSeries(prisma, range),
+    getKpiSeries(prisma, range),
     getStatusDistribution(prisma),
     getBestSellers(prisma, range),
     getLowStock(prisma),
@@ -46,7 +46,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     ordersTrend: kpis.orders.trend,
     avgOrder: kpis.avgOrder.value,
     avgOrderTrend: kpis.avgOrder.trend,
-    revenueSeries,
+    revenueSeries: kpiSeries.map(({ label, revenue }) => ({ label, revenue })),
+    kpiSeries,
     statusDist,
     bestSellers,
     recentOrders,
@@ -71,9 +72,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
       {/* KPI */}
       <div className="grid grid-cols-1 gap-[18px] md:grid-cols-2 xl:grid-cols-3">
-        <KpiCard tone="revenue" label="Выручка за период" value={formatPrice(view.revenue)} trend={view.revenueTrend} />
-        <KpiCard tone="orders" label="Заказы" value={String(view.orders)} trend={view.ordersTrend} />
-        <KpiCard tone="average" label="Средний чек" value={formatPrice(view.avgOrder)} trend={view.avgOrderTrend} />
+        <KpiCard tone="revenue" label="Выручка за период" value={formatPrice(view.revenue)} trend={view.revenueTrend} series={view.kpiSeries.map(({ revenue }) => revenue)} />
+        <KpiCard tone="orders" label="Заказы" value={String(view.orders)} trend={view.ordersTrend} series={view.kpiSeries.map(({ orders }) => orders)} />
+        <KpiCard tone="average" label="Средний чек" value={formatPrice(view.avgOrder)} trend={view.avgOrderTrend} series={view.kpiSeries.map(({ avgOrder }) => avgOrder)} />
       </div>
 
       <div className="grid items-start gap-[24px] xl:grid-cols-[minmax(0,1.62fr)_minmax(330px,.96fr)]">

@@ -3,36 +3,47 @@ import type { Trend } from '@/lib/admin/analytics';
 
 type KpiTone = 'revenue' | 'orders' | 'average';
 
-const TONE_STYLE: Record<KpiTone, { line: string; fill: string; path: string }> = {
-  revenue: {
-    line: '#ff8d6a',
-    fill: '#ff8d6a',
-    path: 'M4 51 C14 48, 15 41, 22 39 S33 24, 43 29 53 36, 61 23 77 8, 87 15 92 36, 104 38 109 45, 120 55 136 42',
-  },
-  orders: {
-    line: '#f2c94c',
-    fill: '#f2c94c',
-    path: 'M4 51 C14 48, 15 41, 22 39 S33 24, 43 29 53 36, 61 23 77 8, 87 15 92 36, 104 38 109 45, 120 55 136 42',
-  },
-  average: {
-    line: '#ff6d63',
-    fill: '#ff6d63',
-    path: 'M4 51 C14 48, 15 41, 22 39 S33 24, 43 29 53 36, 61 23 77 8, 87 15 92 36, 104 38 109 45, 120 55 136 42',
-  },
+const TONE_STYLE: Record<KpiTone, { line: string; fill: string }> = {
+  revenue: { line: '#ff8d6a', fill: '#ff8d6a' },
+  orders: { line: '#f2c94c', fill: '#f2c94c' },
+  average: { line: '#ff6d63', fill: '#ff6d63' },
 };
+
+function buildSparkline(series: number[]) {
+  const values = series.length > 0 ? series : [0];
+  const minimum = Math.min(...values);
+  const maximum = Math.max(...values);
+  const range = maximum - minimum;
+  const points = values.map((value, index) => ({
+    x: values.length === 1 ? 70 : 4 + (132 * index) / (values.length - 1),
+    y: range === 0 ? 32 : 56 - ((value - minimum) / range) * 48,
+    value,
+  }));
+  const peak = points.reduce((highest, point) =>
+    point.value > highest.value ? point : highest,
+  );
+  const line = points
+    .map((point, index) => `${index === 0 ? 'M' : 'L'}${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
+    .join(' ');
+
+  return { line, area: `${line} L136 60 L4 60 Z`, peak };
+}
 
 export function KpiCard({
   label,
   value,
   trend,
   tone,
+  series,
 }: {
   label: string;
   value: string;
   trend: Trend;
   tone: KpiTone;
+  series: number[];
 }) {
   const style = TONE_STYLE[tone];
+  const sparkline = buildSparkline(series);
   const gradientId = `kpi-${tone}-fill`;
   const filterId = `kpi-${tone}-glow`;
 
@@ -61,9 +72,9 @@ export function KpiCard({
             <stop offset="1" stopColor={style.fill} stopOpacity="0" />
           </linearGradient>
         </defs>
-        <path d={`${style.path} L136 60 L4 60 Z`} fill={`url(#${gradientId})`} opacity=".9" />
-        <path d={style.path} fill="none" stroke={style.line} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" filter={`url(#${filterId})`} />
-        <circle cx="77" cy="8" r="3.6" fill="white" opacity=".92" />
+        <path d={sparkline.area} fill={`url(#${gradientId})`} opacity=".9" />
+        <path d={sparkline.line} fill="none" stroke={style.line} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" filter={`url(#${filterId})`} />
+        <circle cx={sparkline.peak.x} cy={sparkline.peak.y} r="3.6" fill="white" opacity=".92" />
       </svg>
     </article>
   );
