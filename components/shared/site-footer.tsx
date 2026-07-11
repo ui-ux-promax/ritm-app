@@ -47,9 +47,9 @@ export function SiteFooter() {
     <footer className="mt-[70px] overflow-hidden bg-footer pb-px text-white">
       <RevealObserver className="footer-motion">
       <div className="mx-auto max-w-[1200px] px-6">
-        <div className="grid gap-8 pt-[52px] pb-9 min-[640px]:grid-cols-[1.5fr_1fr_1fr_1fr]">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 pt-[52px] pb-9 min-[640px]:grid-cols-[1.5fr_1fr_1fr_1fr]">
           {/* Brand + newsletter */}
-          <div data-reveal="left">
+          <div data-reveal="left" className="col-span-2 min-[640px]:col-span-1">
             <Image src="/ritm-logo-light.svg" alt="Ritm" width={112} height={32} className="w-[112px] h-auto" />
             <p className="text-white/60 text-sm mt-2.5 max-w-[320px]">Подписка на новые капсулы, restock размеров и закрытые скидки.</p>
             <NewsletterForm />
