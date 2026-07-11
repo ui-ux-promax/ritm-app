@@ -20,8 +20,10 @@ export function SeasonSection() {
           className="object-cover"
           data-landing-parallax
         />
-        <div className="absolute left-1/2 bottom-8 -translate-x-1/2 w-[116px] h-[116px] rounded-full grid place-items-center text-center bg-surface/92 border-2 border-surface shadow-lg">
-          <span className="font-mono text-[11px] leading-[1.2] font-bold text-ink">RITM<br />SS26<br />COLLECTION</span>
+        <div className="absolute bottom-7 left-1/2 inline-flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/35 bg-ink/72 px-4 py-2 text-white shadow-xl backdrop-blur-md">
+          <span className="font-mono text-[10px] font-bold tracking-[.18em]">RITM / SS26</span>
+          <span className="h-1 w-1 rounded-full bg-accent" />
+          <span className="hidden text-[11px] text-white/72 sm:inline">Лимитированная коллекция</span>
         </div>
       </div>
     </section>

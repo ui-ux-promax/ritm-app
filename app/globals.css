@@ -104,17 +104,19 @@
   }
   .landing-heart-pop { animation: landing-heart-pop 360ms var(--motion-ease) both; }
 
-  @keyframes landing-parallax {
-    from { transform: translate3d(0, -14px, 0) scale(1.02); }
-    to { transform: translate3d(0, 18px, 0) scale(1.065); }
-  }
+@keyframes landing-parallax {
+  from { transform: translate3d(0, -42px, 0) scale(1.04); }
+  to { transform: translate3d(0, 42px, 0) scale(1.12); }
+}
   @supports (animation-timeline: view()) {
-    .motion-scope [data-landing-parallax] {
-      animation: landing-parallax linear both;
-      animation-timeline: view();
-      animation-range: entry 0% exit 100%;
-    }
+  .motion-scope [data-landing-parallax] {
+    animation: landing-parallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+    transform-origin: center;
+    will-change: transform;
   }
+}
 
   @media (prefers-reduced-motion: reduce) {
     .landing-hero-in, .landing-hero-ken-burns, .landing-heart-pop { animation: none !important; transform: none !important; }
