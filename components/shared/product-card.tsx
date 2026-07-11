@@ -42,13 +42,13 @@ export function ProductCard({ data, wishlisted = false, landingMotion = false }:
         </h3>
         <p className="mt-2 text-ink-muted text-[13px] leading-[1.45] line-clamp-1 min-h-[19px]">{data.categoryName}</p>
         {/* Actions — price pill + tool buttons (heart + cart) */}
-        <div className="flex items-center justify-between gap-2.5 mt-auto pt-[18px]">
+        <div className="flex min-w-0 items-center justify-between gap-2.5 pt-[18px] mt-auto max-[560px]:grid max-[560px]:grid-cols-[minmax(0,1fr)_auto] max-[560px]:gap-2">
           {/* Price pill */}
-          <span className="inline-flex items-center justify-center h-9 min-w-[112px] px-4 rounded-full border border-line text-ink text-xs font-bold tnum">
+          <span className="inline-flex min-w-[112px] items-center justify-center rounded-full border border-line px-4 h-9 text-ink text-xs font-bold tnum max-[560px]:min-w-0 max-[560px]:px-2">
             {data.minPrice.toLocaleString('ru-RU')} ₽
           </span>
           {/* Tool buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2 max-[560px]:gap-1">
             {!data.soldOut && (
               <WishlistHeart productId={data.id} initialActive={wishlisted} variant="card" landingMotion={landingMotion} />
             )}

@@ -34,7 +34,7 @@ export function SiteHeader() {
         </div>
 
         <Suspense fallback={<div className="hidden h-[56px] md:block" aria-hidden />}>
-          <div className="hidden grid-cols-[182px_1fr_auto] items-center gap-3.5 pb-3.5 md:grid">
+          <div className="hidden grid-cols-[182px_minmax(0,1fr)_auto] items-center gap-3.5 pb-3.5 md:grid">
             <CatalogHeaderNav />
           </div>
         </Suspense>

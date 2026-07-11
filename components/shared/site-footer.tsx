@@ -47,7 +47,7 @@ export function SiteFooter() {
     <footer className="mt-[70px] overflow-hidden bg-footer pb-px text-white">
       <RevealObserver className="footer-motion">
       <div className="mx-auto max-w-[1200px] px-6">
-        <div className="grid md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-8 pt-[52px] pb-9">
+        <div className="grid gap-8 pt-[52px] pb-9 min-[640px]:grid-cols-[1.5fr_1fr_1fr_1fr]">
           {/* Brand + newsletter */}
           <div data-reveal="left">
             <Image src="/ritm-logo-light.svg" alt="Ritm" width={112} height={32} className="w-[112px] h-auto" />
