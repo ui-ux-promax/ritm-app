@@ -57,7 +57,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
         <div>
           {/* Тулбар — sticky под хедером на телефоне (glassmorphism как у шапки), чтобы кнопка
               «Фильтры» была всегда на виду при скролле. С md+ статичный, фильтр в инлайн-сайдбаре. */}
-          <div className="sticky top-16 z-30 -mx-4 mb-4 flex min-w-0 items-center gap-2 border-b border-line px-4 py-2.5 backdrop-blur-xl sm:-mx-6 sm:gap-3 sm:px-6 md:static md:mx-0 md:border-0 md:px-0 md:py-0 md:backdrop-blur-0">
+          <div className="sticky top-[56px] z-30 -mx-4 mb-4 flex min-w-0 items-center gap-2 border-b border-line px-4 py-2.5 backdrop-blur-xl sm:-mx-6 sm:gap-3 sm:px-6 md:static md:mx-0 md:border-0 md:px-0 md:py-0 md:backdrop-blur-0">
             <Suspense><MobileFilterDrawer facets={facets} total={total} /></Suspense>
             <p className="text-sm text-ink-muted hidden sm:block">Найдено <span className="font-semibold text-ink tnum">{total}</span></p>
             <div className="flex-1" />
