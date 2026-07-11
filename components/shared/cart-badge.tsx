@@ -19,7 +19,7 @@ export function CartBadge() {
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M3.8 5.2h2.35l1.55 9.45a2 2 0 0 0 1.98 1.68h7.7a2 2 0 0 0 1.93-1.47l1.2-4.45H7.15" /><circle cx="9.45" cy="19.25" r="1.05" /><circle cx="17.25" cy="19.25" r="1.05" />
       </svg>
-      {count > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-5 w-5 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground tnum">{count}</span>}
+      {count > 0 && <span className={cn('absolute -right-0.5 -top-0.5 grid h-5 w-5 place-items-center rounded-full text-[10px] font-bold tnum', active ? 'bg-surface text-primary' : 'bg-primary text-primary-foreground')}>{count}</span>}
     </Link>
   );
 }
