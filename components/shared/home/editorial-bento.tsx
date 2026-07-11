@@ -114,7 +114,7 @@ export function EditorialBento() {
     <div
       ref={gridRef}
       data-reveal="scale"
-      className="grid grid-cols-2 gap-3 rounded-[22px] bg-ink p-3 md:grid-cols-4 md:grid-rows-[230px_230px_230px] md:gap-4 md:p-4"
+      className="grid grid-cols-2 gap-x-4 gap-y-4 md:grid-cols-4 md:grid-rows-[230px_230px_230px] md:gap-x-5 md:gap-y-5"
     >
       {items.map((item, index) => (
         <figure key={item.src} className={`relative overflow-hidden rounded-[16px] bg-surface-soft ${item.className}`}>
