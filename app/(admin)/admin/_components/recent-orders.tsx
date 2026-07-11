@@ -25,7 +25,7 @@ export function RecentOrders({ rows }: { rows: RecentOrderRow[] }) {
   });
 
   return (
-    <article className="rounded-[32px] border border-admin-outline-variant bg-admin-surface p-6 shadow-[var(--admin-shadow-tight)]">
+    <article className="min-w-0 rounded-[32px] border border-admin-outline-variant bg-admin-surface p-6 shadow-[var(--admin-shadow-tight)]">
       <div className="mb-[22px] flex items-start justify-between gap-[18px] max-[760px]:grid">
         <div>
           <h2 className="font-admin-head text-[clamp(22px,1.7vw,30px)] font-extrabold leading-[1.05] tracking-[-.035em] text-admin-on-surface">
@@ -64,8 +64,9 @@ export function RecentOrders({ rows }: { rows: RecentOrderRow[] }) {
           Ничего не найдено. Измените статус.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-[20px] border border-admin-outline-variant">
-          <table className="w-full min-w-[900px] border-collapse text-left text-[14px]">
+        <>
+          <div className="hidden overflow-x-auto rounded-[20px] border border-admin-outline-variant md:block">
+            <table className="w-full min-w-[900px] border-collapse text-left text-[14px]">
             <thead className="bg-admin-surface-low">
               <tr>
                 {['Заказ', 'Товар', 'Дата', 'Статус', 'Сумма', 'Клиент'].map((head) => (
@@ -111,8 +112,43 @@ export function RecentOrders({ rows }: { rows: RecentOrderRow[] }) {
                 );
               })}
             </tbody>
-          </table>
-        </div>
+            </table>
+          </div>
+          <div className="divide-y divide-admin-outline-variant overflow-hidden rounded-[20px] border border-admin-outline-variant md:hidden">
+            {filtered.map((row) => {
+              const status = dashboardStatus(row);
+              return (
+                <Link
+                  key={row.id}
+                  href={`/admin/orders/${row.id}`}
+                  className="grid gap-3 bg-admin-surface p-4 transition-colors hover:bg-admin-surface-low"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <strong className="block font-mono text-[15px] font-extrabold text-admin-on-surface tabular-nums">
+                        ORD-{row.orderNumber}
+                      </strong>
+                      <span className="mt-1 block truncate text-[13px] text-admin-on-surface-variant">
+                        {row.contactName}
+                      </span>
+                    </div>
+                    <strong className="shrink-0 font-mono text-[14px] font-extrabold text-admin-on-surface tabular-nums">
+                      {formatPrice(row.totalAmount)}
+                    </strong>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`inline-flex min-h-[29px] items-center rounded-full border px-[10px] text-[12px] font-extrabold ${status.className}`}>
+                      {status.label}
+                    </span>
+                    <span className="text-[12px] text-admin-on-surface-variant">
+                      {formatDate(row.createdAt)} · {row.itemCount} поз.
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </>
       )}
     </article>
   );

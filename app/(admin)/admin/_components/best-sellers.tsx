@@ -4,7 +4,7 @@ import type { BestSeller } from '@/lib/admin/analytics';
 
 export function BestSellers({ items }: { items: BestSeller[] }) {
   return (
-    <article className="rounded-[32px] border border-admin-outline-variant bg-admin-surface p-6 shadow-[var(--admin-shadow-tight)]">
+    <article className="min-w-0 rounded-[32px] border border-admin-outline-variant bg-admin-surface p-6 shadow-[var(--admin-shadow-tight)]">
       <div className="mb-[22px] flex items-start justify-between gap-[18px]">
         <div>
           <h2 className="font-admin-head text-[clamp(22px,1.7vw,30px)] font-extrabold leading-[1.05] tracking-[-.035em] text-admin-on-surface">

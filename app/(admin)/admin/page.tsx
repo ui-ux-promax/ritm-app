@@ -77,8 +77,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <KpiCard tone="average" label="Средний чек" value={formatPrice(view.avgOrder)} trend={view.avgOrderTrend} series={view.kpiSeries.map(({ avgOrder }) => avgOrder)} />
       </div>
 
-      <div className="grid items-start gap-[24px] xl:grid-cols-[minmax(0,1.62fr)_minmax(330px,.96fr)]">
-        <article className="grid min-h-[346px] grid-rows-[auto_1fr] rounded-[28px] border border-admin-outline-variant bg-admin-surface p-6 shadow-[var(--admin-shadow-tight)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-[24px] xl:grid-cols-[minmax(0,1.62fr)_minmax(330px,.96fr)]">
+        <article className="grid min-w-0 min-h-[346px] grid-rows-[auto_1fr] rounded-[28px] border border-admin-outline-variant bg-admin-surface p-6 shadow-[var(--admin-shadow-tight)]">
           <div className="mb-[22px] flex items-start justify-between gap-[18px] max-[760px]:grid">
             <div>
               <h2 className="font-admin-head text-[clamp(22px,1.7vw,30px)] font-extrabold leading-[1.05] tracking-[-.035em] text-admin-on-surface">
@@ -109,7 +109,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </div>
         </article>
 
-        <div className="grid gap-[24px]">
+        <div className="grid min-w-0 gap-[24px]">
           <article className="rounded-[32px] border border-admin-outline-variant bg-admin-surface p-6 shadow-[var(--admin-shadow-tight)]">
             <div className="mb-[22px] flex items-start justify-between gap-[18px]">
               <div>
@@ -143,7 +143,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       </div>
 
       {/* Нижний ряд */}
-      <div className="grid gap-[24px] xl:grid-cols-[minmax(300px,.82fr)_minmax(0,1.38fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-[24px] xl:grid-cols-[minmax(300px,.82fr)_minmax(0,1.38fr)]">
         <BestSellers items={view.bestSellers} />
         <RecentOrders rows={view.recentOrders} />
       </div>
