@@ -130,12 +130,9 @@ export function AdminShell({ user, children }: AdminShellProps) {
       </aside>
 
       <header className="fixed left-0 right-0 top-0 z-30 flex h-16 items-center gap-4 border-b border-admin-outline-variant bg-admin-surface/90 px-[18px] backdrop-blur-lg md:hidden">
-        <div className="flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-admin-primary text-admin-on-primary">
-            <Icon name="bolt" filled />
-          </div>
-          <span className="font-admin-head text-xl font-extrabold tracking-[-.06em] text-admin-on-surface">RITM</span>
-        </div>
+        <Link href="/admin" aria-label="Ritm admin" className="flex items-center">
+          <Image src="/ritm-logo.svg" alt="Ritm" width={98} height={28} priority className="h-auto w-[84px]" />
+        </Link>
         <div className="ml-auto">
           <AdminMobileMenu user={user} />
         </div>

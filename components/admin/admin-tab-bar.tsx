@@ -19,8 +19,7 @@ export function AdminTabBar() {
   return (
     <nav
       aria-label="Основная навигация"
-      className="fixed inset-x-3 bottom-3 z-40 rounded-[24px] border border-admin-outline-variant bg-admin-surface/95 p-2 shadow-[var(--admin-shadow-soft)] backdrop-blur-lg md:hidden"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="fixed inset-x-3 bottom-3 z-40 rounded-[24px] border border-admin-outline-variant bg-admin-surface/95 p-2 [padding-bottom:calc(0.5rem+env(safe-area-inset-bottom))] shadow-[var(--admin-shadow-soft)] backdrop-blur-lg md:hidden"
     >
       <div className="relative isolate flex h-14 items-stretch">
         {/* Скользящая лайм-пилюля (декоративная) */}
