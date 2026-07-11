@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { OrderStatus } from '@prisma/client';
 import { cn } from '@/lib/utils';
@@ -45,19 +46,19 @@ export function OrderTable({ rows, page, totalPages, total, limit }: OrderTableP
   const to = Math.min(page * limit, total);
 
   return (
-    <div className="bg-admin-surface border border-admin-outline-variant rounded-xl overflow-hidden">
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-admin-surface-high">
+    <div className="mt-[18px] overflow-hidden rounded-[20px] border border-admin-outline-variant bg-admin-surface">
+      <div className="hidden overflow-x-auto md:block">
+        <table className="w-full min-w-[1000px] border-collapse text-left text-[14px]">
+          <thead className="bg-admin-surface-low">
             <tr>
               {['Заказ', 'Покупатель', 'Позиции', 'Сумма', 'Оплата', 'Статус'].map((h) => (
-                <th key={h} className="px-6 py-4 text-[12px] font-semibold uppercase tracking-widest text-admin-on-surface-variant">
+                <th key={h} className="border-b border-admin-outline-variant px-4 py-[15px] text-[11px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-admin-outline-variant">
+          <tbody>
             {rows.map((row) => {
               const sv = orderStatusView(row.status, row.paymentStatus);
               const pv = paymentStatusView(row.paymentStatus);
@@ -65,28 +66,28 @@ export function OrderTable({ rows, page, totalPages, total, limit }: OrderTableP
                 <tr
                   key={row.id}
                   onClick={() => router.push(`/admin/orders/${row.id}`)}
-                  className="group hover:bg-admin-surface-high transition-colors cursor-pointer"
+                  className="group cursor-pointer transition-colors hover:bg-admin-surface-low"
                 >
                   {/* Заказ */}
-                  <td className="px-6 py-4">
-                    <a
+                  <td className="border-b border-admin-outline-variant px-4 py-[15px]">
+                    <Link
                       href={`/admin/orders/${row.id}`}
                       onClick={(e) => e.stopPropagation()}
                       className="font-bold text-admin-on-surface hover:underline tabular-nums"
                     >
                       #{row.orderNumber}
-                    </a>
+                    </Link>
                     <div className="text-xs text-admin-on-surface-variant tabular-nums">{row.createdLabel}</div>
                   </td>
                   {/* Покупатель */}
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-admin-on-surface truncate max-w-[200px]">{row.contactName}</div>
+                  <td className="border-b border-admin-outline-variant px-4 py-[15px]">
+                    <div className="font-bold text-admin-on-surface truncate max-w-[200px]">{row.contactName}</div>
                     <div className="text-xs text-admin-on-surface-variant truncate max-w-[200px]">{row.contactEmail}</div>
                   </td>
                   {/* Позиции */}
-                  <td className="px-6 py-4">
+                  <td className="border-b border-admin-outline-variant px-4 py-[15px]">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-admin-surface-high border border-admin-outline-variant p-1 overflow-hidden flex items-center justify-center shrink-0">
+                      <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-admin-outline-variant bg-admin-surface-low p-1">
                         {row.coverImage ? (
                           /* eslint-disable-next-line @next/next/no-img-element -- admin thumb */
                           <img src={row.coverImage} alt="" className="object-contain w-full h-full" />
@@ -98,16 +99,16 @@ export function OrderTable({ rows, page, totalPages, total, limit }: OrderTableP
                     </div>
                   </td>
                   {/* Сумма */}
-                  <td className="px-6 py-4 font-bold text-admin-on-surface tabular-nums">{formatPrice(row.totalAmount)}</td>
+                  <td className="border-b border-admin-outline-variant px-4 py-[15px] font-bold tabular-nums text-admin-on-surface">{formatPrice(row.totalAmount)}</td>
                   {/* Оплата */}
-                  <td className="px-6 py-4">
+                  <td className="border-b border-admin-outline-variant px-4 py-[15px]">
                     <span className={pv.badge}>{pv.label}</span>
                     <div className="text-[11px] text-admin-on-surface-variant mt-1 uppercase tracking-wider">
                       {row.paymentMethod === 'online' ? 'Онлайн' : 'При получении'}
                     </div>
                   </td>
                   {/* Статус */}
-                  <td className="px-6 py-4">
+                  <td className="border-b border-admin-outline-variant px-4 py-[15px]">
                     <span className={sv.badge}>{sv.label}</span>
                   </td>
                 </tr>
@@ -118,7 +119,7 @@ export function OrderTable({ rows, page, totalPages, total, limit }: OrderTableP
       </div>
 
       {/* Мобильная раскладка: карточки вместо таблицы (<md) */}
-      <div className="md:hidden divide-y divide-admin-outline-variant">
+      <div className="divide-y divide-admin-outline-variant md:hidden">
         {rows.map((row) => {
           const sv = orderStatusView(row.status, row.paymentStatus);
           const pv = paymentStatusView(row.paymentStatus);
@@ -126,10 +127,10 @@ export function OrderTable({ rows, page, totalPages, total, limit }: OrderTableP
             <div
               key={row.id}
               onClick={() => router.push(`/admin/orders/${row.id}`)}
-              className="p-4 cursor-pointer hover:bg-admin-surface-high transition-colors"
+              className="cursor-pointer p-4 transition-colors hover:bg-admin-surface-low"
             >
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-admin-surface-high border border-admin-outline-variant p-1 overflow-hidden flex items-center justify-center shrink-0">
+                <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-admin-outline-variant bg-admin-surface-low p-1">
                   {row.coverImage ? (
                     /* eslint-disable-next-line @next/next/no-img-element -- admin thumb */
                     <img src={row.coverImage} alt="" className="object-contain w-full h-full" />
@@ -138,13 +139,13 @@ export function OrderTable({ rows, page, totalPages, total, limit }: OrderTableP
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <a
+                  <Link
                     href={`/admin/orders/${row.id}`}
                     onClick={(e) => e.stopPropagation()}
                     className="font-bold text-admin-on-surface hover:underline tabular-nums"
                   >
                     #{row.orderNumber}
-                  </a>
+                  </Link>
                   <div className="text-xs text-admin-on-surface-variant tabular-nums">{row.createdLabel}</div>
                 </div>
                 <span className="font-bold text-admin-on-surface tabular-nums whitespace-nowrap">
@@ -153,7 +154,7 @@ export function OrderTable({ rows, page, totalPages, total, limit }: OrderTableP
               </div>
 
               <div className="mt-3">
-                <div className="font-medium text-admin-on-surface truncate">{row.contactName}</div>
+                <div className="truncate font-bold text-admin-on-surface">{row.contactName}</div>
                 <div className="text-xs text-admin-on-surface-variant truncate">{row.contactEmail}</div>
               </div>
 
@@ -173,7 +174,7 @@ export function OrderTable({ rows, page, totalPages, total, limit }: OrderTableP
       </div>
 
       {/* Пагинация */}
-      <div className="px-6 py-4 border-t border-admin-outline-variant flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 border-t border-admin-outline-variant px-6 py-4 max-[640px]:justify-center">
         <p className="text-xs text-admin-on-surface-variant">
           Показано {from}–{to} из {total}
         </p>
@@ -189,10 +190,10 @@ export function OrderTable({ rows, page, totalPages, total, limit }: OrderTableP
                   type="button"
                   onClick={() => goPage(it)}
                   className={cn(
-                    'w-8 h-8 flex items-center justify-center rounded-lg font-bold transition-colors',
+                    'flex h-10 w-10 items-center justify-center rounded-[12px] font-bold transition-colors',
                     it === page
-                      ? 'bg-admin-primary text-admin-on-primary'
-                      : 'text-admin-on-surface-variant hover:bg-admin-surface-high',
+                      ? 'bg-[var(--admin-sidebar)] text-white'
+                      : 'border border-admin-outline-variant text-admin-on-surface-variant hover:bg-admin-surface-low',
                   )}
                 >
                   {it}
@@ -213,7 +214,7 @@ function PagerBtn({ disabled, onClick, icon }: { disabled: boolean; onClick: () 
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="w-8 h-8 flex items-center justify-center rounded-lg border border-admin-outline-variant text-admin-on-surface-variant hover:bg-admin-surface-high transition-colors disabled:opacity-30"
+      className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-admin-outline-variant text-admin-on-surface-variant transition-colors hover:bg-admin-surface-low disabled:opacity-30"
     >
       <Icon name={icon} />
     </button>

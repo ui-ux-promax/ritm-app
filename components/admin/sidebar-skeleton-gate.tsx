@@ -39,8 +39,8 @@ export default function SidebarSkeletonGate(): JSX.Element | null {
       <nav className="flex-1 flex flex-col gap-1">
         {/* Активный пункт: лайм-фон, светлые плейсхолдеры on-primary внутри */}
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-admin-primary">
-          <div className="sk sk-circle w-6 h-6 bg-admin-on-primary/25" />
-          <div className="sk sk-line w-24 bg-admin-on-primary/25" />
+          <div className="sk sk-circle w-6 h-6 bg-white/25" />
+          <div className="sk sk-line w-24 bg-white/25" />
         </div>
         {/* 4 неактивных: серый квадрат-иконка + строка */}
         {(['d1', 'd2', 'd3', 'd4'] as const).map((d) => (

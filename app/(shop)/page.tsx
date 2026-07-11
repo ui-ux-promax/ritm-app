@@ -12,6 +12,7 @@ import { BestsellersSection } from '@/components/shared/home/bestsellers-section
 import { SeasonSection } from '@/components/shared/home/season-section';
 import { BlogSection } from '@/components/shared/home/blog-section';
 import { NewsletterBanner } from '@/components/shared/home/newsletter-banner';
+import { LandingMotion } from '@/components/shared/home/landing-motion';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +30,7 @@ export default async function HomePage() {
   const wishlistedIds = await getWishlistProductIds(session, store.get(wishlistCookieName)?.value);
 
   return (
-    <>
+    <LandingMotion>
       <Hero />
       <IntroSection />
       <EditorialSection />
@@ -37,6 +38,6 @@ export default async function HomePage() {
       <SeasonSection />
       <BlogSection />
       <NewsletterBanner />
-    </>
+    </LandingMotion>
   );
 }

@@ -29,9 +29,9 @@ export interface CouponRow {
 }
 
 const STATUS_META: Record<CouponStatus, { label: string; cls: string }> = {
-  active: { label: 'Активен', cls: 'bg-admin-primary text-admin-on-primary' },
-  inactive: { label: 'Выключен', cls: 'bg-admin-surface-high text-admin-on-surface-variant' },
-  expired: { label: 'Истёк', cls: 'bg-admin-error/15 text-admin-error' },
+  active: { label: 'Активен', cls: 'border-[hsl(var(--color-success)/.22)] bg-[hsl(var(--color-success)/.12)] text-[var(--admin-money)]' },
+  inactive: { label: 'Выключен', cls: 'border-admin-outline-variant bg-admin-surface-low text-admin-on-surface-variant' },
+  expired: { label: 'Истёк', cls: 'border-[hsl(var(--color-danger)/.18)] bg-[hsl(var(--color-danger)/.1)] text-admin-error' },
 };
 
 export function CouponTable({ rows }: { rows: CouponRow[] }) {
@@ -61,7 +61,7 @@ export function CouponTable({ rows }: { rows: CouponRow[] }) {
 
   return (
     <div className="space-y-3">
-      <div className="bg-admin-surface border border-admin-outline-variant rounded-xl overflow-hidden">
+      <div className="overflow-hidden rounded-[20px] border border-admin-outline-variant bg-admin-surface">
         <div className="hidden md:block">
           <Table>
           <TableHeader>
@@ -78,10 +78,11 @@ export function CouponTable({ rows }: { rows: CouponRow[] }) {
           <TableBody>
             {rows.map((row) => (
               <TableRow key={row.id}>
-                <TableCell className="font-medium font-mono">{row.code}</TableCell>
-                <TableCell>{row.percent}%</TableCell>
+                <TableCell className="font-mono font-extrabold tracking-[-.02em]">{row.code}</TableCell>
+                <TableCell className="font-bold tabular-nums">{row.percent}%</TableCell>
                 <TableCell>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold w-fit inline-block ${STATUS_META[row.status].cls}`}>
+                  <span className={`inline-flex min-h-[29px] w-fit items-center gap-1 rounded-full border px-[10px] text-xs font-extrabold ${STATUS_META[row.status].cls}`}>
+                    <span className="h-[7px] w-[7px] rounded-full bg-current" />
                     {STATUS_META[row.status].label}
                   </span>
                 </TableCell>
@@ -115,10 +116,11 @@ export function CouponTable({ rows }: { rows: CouponRow[] }) {
             <div key={row.id} className="p-4 space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <span className="font-mono font-medium text-admin-on-surface">{row.code}</span>
-                  <div className="text-sm text-admin-on-surface-variant tabular-nums">{row.percent}% скидка</div>
+                  <span className="font-mono font-extrabold tracking-[-.02em] text-admin-on-surface">{row.code}</span>
+                  <div className="text-sm tabular-nums text-admin-on-surface-variant">{row.percent}% скидка</div>
                 </div>
-                <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold w-fit ${STATUS_META[row.status].cls}`}>
+                <span className={`inline-flex min-h-[29px] w-fit shrink-0 items-center gap-1 rounded-full border px-[10px] text-xs font-extrabold ${STATUS_META[row.status].cls}`}>
+                  <span className="h-[7px] w-[7px] rounded-full bg-current" />
                   {STATUS_META[row.status].label}
                 </span>
               </div>

@@ -24,6 +24,7 @@ export default async function ProfilePage() {
       select: {
         id: true,
         email: true,
+        role: true,
         name: true,
         phone: true,
         birthdate: true,
@@ -122,6 +123,7 @@ export default async function ProfilePage() {
         createdAt: user.createdAt.toISOString(),
       }}
       initial={initial}
+      isAdmin={user.role === 'ADMIN'}
       orders={orders}
       wishlist={wishlistProducts}
       addresses={user.addresses.map((a) => ({

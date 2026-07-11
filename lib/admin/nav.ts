@@ -7,11 +7,11 @@ export interface AdminNavItem {
 
 /** Single source of truth for primary admin navigation (sidebar + mobile tab bar). */
 export const ADMIN_NAV: AdminNavItem[] = [
-  { label: 'Дашборд',   href: '/admin',           icon: 'dashboard',     exact: true },
-  { label: 'Каталог',   href: '/admin/catalog',   icon: 'inventory_2',   exact: false },
-  { label: 'Заказы',    href: '/admin/orders',    icon: 'shopping_cart', exact: false },
-  { label: 'Клиенты',   href: '/admin/customers', icon: 'group',         exact: false },
-  { label: 'Маркетинг', href: '/admin/marketing', icon: 'campaign',      exact: false },
+  { label: 'Дашборд', href: '/admin',           icon: 'dashboard',      exact: true },
+  { label: 'Заказы',  href: '/admin/orders',    icon: 'shopping_cart', exact: false },
+  { label: 'Каталог', href: '/admin/catalog',   icon: 'deployed_code', exact: false },
+  { label: 'Клиенты', href: '/admin/customers', icon: 'group',         exact: false },
+  { label: 'Промокоды', href: '/admin/marketing', icon: 'confirmation_number', exact: false },
 ];
 
 /** True if a nav item is the active route for `pathname`. */

@@ -15,7 +15,7 @@ export function BestsellersSection({ products, wishlistedIds }: { products: Prod
   return (
     <section id="products" className="mx-auto max-w-[1240px] px-4 sm:px-6 pt-14 md:pt-[78px]">
       {/* Heading */}
-      <div className="grid justify-items-center gap-5 mb-9">
+      <div data-reveal="up" className="grid justify-items-center gap-5 mb-9">
         <h2 className="font-display font-bold text-[28px] md:text-[38px] leading-[1.05] text-center">Просмотрите все, что нужно.</h2>
         {/* Filter tabs */}
         <div className="flex flex-wrap justify-center gap-2" aria-label="Фильтр товаров">
@@ -37,15 +37,17 @@ export function BestsellersSection({ products, wishlistedIds }: { products: Prod
       </div>
       {/* Product grid — 3 columns */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-        {products.map((p) => (
-          <ProductCard key={p.slug} data={p} wishlisted={wishlistedIds.has(p.id)} />
+        {products.map((p, index) => (
+          <div key={p.slug} data-reveal="up" data-reveal-delay={Math.min(index + 1, 6)}>
+            <ProductCard data={p} wishlisted={wishlistedIds.has(p.id)} landingMotion />
+          </div>
         ))}
       </div>
       {/* View more */}
-      <div className="flex justify-center mt-10">
+      <div data-reveal="up" data-reveal-delay="2" className="flex justify-center mt-10">
         <Link
           href="/catalog"
-          className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground min-h-[48px] px-7 font-bold hover:-translate-y-px transition-transform"
+          className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground min-h-[48px] px-7 font-bold transition-transform duration-200 [transition-timing-function:cubic-bezier(.22,1,.36,1)] hover:-translate-y-px active:scale-[.97] motion-reduce:transform-none"
         >
           Смотреть больше
         </Link>

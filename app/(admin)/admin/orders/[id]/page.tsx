@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { AdminPageHeader } from '@/components/admin/admin-page-header';
+import { AdminPanel } from '@/components/admin/admin-panel';
 import { prisma } from '@/lib/prisma-client';
 import { Icon } from '@/components/admin/icon';
 import { formatPrice, formatDateTime } from '@/lib/format';
@@ -29,38 +31,39 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const pv = paymentStatusView(order.payment?.status);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-[24px]">
       {/* Назад */}
       <Link
         href="/admin/orders"
-        className="inline-flex items-center gap-1 text-sm text-admin-on-surface-variant hover:text-admin-on-surface"
+        className="inline-flex items-center gap-1 text-sm font-bold text-admin-on-surface-variant hover:text-admin-on-surface"
       >
         <Icon name="arrow_back" className="text-[18px]" /> К заказам
       </Link>
 
       {/* Шапка */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <h2 className="font-admin-head text-3xl font-bold text-admin-on-surface tabular-nums">
-              Заказ #{order.orderNumber}
-            </h2>
+      <AdminPageHeader
+        kicker="Заказ"
+        title={`#${order.orderNumber}`}
+        subtitle={`Оформлен ${formatDateTime(order.createdAt)}`}
+        action={(
+          <div className="grid gap-3 justify-items-end max-[760px]:justify-items-start">
+            <div className="flex flex-wrap items-center justify-end gap-2 max-[760px]:justify-start">
             <span className={sv.badge}>{sv.label}</span>
             <span className={pv.badge}>{pv.label}</span>
           </div>
-          <p className="text-sm text-admin-on-surface-variant tabular-nums">Оформлен {formatDateTime(order.createdAt)}</p>
-        </div>
         <OrderStatusActions orderId={order.id} status={order.status} />
-      </div>
+          </div>
+        )}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-[22px] lg:grid-cols-3">
         {/* Позиции */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-[22px] lg:col-span-2">
           <Section title="Позиции">
             <div className="divide-y divide-admin-outline-variant">
               {order.items.map((it) => (
                 <div key={it.id} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-                  <div className="w-14 h-14 rounded-lg bg-admin-surface-high border border-admin-outline-variant p-1 overflow-hidden flex items-center justify-center shrink-0">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[16px] border border-admin-outline-variant bg-admin-surface-low p-1">
                     {it.imageUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element -- admin thumb */
                       <img src={it.imageUrl} alt="" className="object-contain w-full h-full" />
@@ -105,7 +108,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         </div>
 
         {/* Боковая колонка */}
-        <div className="space-y-6">
+        <div className="space-y-[22px]">
           <Section title="Покупатель">
             <dl className="space-y-2 text-sm">
               <Row label="Имя" value={order.contactName} />
@@ -145,10 +148,10 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-admin-surface border border-admin-outline-variant rounded-xl p-6">
-      <h3 className="font-admin-head text-lg font-bold text-admin-on-surface mb-4">{title}</h3>
+    <AdminPanel className="p-[22px]">
+      <h3 className="mb-4 font-admin-head text-[22px] font-extrabold leading-none tracking-[-.035em] text-admin-on-surface">{title}</h3>
       {children}
-    </div>
+    </AdminPanel>
   );
 }
 

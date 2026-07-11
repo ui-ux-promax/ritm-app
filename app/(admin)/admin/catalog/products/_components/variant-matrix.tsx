@@ -67,17 +67,17 @@ export function VariantMatrix({ ci, control, register, fieldArray, setValue, get
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-2">
         {CLOTHING_SIZES.map((size) => (
           <button
             key={size}
             type="button"
             onClick={() => toggleSize(size)}
             className={
-              'px-2.5 py-1 rounded-lg text-xs border ' +
+              'min-h-[35px] rounded-full border px-[13px] text-xs font-bold transition-colors ' +
               (selected.has(size)
-                ? 'bg-admin-primary text-admin-on-primary border-admin-primary'
-                : 'border-admin-outline-variant text-admin-on-surface-variant hover:bg-admin-surface-high')
+                ? 'border-[var(--admin-sidebar)] bg-[var(--admin-sidebar)] text-white'
+                : 'border-admin-outline-variant text-admin-on-surface-variant hover:bg-admin-surface-low')
             }
           >
             {size}
@@ -87,7 +87,7 @@ export function VariantMatrix({ ci, control, register, fieldArray, setValue, get
 
       {fields.length > 0 && (
         <>
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap items-center gap-2">
             <BulkInput label="Цена всем" onApply={bulkPrice} />
             <BulkInput label="Остаток всем" onApply={bulkStock} />
           </div>
@@ -100,9 +100,9 @@ export function VariantMatrix({ ci, control, register, fieldArray, setValue, get
                 <div
                   key={row.key}
                   className={cn(
-                    'grid gap-2 rounded-xl border border-admin-outline-variant bg-admin-surface-low p-3',
+                    'grid gap-2 rounded-[18px] border border-admin-outline-variant bg-admin-surface-low p-3',
                     'grid-cols-2 [grid-template-areas:"size_ctrl"_"price_old"_"stock_sku"]',
-                    'md:rounded-none md:border-0 md:bg-transparent md:p-0 md:items-center',
+                    'md:items-center md:rounded-none md:border-0 md:bg-transparent md:p-0',
                     'md:grid-cols-[60px_1fr_110px_110px_90px_auto] md:[grid-template-areas:"size_sku_price_old_stock_ctrl"]',
                   )}
                 >
@@ -153,7 +153,7 @@ function BulkInput({ label, onApply }: { label: string; onApply: (v: number) => 
   const [v, setV] = React.useState('');
   return (
     <div className="flex items-center gap-1">
-      <Input className="w-28" type="number" placeholder={label} value={v} onChange={(e) => setV(e.target.value)} />
+      <Input className="w-32" type="number" placeholder={label} value={v} onChange={(e) => setV(e.target.value)} />
       <Button type="button" variant="outline" size="sm" onClick={() => onApply(Number(v) || 0)}>OK</Button>
     </div>
   );
@@ -162,7 +162,7 @@ function BulkInput({ label, onApply }: { label: string; onApply: (v: number) => 
 function Field({ area, label, children }: { area: string; label: string; children: React.ReactNode }) {
   return (
     <div className="min-w-0" style={{ gridArea: area }}>
-      <label className="md:hidden block text-[11px] font-medium text-admin-on-surface-variant mb-1">{label}</label>
+      <label className="mb-1 block text-[11px] font-bold uppercase tracking-[.06em] text-admin-on-surface-variant md:hidden">{label}</label>
       {children}
     </div>
   );

@@ -1,0 +1,136 @@
+'use client';
+
+import Image from 'next/image';
+import { useEffect, useRef } from 'react';
+
+type BentoItem = {
+  src: string;
+  alt: string;
+  className: string;
+  x: number;
+  y: number;
+};
+
+const items: BentoItem[] = [
+  {
+    src: '/home/hero-slide-3.png',
+    alt: 'Мужской образ RITM в свободном силуэте',
+    className: 'col-span-2 h-[220px] md:col-start-1 md:row-start-1 md:h-auto',
+    x: 22,
+    y: -22,
+  },
+  {
+    src: '/home/collection-rail.png',
+    alt: 'Рейл новой коллекции RITM',
+    className: 'h-[220px] md:col-start-3 md:row-start-1 md:h-auto',
+    x: -22,
+    y: -14,
+  },
+  {
+    src: '/home/coming-card.png',
+    alt: 'Женский образ RITM в стёганой куртке',
+    className: 'h-[320px] md:col-start-4 md:row-start-1 md:row-span-2 md:h-auto',
+    x: 14,
+    y: -24,
+  },
+  {
+    src: '/home/blog-wardrobe.png',
+    alt: 'Детали базового гардероба RITM',
+    className: 'h-[320px] md:col-start-1 md:row-start-2 md:row-span-2 md:h-auto',
+    x: -16,
+    y: 24,
+  },
+  {
+    src: '/home/blog-chic.png',
+    alt: 'Повседневный многослойный образ RITM',
+    className: 'col-span-2 h-[220px] md:col-start-2 md:row-start-2 md:h-auto',
+    x: 24,
+    y: 14,
+  },
+  {
+    src: '/home/season-collage.png',
+    alt: 'Фактура и крой сезонной коллекции RITM',
+    className: 'col-span-2 h-[220px] md:col-start-2 md:row-start-3 md:h-auto',
+    x: -20,
+    y: -20,
+  },
+  {
+    src: '/home/blog-arrival.png',
+    alt: 'Новый образ из коллекции RITM',
+    className: 'col-span-2 h-[220px] md:col-span-1 md:col-start-4 md:row-start-3 md:h-auto',
+    x: 18,
+    y: 22,
+  },
+];
+
+export function EditorialBento() {
+  const gridRef = useRef<HTMLDivElement>(null);
+  const imageRefs = useRef<Array<HTMLImageElement | null>>([]);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let current = 0;
+    let target = 0;
+    let frame: number | null = null;
+
+    const render = () => {
+      current += (target - current) * 0.11;
+
+      imageRefs.current.forEach((image, index) => {
+        if (!image) return;
+        const item = items[index];
+        image.style.transform = `translate3d(${(item.x * current).toFixed(2)}px, ${(item.y * current).toFixed(2)}px, 0) scale(1.26)`;
+      });
+
+      if (Math.abs(target - current) > 0.001) {
+        frame = window.requestAnimationFrame(render);
+      } else {
+        frame = null;
+      }
+    };
+
+    const update = () => {
+      const rect = grid.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const gridCenter = rect.top + rect.height / 2;
+      target = Math.max(-1, Math.min(1, (viewportHeight / 2 - gridCenter) / ((viewportHeight + rect.height) / 2)));
+      if (frame === null) frame = window.requestAnimationFrame(render);
+    };
+
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+      if (frame !== null) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={gridRef}
+      data-reveal="scale"
+      className="grid grid-cols-2 gap-x-4 gap-y-4 md:grid-cols-4 md:grid-rows-[230px_230px_230px] md:gap-x-5 md:gap-y-5"
+    >
+      {items.map((item, index) => (
+        <figure key={item.src} className={`relative overflow-hidden rounded-[16px] bg-surface-soft ${item.className}`}>
+          <Image
+            ref={(node) => {
+              imageRefs.current[index] = node;
+            }}
+            src={item.src}
+            alt={item.alt}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover will-change-transform"
+            style={{ transform: 'scale(1.26)' }}
+          />
+        </figure>
+      ))}
+    </div>
+  );
+}

@@ -1,9 +1,37 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function NewsletterBanner() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('');
+  const [discount, setDiscount] = useState(50);
+  const bannerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const banner = bannerRef.current;
+    if (!banner || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let frame = 0;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry?.isIntersecting) return;
+      observer.disconnect();
+      setDiscount(0);
+      const startedAt = performance.now();
+      const tick = (now: number) => {
+        const progress = Math.min((now - startedAt) / 1100, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setDiscount(Math.round(50 * eased));
+        if (progress < 1) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    }, { threshold: 0.25 });
+
+    observer.observe(banner);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, []);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +47,8 @@ export function NewsletterBanner() {
   return (
     <section className="mx-auto max-w-[1200px] px-6 my-8 md:my-[52px]">
       <div
+        ref={bannerRef}
+        data-reveal="up"
         className="rounded-[22px] text-white p-8 md:p-12 grid md:grid-cols-[1fr_0.9fr] gap-8 md:gap-11 items-end"
         style={{
           background:
@@ -27,7 +57,8 @@ export function NewsletterBanner() {
       >
         <div>
           <h2 className="font-display font-bold text-[28px] md:text-[45px] leading-[1.05] max-w-[540px]">
-            Скидка 50% на все аутфиты. Присоединяйтесь сейчас.
+            <span className="sr-only">Скидка 50% на все аутфиты. Присоединяйтесь сейчас.</span>
+            <span aria-hidden="true">Скидка <span className="tnum" data-testid="discount-counter">{discount}%</span> на все аутфиты. Присоединяйтесь сейчас.</span>
           </h2>
           <form onSubmit={onSubmit} noValidate className="mt-7 w-full max-w-[420px] grid grid-cols-[1fr_auto] gap-1.5 bg-surface rounded-full p-1.5">
             <input
@@ -41,7 +72,7 @@ export function NewsletterBanner() {
             />
             <button
               type="submit"
-              className="rounded-full bg-primary text-primary-foreground px-4 min-h-[34px] text-xs font-bold"
+              className="rounded-full bg-primary text-primary-foreground px-4 min-h-[34px] text-xs font-bold transition-transform duration-200 active:scale-95 motion-reduce:transform-none"
             >
               Подписаться
             </button>

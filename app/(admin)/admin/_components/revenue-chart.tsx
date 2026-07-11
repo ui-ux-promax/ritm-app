@@ -5,15 +5,22 @@ import { formatPrice } from '@/lib/format';
 
 export function RevenueChart({ data }: { data: { label: string; revenue: number }[] }) {
   return (
-    <ResponsiveContainer width="100%" height={320}>
-      <AreaChart data={data} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
+    <div className="relative min-h-[262px] overflow-hidden rounded-[22px]">
+      <ResponsiveContainer width="100%" height={262}>
+      <AreaChart data={data} margin={{ top: 10, right: 18, left: 8, bottom: 0 }}>
         <defs>
           <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--admin-primary)" stopOpacity={0.3} />
-            <stop offset="100%" stopColor="var(--admin-primary)" stopOpacity={0} />
+            <stop offset="0%" stopColor="#15d3a2" stopOpacity={0.34} />
+            <stop offset="48%" stopColor="#15d3a2" stopOpacity={0.16} />
+            <stop offset="100%" stopColor="#15d3a2" stopOpacity={0} />
           </linearGradient>
+          <filter id="salesChartGlow" x="-8%" y="-24%" width="116%" height="150%">
+            <feGaussianBlur stdDeviation="7" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.08 0 0 0 0 0.83 0 0 0 0 0.64 0 0 0 .72 0" result="glow" />
+            <feMerge><feMergeNode in="glow" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
         </defs>
-        <CartesianGrid strokeDasharray="4 4" stroke="var(--admin-outline-variant)" vertical={false} />
+        <CartesianGrid strokeDasharray="3 5" stroke="var(--admin-outline-variant)" vertical={false} />
         <XAxis
           dataKey="label"
           tick={{ fill: 'var(--admin-on-surface-variant)', fontSize: 12 }}
@@ -25,7 +32,7 @@ export function RevenueChart({ data }: { data: { label: string; revenue: number 
           tick={{ fill: 'var(--admin-on-surface-variant)', fontSize: 12 }}
           tickLine={false}
           axisLine={false}
-          width={56}
+          width={60}
           tickFormatter={(v: number) => (v >= 1000 ? `${Math.round(v / 1000)}k` : String(v))}
         />
         <Tooltip
@@ -38,8 +45,9 @@ export function RevenueChart({ data }: { data: { label: string; revenue: number 
           }}
           labelStyle={{ color: 'var(--admin-on-surface-variant)' }}
         />
-        <Area type="monotone" dataKey="revenue" stroke="var(--admin-primary)" strokeWidth={3} fill="url(#revFill)" />
+        <Area type="monotone" dataKey="revenue" stroke="#15d3a2" strokeWidth={6} fill="url(#revFill)" filter="url(#salesChartGlow)" dot={{ r: 0 }} activeDot={{ r: 8, fill: 'var(--admin-surface)', stroke: '#15d3a2', strokeWidth: 6 }} />
       </AreaChart>
     </ResponsiveContainer>
+    </div>
   );
 }

@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import type { Prisma } from '@prisma/client';
+import { AdminKpiCard } from '@/components/admin/admin-kpi-card';
+import { AdminPageHeader } from '@/components/admin/admin-page-header';
+import { AdminPanel } from '@/components/admin/admin-panel';
 import { Button } from '@/components/admin/ui/button';
 import { Icon } from '@/components/admin/icon';
 import { prisma } from '@/lib/prisma-client';
@@ -95,59 +98,50 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const salesValue = salesAgg._sum.lineTotal ?? 0;
 
   return (
-    <div className="space-y-8">
-      {/* Заголовок */}
-      <div className="flex flex-wrap gap-4 justify-between items-end">
-        <div>
-          <h2 className="font-admin-head text-3xl font-bold text-admin-on-surface mb-1">Товары ({total})</h2>
-          <p className="text-admin-on-surface-variant">Управление каталогом и статусом отображения товаров.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <ViewToggle />
-          <Button asChild>
-            <Link href="/admin/catalog/products/new">
-              <Icon name="add" className="text-[18px]" /> Добавить товар
-            </Link>
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-[24px]">
+      <AdminPageHeader
+        kicker="Каталог"
+        title={`Товары (${total})`}
+        subtitle="Управление карточками, остатками, ценами и статусами витрины."
+        action={(
+          <div className="flex flex-wrap items-center gap-3">
+            <ViewToggle />
+            <Button asChild>
+              <Link href="/admin/catalog/products/new">
+                <Icon name="add" className="text-[18px]" /> Добавить товар
+              </Link>
+            </Button>
+          </div>
+        )}
+      />
 
-      <ProductFilters options={{ brands: brandList.map((b) => b.brand), categories }} />
-
-      {rows.length > 0 ? (
-        <ProductTable rows={rows} page={meta.page} totalPages={meta.totalPages} total={total} limit={limit} />
-      ) : (
-        <div className="bg-admin-surface border border-admin-outline-variant rounded-xl p-8 text-admin-on-surface-variant text-sm">
-          Товары не найдены.
-        </div>
-      )}
-
-      {/* Bento-метрики */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard icon="trending_up" label="Объём продаж" value={formatPrice(salesValue)} />
-        <StatCard
+      <div className="grid grid-cols-1 gap-[18px] md:grid-cols-3">
+        <AdminKpiCard icon="trending_up" label="Объем продаж" value={formatPrice(salesValue)} tone="primary" />
+        <AdminKpiCard
           icon="inventory_2"
           label="Текущий остаток"
           value={stockTotal.toLocaleString('ru-RU')}
-          tag={stockTotal >= LOW_STOCK_TOTAL ? 'Здоровый' : 'Низкий'}
+          delta={stockTotal >= LOW_STOCK_TOTAL ? 'Здоровый' : 'Низкий'}
+          tone={stockTotal >= LOW_STOCK_TOTAL ? 'default' : 'danger'}
         />
-        <StatCard icon="workspace_premium" label="Лидер продаж" value={topBrand} tag="Топ-бренд" />
+        <AdminKpiCard icon="workspace_premium" label="Лидер продаж" value={topBrand} delta="Топ-бренд" />
       </div>
-    </div>
-  );
-}
 
-function StatCard({ icon, label, value, tag }: { icon: string; label: string; value: string; tag?: string }) {
-  return (
-    <div className="bg-admin-surface p-6 rounded-xl border border-admin-outline-variant hover:border-admin-primary transition-colors group">
-      <div className="flex justify-between items-start mb-4">
-        <div className="w-10 h-10 rounded-lg bg-admin-surface-high flex items-center justify-center group-hover:bg-admin-primary transition-colors">
-          <Icon name={icon} className="text-admin-on-surface-variant group-hover:text-admin-on-primary" />
-        </div>
-        {tag && <span className="text-admin-on-surface-variant font-bold text-xs">{tag}</span>}
-      </div>
-      <p className="text-xs text-admin-on-surface-variant uppercase tracking-wider mb-1">{label}</p>
-      <h3 className="font-admin-head text-2xl font-bold text-admin-on-surface">{value}</h3>
+      <AdminPanel
+        title="Каталог товаров"
+        note="Поиск работает по названию, slug и SKU. Фильтры сбрасывают пагинацию."
+        actions={<div className="text-[13px] font-bold text-admin-on-surface-variant">Показано <b className="font-mono text-admin-on-surface">{total}</b> товаров</div>}
+      >
+        <ProductFilters options={{ brands: brandList.map((b) => b.brand), categories }} />
+
+        {rows.length > 0 ? (
+          <ProductTable rows={rows} page={meta.page} totalPages={meta.totalPages} total={total} limit={limit} />
+        ) : (
+          <div className="mt-[18px] rounded-[20px] border border-admin-outline-variant bg-admin-surface-low p-10 text-center text-sm font-bold text-admin-on-surface-variant">
+            Товары не найдены.
+          </div>
+        )}
+      </AdminPanel>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { Heading } from '@/components/admin/heading';
+import { AdminPageHeader } from '@/components/admin/admin-page-header';
+import { AdminPanel } from '@/components/admin/admin-panel';
 import { prisma } from '@/lib/prisma-client';
 import { ProductForm, type ProductFormInitial } from '../../_components/product-form';
 import type { ProductValues } from '@/services/dto/product.dto';
@@ -51,7 +52,16 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
       slug: c.slug,
       swatchHex: c.swatchHex ?? undefined,
       isDefault: c.isDefault,
-      images: c.images.map((im) => ({ url: im.url, publicId: im.publicId ?? undefined, alt: im.alt ?? undefined })),
+      images: c.images.map((im) => ({
+        url: im.url,
+        publicId: im.publicId ?? undefined,
+        alt: im.alt ?? undefined,
+        width: 0,
+        height: 0,
+        format: '',
+        bytes: 0,
+        persisted: true,
+      })),
       variants: c.variants.map((v) => {
         if (v._count.orderItems > 0) referencedVariantIds.push(v.id);
         if (!clothingSizeSet.has(v.size)) {
@@ -72,9 +82,11 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   };
 
   return (
-    <div className="space-y-6">
-      <Heading title="Редактирование товара" description={product.name} />
-      <ProductForm initial={initial} categories={categories} brands={brandRows.map((b) => b.brand)} referencedVariantIds={referencedVariantIds} />
+    <div className="space-y-[24px]">
+      <AdminPageHeader kicker="Каталог" title="Редактирование товара" subtitle={product.name} />
+      <AdminPanel title="Данные товара" note="Изменения применятся после сохранения. Варианты из заказов нельзя удалить, только деактивировать.">
+        <ProductForm initial={initial} categories={categories} brands={brandRows.map((b) => b.brand)} referencedVariantIds={referencedVariantIds} />
+      </AdminPanel>
     </div>
   );
 }

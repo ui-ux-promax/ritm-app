@@ -25,7 +25,7 @@ export function CategoryForm({ initial }: { initial?: CategoryFormInitial }) {
   const router = useRouter();
   const [cover, setCover] = React.useState<UploadedImage | null>(
     initial?.coverImage && initial.coverImagePublicId
-      ? { publicId: initial.coverImagePublicId, url: initial.coverImage, width: 0, height: 0, format: '', bytes: 0 }
+      ? { publicId: initial.coverImagePublicId, url: initial.coverImage, width: 0, height: 0, format: '', bytes: 0, persisted: true }
       : null,
   );
   const [serverError, setServerError] = React.useState<string | null>(null);
@@ -65,15 +65,15 @@ export function CategoryForm({ initial }: { initial?: CategoryFormInitial }) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl space-y-[22px]">
       <div className="space-y-1">
-        <label className="text-sm font-medium text-admin-on-surface">Название</label>
+        <label className="text-[12px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">Название</label>
         <Input {...register('name', { onChange: onNameChange })} placeholder="Футболки" />
         {errors.name && <p className="text-sm text-admin-error">{errors.name.message}</p>}
       </div>
 
       <div className="space-y-1">
-        <label className="text-sm font-medium text-admin-on-surface">Slug</label>
+        <label className="text-[12px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">Slug</label>
         <Input
           {...register('slug', { onChange: () => { slugDirty.current = true; } })}
           placeholder="tees"
@@ -82,13 +82,13 @@ export function CategoryForm({ initial }: { initial?: CategoryFormInitial }) {
       </div>
 
       <div className="space-y-1">
-        <label className="text-sm font-medium text-admin-on-surface">Подпись</label>
+        <label className="text-[12px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">Подпись</label>
         <Input {...register('tagline')} placeholder="База на каждый день" />
         {errors.tagline && <p className="text-sm text-admin-error">{errors.tagline.message}</p>}
       </div>
 
-      <div className="space-y-1">
-        <label className="text-sm font-medium text-admin-on-surface">Обложка</label>
+      <div className="space-y-2 rounded-[20px] border border-admin-outline-variant bg-admin-surface-low p-4">
+        <label className="text-[12px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">Обложка</label>
         <ImageUploader
           value={cover ? [cover] : []}
           onChange={(imgs) => setCover(imgs[0] ?? null)}
@@ -99,7 +99,7 @@ export function CategoryForm({ initial }: { initial?: CategoryFormInitial }) {
 
       {serverError && <p className="text-sm text-admin-error">{serverError}</p>}
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3 border-t border-admin-outline-variant pt-[22px]">
         <Button type="submit" loading={isSubmitting}>
           {initial ? 'Сохранить' : 'Создать'}
         </Button>
