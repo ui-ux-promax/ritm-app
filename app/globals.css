@@ -54,31 +54,31 @@
   .tnum { font-variant-numeric: tabular-nums; }
 
   /* Landing motion system: progressive enhancement, visible without JS. */
-  .landing-motion {
+  .motion-scope {
     --motion-fast: 200ms;
     --motion-reveal: 600ms;
     --motion-ease: cubic-bezier(.22, 1, .36, 1);
   }
-  .landing-motion [data-reveal] {
+  .motion-scope [data-reveal] {
     transition:
       opacity var(--motion-reveal) var(--motion-ease),
       transform var(--motion-reveal) var(--motion-ease);
     transition-delay: var(--reveal-delay, 0ms);
     will-change: opacity, transform;
   }
-  .landing-motion.motion-ready [data-reveal]:not(.is-visible) { opacity: 0; }
-  .landing-motion.motion-ready [data-reveal='up']:not(.is-visible) { transform: translate3d(0, 28px, 0); }
-  .landing-motion.motion-ready [data-reveal='left']:not(.is-visible) { transform: translate3d(-30px, 0, 0); }
-  .landing-motion.motion-ready [data-reveal='right']:not(.is-visible) { transform: translate3d(30px, 0, 0); }
-  .landing-motion.motion-ready [data-reveal='scale']:not(.is-visible) { transform: scale(.955); }
-  .landing-motion [data-reveal].is-visible { opacity: 1; transform: none; }
-  .landing-motion [data-reveal-delay='1'] { --reveal-delay: 80ms; }
-  .landing-motion [data-reveal-delay='2'] { --reveal-delay: 160ms; }
-  .landing-motion [data-reveal-delay='3'] { --reveal-delay: 240ms; }
-  .landing-motion [data-reveal-delay='4'] { --reveal-delay: 320ms; }
-  .landing-motion [data-reveal-delay='5'] { --reveal-delay: 400ms; }
-  .landing-motion [data-reveal-delay='6'] { --reveal-delay: 480ms; }
-  .landing-motion [data-reveal-delay='7'] { --reveal-delay: 560ms; }
+  .motion-scope.motion-ready [data-reveal]:not(.is-visible) { opacity: 0; }
+  .motion-scope.motion-ready [data-reveal='up']:not(.is-visible) { transform: translate3d(0, 28px, 0); }
+  .motion-scope.motion-ready [data-reveal='left']:not(.is-visible) { transform: translate3d(-30px, 0, 0); }
+  .motion-scope.motion-ready [data-reveal='right']:not(.is-visible) { transform: translate3d(30px, 0, 0); }
+  .motion-scope.motion-ready [data-reveal='scale']:not(.is-visible) { transform: scale(.955); }
+  .motion-scope [data-reveal].is-visible { opacity: 1; transform: none; }
+  .motion-scope [data-reveal-delay='1'] { --reveal-delay: 80ms; }
+  .motion-scope [data-reveal-delay='2'] { --reveal-delay: 160ms; }
+  .motion-scope [data-reveal-delay='3'] { --reveal-delay: 240ms; }
+  .motion-scope [data-reveal-delay='4'] { --reveal-delay: 320ms; }
+  .motion-scope [data-reveal-delay='5'] { --reveal-delay: 400ms; }
+  .motion-scope [data-reveal-delay='6'] { --reveal-delay: 480ms; }
+  .motion-scope [data-reveal-delay='7'] { --reveal-delay: 560ms; }
 
   @keyframes landing-hero-in {
     from { opacity: 0; transform: scale(.985); }
@@ -108,7 +108,7 @@
     to { transform: translate3d(0, 18px, 0) scale(1.065); }
   }
   @supports (animation-timeline: view()) {
-    .landing-motion [data-landing-parallax] {
+    .motion-scope [data-landing-parallax] {
       animation: landing-parallax linear both;
       animation-timeline: view();
       animation-range: entry 0% exit 100%;
@@ -117,12 +117,12 @@
 
   @media (prefers-reduced-motion: reduce) {
     .landing-hero-in, .landing-hero-ken-burns, .landing-heart-pop { animation: none !important; transform: none !important; }
-    .landing-motion [data-reveal] {
+    .motion-scope [data-reveal] {
       opacity: 1 !important;
       transform: none !important;
       transition: none !important;
     }
-    .landing-motion [data-landing-parallax] { animation: none !important; transform: none !important; }
+    .motion-scope [data-landing-parallax] { animation: none !important; transform: none !important; }
   }
 
   .label {
