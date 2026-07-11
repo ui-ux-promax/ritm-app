@@ -5,7 +5,7 @@ export function EditorialSection() {
     <section className="mx-auto max-w-[1240px] px-4 sm:px-6 pb-14 md:pb-20">
       <div className="grid md:grid-cols-[1.18fr_0.82fr] gap-5">
         {/* Image card */}
-        <figure className="rounded-[16px] overflow-hidden bg-surface-soft">
+        <figure data-reveal="left" className="rounded-[16px] overflow-hidden bg-surface-soft">
           <div className="relative h-[280px] md:h-[450px]">
             <Image
               src="/home/collection-rail.png"
@@ -21,12 +21,12 @@ export function EditorialSection() {
           </figcaption>
         </figure>
         {/* Coming card */}
-        <article className="rounded-[16px] bg-surface-soft overflow-hidden p-8 md:p-12 flex flex-col justify-between min-h-[420px] md:min-h-[575px]">
+        <article data-reveal="right" data-reveal-delay="1" className="rounded-[16px] bg-surface-soft overflow-hidden p-8 md:p-12 flex flex-col justify-between min-h-[420px] md:min-h-[575px]">
           <div>
             <h3 className="font-display font-bold italic text-[22px] md:text-[31px] leading-tight">Держитесь, новый продукт уже близко!</h3>
             <p className="mt-2 text-ink-muted text-sm">Приносим новую эру простых и выразительных вещей.</p>
           </div>
-          <div className="self-center w-full max-w-[440px] mt-8 rounded-[22px] overflow-hidden bg-surface shadow-lg">
+          <div data-reveal="scale" data-reveal-delay="2" className="self-center w-full max-w-[440px] mt-8 rounded-[22px] overflow-hidden bg-surface shadow-lg">
             <div className="relative h-[260px] md:h-[300px]">
               <Image
                 src="/home/coming-card.png"

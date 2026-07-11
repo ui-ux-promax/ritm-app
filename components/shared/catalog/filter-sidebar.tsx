@@ -5,7 +5,7 @@ import type { CatalogResult } from '@/lib/find-products';
 // Ниже md фасеты живут в MobileFilterDrawer. Узкий (~240px колонка задаётся гридом страницы).
 export function FilterSidebar({ facets }: { facets: CatalogResult['facets'] }) {
   return (
-    <aside className="hidden md:block">
+    <aside id="filters" className="hidden md:block">
       <div className="sticky top-[140px] rounded-[16px] border border-line bg-surface p-5 lg:p-6">
         <FilterControls facets={facets} />
       </div>

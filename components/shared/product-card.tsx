@@ -3,14 +3,15 @@ import Image from 'next/image';
 import { Badge } from '@/components/ui';
 import { WishlistHeart } from '@/components/shared/wishlist/wishlist-heart';
 import type { ProductCardData } from '@/lib/product-summary';
+import { cn } from '@/lib/utils';
 
 const BEIGE_BLUR =
   "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='8'%3E%3Crect%20width='8'%20height='8'%20fill='%23f1ece1'/%3E%3C/svg%3E";
 
-export function ProductCard({ data, wishlisted = false }: { data: ProductCardData; wishlisted?: boolean }) {
+export function ProductCard({ data, wishlisted = false, landingMotion = false }: { data: ProductCardData; wishlisted?: boolean; landingMotion?: boolean }) {
   const href = `/product/${data.slug}`;
   return (
-    <article className="group border border-line bg-surface rounded-[10px] p-2.5 pb-4 transition-transform duration-200 hover:-translate-y-[3px] hover:border-ink/20 hover:shadow-[0_18px_45px_hsl(220_12%_10%_/_0.08)]">
+    <article className={cn('group border border-line bg-surface rounded-[10px] p-2.5 pb-4 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-[3px] hover:border-ink/20 hover:shadow-[0_18px_45px_hsl(220_12%_10%_/_0.08)]', landingMotion && '[transition-timing-function:cubic-bezier(.22,1,.36,1)] motion-reduce:transform-none')}>
       {/* Media */}
       <div className="relative aspect-[1.3/1] overflow-hidden rounded-[10px] bg-surface-soft">
         {data.badges[0] && (
@@ -49,13 +50,13 @@ export function ProductCard({ data, wishlisted = false }: { data: ProductCardDat
           {/* Tool buttons */}
           <div className="flex items-center gap-2">
             {!data.soldOut && (
-              <WishlistHeart productId={data.id} initialActive={wishlisted} variant="card" />
+              <WishlistHeart productId={data.id} initialActive={wishlisted} variant="card" landingMotion={landingMotion} />
             )}
             {!data.soldOut && (
               <Link
                 href={href}
                 aria-label={`Выбрать размер: ${data.name}`}
-                className="w-[34px] h-[34px] rounded-full border border-line bg-surface text-ink grid place-items-center hover:border-ink transition-colors"
+                className={cn('w-[34px] h-[34px] rounded-full border border-line bg-surface text-ink grid place-items-center hover:border-ink transition-[transform,border-color] duration-200', landingMotion && 'active:scale-90 motion-reduce:transform-none')}
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
                   <path d="M6 8h14l-2 11H8L6 8Z"/>

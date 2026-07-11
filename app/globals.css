@@ -53,6 +53,78 @@
 @layer components {
   .tnum { font-variant-numeric: tabular-nums; }
 
+  /* Landing motion system: progressive enhancement, visible without JS. */
+  .landing-motion {
+    --motion-fast: 200ms;
+    --motion-reveal: 600ms;
+    --motion-ease: cubic-bezier(.22, 1, .36, 1);
+  }
+  .landing-motion [data-reveal] {
+    transition:
+      opacity var(--motion-reveal) var(--motion-ease),
+      transform var(--motion-reveal) var(--motion-ease);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+  .landing-motion.motion-ready [data-reveal]:not(.is-visible) { opacity: 0; }
+  .landing-motion.motion-ready [data-reveal='up']:not(.is-visible) { transform: translate3d(0, 28px, 0); }
+  .landing-motion.motion-ready [data-reveal='left']:not(.is-visible) { transform: translate3d(-30px, 0, 0); }
+  .landing-motion.motion-ready [data-reveal='right']:not(.is-visible) { transform: translate3d(30px, 0, 0); }
+  .landing-motion.motion-ready [data-reveal='scale']:not(.is-visible) { transform: scale(.955); }
+  .landing-motion [data-reveal].is-visible { opacity: 1; transform: none; }
+  .landing-motion [data-reveal-delay='1'] { --reveal-delay: 80ms; }
+  .landing-motion [data-reveal-delay='2'] { --reveal-delay: 160ms; }
+  .landing-motion [data-reveal-delay='3'] { --reveal-delay: 240ms; }
+  .landing-motion [data-reveal-delay='4'] { --reveal-delay: 320ms; }
+  .landing-motion [data-reveal-delay='5'] { --reveal-delay: 400ms; }
+  .landing-motion [data-reveal-delay='6'] { --reveal-delay: 480ms; }
+  .landing-motion [data-reveal-delay='7'] { --reveal-delay: 560ms; }
+
+  @keyframes landing-hero-in {
+    from { opacity: 0; transform: scale(.985); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes landing-hero-ken-burns {
+    from { transform: scale(1); }
+    to { transform: scale(1.055); }
+  }
+  .landing-hero-in { animation: landing-hero-in 650ms var(--motion-ease) both; }
+  .landing-hero-slide {
+    transition: opacity 900ms var(--motion-ease);
+  }
+  .landing-hero-ken-burns {
+    animation: landing-hero-ken-burns 5600ms linear both;
+    will-change: transform;
+  }
+  @keyframes landing-heart-pop {
+    0% { transform: scale(.7); }
+    58% { transform: scale(1.28); }
+    100% { transform: scale(1); }
+  }
+  .landing-heart-pop { animation: landing-heart-pop 360ms var(--motion-ease) both; }
+
+  @keyframes landing-parallax {
+    from { transform: translate3d(0, -14px, 0) scale(1.02); }
+    to { transform: translate3d(0, 18px, 0) scale(1.065); }
+  }
+  @supports (animation-timeline: view()) {
+    .landing-motion [data-landing-parallax] {
+      animation: landing-parallax linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-hero-in, .landing-hero-ken-burns, .landing-heart-pop { animation: none !important; transform: none !important; }
+    .landing-motion [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .landing-motion [data-landing-parallax] { animation: none !important; transform: none !important; }
+  }
+
   .label {
     font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
     text-transform: uppercase; color: hsl(var(--color-text-muted));

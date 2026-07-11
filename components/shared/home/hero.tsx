@@ -15,39 +15,58 @@ const slides = [
 export function Hero() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [cycle, setCycle] = useState(0);
 
   useEffect(() => {
     if (paused) return;
-    const timer = window.setInterval(() => setActive((current) => (current + 1) % slides.length), 5600);
-    return () => window.clearInterval(timer);
-  }, [paused]);
+    const timer = window.setTimeout(() => {
+      setActive((current) => (current + 1) % slides.length);
+      setCycle((current) => current + 1);
+    }, 5600);
+    return () => window.clearTimeout(timer);
+  }, [cycle, paused]);
 
-  const go = (direction: 1 | -1) => setActive((current) => (current + direction + slides.length) % slides.length);
+  const select = (next: number) => {
+    setActive(next);
+    setCycle((current) => current + 1);
+  };
+  const go = (direction: 1 | -1) => {
+    setActive((current) => (current + direction + slides.length) % slides.length);
+    setCycle((current) => current + 1);
+  };
 
   return (
     <section className="mx-auto max-w-[1240px] px-4 pt-3.5 sm:px-6">
       <div
-        className="relative flex min-h-[380px] items-center overflow-hidden rounded-[22px] md:min-h-[604px]"
+        className="landing-hero-in relative flex min-h-[380px] items-center overflow-hidden rounded-[22px] md:min-h-[604px]"
         style={{ isolation: 'isolate' }}
+        data-testid="hero-slider"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onFocusCapture={() => setPaused(true)}
         onBlurCapture={() => setPaused(false)}
       >
         {slides.map((src, index) => (
-          <Image
+          <div
             key={src}
-            src={src}
-            alt=""
-            fill
-            priority={index === 0}
-            sizes="(min-width: 1240px) 1176px, 100vw"
-            aria-hidden
+            data-slide-index={index}
             className={cn(
-              'object-cover transition-[opacity,transform] duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none',
-              index === active ? 'scale-100 opacity-100' : 'scale-[1.045] opacity-0',
+              'landing-hero-slide absolute inset-0 motion-reduce:duration-0',
+              index === active ? 'opacity-100' : 'pointer-events-none opacity-0',
             )}
-          />
+            aria-hidden={index !== active}
+          >
+            <Image
+              src={src}
+              alt=""
+              fill
+              priority={index === 0}
+              sizes="(min-width: 1240px) 1176px, 100vw"
+              aria-hidden
+              className={cn('object-cover motion-reduce:animate-none', index === active && 'landing-hero-ken-burns')}
+              style={{ animationPlayState: paused ? 'paused' : 'running' }}
+            />
+          </div>
         ))}
         <div className="absolute inset-0 bg-[linear-gradient(90deg,hsl(220_12%_10%_/_0.82),hsl(220_12%_10%_/_0.34)_50%,hsl(220_12%_10%_/_0.08))]" aria-hidden />
 
@@ -59,10 +78,10 @@ export function Hero() {
         </div>
 
         <div className="absolute right-7 top-12 z-10 hidden gap-2 md:flex" aria-label="Переключение промо">
-          <button type="button" onClick={() => go(-1)} aria-label="Предыдущее промо" className="grid h-[34px] w-[34px] place-items-center rounded-full border border-white/30 bg-white/20 text-white transition hover:scale-105 hover:bg-white/30 active:scale-95 motion-reduce:transform-none">
+          <button type="button" onClick={() => go(-1)} aria-label="Предыдущее промо" data-testid="hero-prev" className="grid h-[34px] w-[34px] place-items-center rounded-full border border-white/30 bg-white/20 text-white transition hover:scale-105 hover:bg-white/30 active:scale-95 motion-reduce:transform-none">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
           </button>
-          <button type="button" onClick={() => go(1)} aria-label="Следующее промо" className="grid h-[34px] w-[34px] place-items-center rounded-full bg-surface text-ink transition hover:scale-105 hover:shadow-lg active:scale-95 motion-reduce:transform-none">
+          <button type="button" onClick={() => go(1)} aria-label="Следующее промо" data-testid="hero-next" className="grid h-[34px] w-[34px] place-items-center rounded-full bg-surface text-ink transition hover:scale-105 hover:shadow-lg active:scale-95 motion-reduce:transform-none">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
           </button>
         </div>
@@ -76,7 +95,7 @@ export function Hero() {
           </Link>
           <div className="flex items-center gap-2" aria-label="Слайды промо">
             {slides.map((src, index) => (
-              <button key={src} type="button" onClick={() => setActive(index)} aria-label={`Показать слайд ${index + 1}`} aria-current={index === active ? 'true' : undefined} className={cn('h-1.5 rounded-full bg-white/55 transition-[width,background-color] duration-500 motion-reduce:transition-none', index === active ? 'w-7 bg-white' : 'w-1.5 hover:bg-white/80')} />
+              <button key={src} type="button" onClick={() => select(index)} aria-label={`Показать слайд ${index + 1}`} aria-current={index === active ? 'true' : undefined} data-testid={`hero-dot-${index}`} className={cn('h-1.5 rounded-full bg-white/55 transition-[width,background-color] duration-500 motion-reduce:transition-none', index === active ? 'w-7 bg-white' : 'w-1.5 hover:bg-white/80')} />
             ))}
           </div>
         </div>

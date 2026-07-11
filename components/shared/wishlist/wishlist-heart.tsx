@@ -10,9 +10,10 @@ type Props = {
   productId: string;
   initialActive: boolean;
   variant?: 'card' | 'pdp' | 'catalog';
+  landingMotion?: boolean;
 };
 
-export function WishlistHeart({ productId, initialActive, variant = 'card' }: Props) {
+export function WishlistHeart({ productId, initialActive, variant = 'card', landingMotion = false }: Props) {
   const router = useRouter();
   const increment = useWishlistStore((s) => s.increment);
   const decrement = useWishlistStore((s) => s.decrement);
@@ -95,9 +96,9 @@ export function WishlistHeart({ productId, initialActive, variant = 'card' }: Pr
       onClick={onClick}
       aria-pressed={active}
       aria-label={label}
-      className="w-[34px] h-[34px] rounded-full border border-line bg-surface text-ink grid place-items-center hover:border-ink transition-colors"
+      className={cn('w-[34px] h-[34px] rounded-full border border-line bg-surface text-ink grid place-items-center hover:border-ink transition-[transform,border-color,color] duration-200', landingMotion && 'active:scale-90 motion-reduce:transform-none')}
     >
-      <svg width="15" height="15" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9" aria-hidden="true" className={active ? 'text-[#e23b4e]' : ''}>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9" aria-hidden="true" className={cn(active && 'text-[#e23b4e]', landingMotion && active && 'landing-heart-pop')}>
         <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>
       </svg>
       <span className="sr-only" role="status" aria-live="polite">{error ?? ''}</span>
