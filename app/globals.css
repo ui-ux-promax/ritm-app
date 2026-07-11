@@ -105,8 +105,8 @@
   .landing-heart-pop { animation: landing-heart-pop 360ms var(--motion-ease) both; }
 
 @keyframes landing-parallax {
-  from { transform: translate3d(0, -42px, 0) scale(1.04); }
-  to { transform: translate3d(0, 42px, 0) scale(1.12); }
+  from { transform: translate3d(0, 12%, 0) scale(1.12); }
+  to { transform: translate3d(0, -12%, 0) scale(1.12); }
 }
   @supports (animation-timeline: view()) {
   .motion-scope [data-landing-parallax] {
