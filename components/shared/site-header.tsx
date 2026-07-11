@@ -10,7 +10,7 @@ import { HeaderTopLinks } from './header-top-links';
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-line backdrop-blur-md" style={{ background: 'hsl(var(--color-bg) / 0.94)' }}>
+    <header className="glass-header sticky top-0 z-50">
       <div className="mx-auto max-w-[1200px] px-6">
         <div className="grid min-h-[56px] grid-cols-[1fr_auto_1fr] items-center gap-4">
           <div className="flex items-center gap-4">

@@ -15,7 +15,7 @@ export function HeaderTopLinks() {
     <nav className="hidden items-center gap-6 text-[13px] font-semibold md:flex" aria-label="Разделы сайта">
       {links.map((link) => {
         const active = pathname === link.href;
-        return <Link key={link.href} href={link.href} aria-current={active ? 'page' : undefined} className={cn('transition-colors', active ? 'text-primary' : 'text-ink hover:text-ink-muted')}>{link.label}</Link>;
+        return <Link key={link.href} href={link.href} aria-current={active ? 'page' : undefined} className={cn('transition-[color,transform] duration-300 ease-out', active ? 'header-active-in text-primary' : 'text-ink hover:text-ink-muted')}>{link.label}</Link>;
       })}
     </nav>
   );
