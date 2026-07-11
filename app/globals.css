@@ -104,12 +104,10 @@
   }
   .landing-heart-pop { animation: landing-heart-pop 360ms var(--motion-ease) both; }
 
-.season-fixed-background {
-  background-image: url('/home/season-collage.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
+.season-parallax-image {
+  transform: scale(1.8);
+  transform-origin: center;
+  will-change: transform;
 }
 
   @media (prefers-reduced-motion: reduce) {
@@ -119,7 +117,7 @@
       transform: none !important;
       transition: none !important;
     }
-    .season-fixed-background { background-attachment: scroll; }
+    .season-parallax-image { transform: scale(1.08) !important; }
   }
 
   .label {
