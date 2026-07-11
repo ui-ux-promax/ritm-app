@@ -104,18 +104,10 @@
   }
   .landing-heart-pop { animation: landing-heart-pop 360ms var(--motion-ease) both; }
 
-@keyframes landing-parallax {
-  from { transform: translate3d(0, 12%, 0) scale(1.12); }
-  to { transform: translate3d(0, -12%, 0) scale(1.12); }
-}
-  @supports (animation-timeline: view()) {
-  .motion-scope [data-landing-parallax] {
-    animation: landing-parallax linear both;
-    animation-timeline: view();
-    animation-range: entry 0% exit 100%;
-    transform-origin: center;
-    will-change: transform;
-  }
+.season-parallax-image {
+  transform: translate3d(0, var(--season-parallax-y, 0px), 0) scale(1.25);
+  transform-origin: center;
+  will-change: transform;
 }
 
   @media (prefers-reduced-motion: reduce) {
@@ -125,7 +117,7 @@
       transform: none !important;
       transition: none !important;
     }
-    .motion-scope [data-landing-parallax] { animation: none !important; transform: none !important; }
+    .season-parallax-image { transform: scale(1.08) !important; }
   }
 
   .label {
