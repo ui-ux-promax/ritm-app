@@ -172,6 +172,9 @@ export function ProfileView({ user, initial, isAdmin, orders, wishlist, addresse
   const go = (key: PanelKey) => {
     setPanel(key);
     history.replaceState(null, '', `#${key}`);
+    // replaceState does not emit hashchange; header navigation uses that event
+    // to keep the favorites shortcut in sync with the active profile panel.
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
     requestAnimationFrame(() => document.getElementById(key)?.scrollIntoView({ block: 'start', behavior: 'smooth' }));
   };
 
