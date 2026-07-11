@@ -62,31 +62,23 @@ function FlowingMenuRow({ item, speed }: { item: FlowingMenuItem; speed: number 
 
   const reveal = (edge: 'top' | 'bottom') => {
     const marquee = marqueeRef.current;
-    const track = trackRef.current;
-    if (!marquee || !track) return;
+    if (!marquee) return;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     tweenRef.current?.play();
-    gsap
-      .timeline({ defaults: { duration: reduced ? 0 : 0.62, ease: 'expo.out' } })
-      .set(marquee, { yPercent: edge === 'top' ? -101 : 101 })
-      .set(track, { yPercent: edge === 'top' ? 101 : -101 })
-      .to([marquee, track], { yPercent: 0 }, 0);
+    gsap.killTweensOf(marquee);
+    gsap.set(marquee, { yPercent: edge === 'top' ? -101 : 101 });
+    gsap.to(marquee, { yPercent: 0, duration: reduced ? 0 : 0.62, ease: 'expo.out' });
   };
 
   const conceal = (edge: 'top' | 'bottom') => {
     const marquee = marqueeRef.current;
-    const track = trackRef.current;
-    if (!marquee || !track) return;
+    if (!marquee) return;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    gsap.killTweensOf(marquee);
     gsap.to(marquee, {
       yPercent: edge === 'top' ? -101 : 101,
-      duration: reduced ? 0 : 0.58,
-      ease: 'expo.out',
-    });
-    gsap.to(track, {
-      yPercent: edge === 'top' ? 101 : -101,
       duration: reduced ? 0 : 0.58,
       ease: 'expo.out',
       onComplete: () => tweenRef.current?.pause(),
@@ -100,16 +92,19 @@ function FlowingMenuRow({ item, speed }: { item: FlowingMenuItem; speed: number 
   };
 
   return (
-    <div ref={rowRef} className="relative min-h-0 flex-1 overflow-hidden border-t border-white/20 first:border-t-0">
+    <div
+      ref={rowRef}
+      className="relative min-h-0 flex-1 overflow-hidden border-t border-white/20 first:border-t-0"
+      onPointerEnter={(event) => {
+        if (event.pointerType === 'mouse') reveal(closestEdge(event.clientY));
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === 'mouse') conceal(closestEdge(event.clientY));
+      }}
+    >
       <Link
         href={item.link}
         className="relative z-[1] flex h-full min-h-[64px] items-center justify-center px-5 text-center font-display text-[clamp(1rem,1.8vw,1.6rem)] font-semibold uppercase leading-none tracking-[-0.02em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white md:min-h-[78px]"
-        onPointerEnter={(event) => {
-          if (event.pointerType === 'mouse') reveal(closestEdge(event.clientY));
-        }}
-        onPointerLeave={(event) => {
-          if (event.pointerType === 'mouse') conceal(closestEdge(event.clientY));
-        }}
         onFocus={() => reveal('bottom')}
         onBlur={() => conceal('bottom')}
       >
