@@ -45,14 +45,9 @@ export function ProductView({
   reviews, reviewState, related, wishlistedIds, wishlisted, productId,
 }: Props) {
   const [activeIdx, setActiveIdx] = useState(0);
-
-  // All images are thumbnails in right column. First one is also main image in left column.
   const main = galleryImages[activeIdx] ?? galleryImages[0];
-
-  // Bento grid: 2 top (square) + 1 wide bottom. If >3 images, extras fill normally.
-  const minPrice = panelVariants.filter(v => v.active && v.stock > 0).length
-    ? Math.min(...panelVariants.filter(v => v.active && v.stock > 0).map(v => v.price))
-    : 0;
+  const availableVariants = panelVariants.filter((variant) => variant.active && variant.stock > 0);
+  const minPrice = availableVariants.length ? Math.min(...availableVariants.map((variant) => variant.price)) : 0;
 
   return (
     <>
@@ -60,31 +55,48 @@ export function ProductView({
         <Breadcrumbs items={[
           { label: 'Главная', href: '/' },
           { label: 'Каталог', href: '/catalog' },
-          { label: product.category.name, href: `/catalog?category=${product.category.slug}` },
+          { label: product.category.name, href: '/catalog?category=' + product.category.slug },
           { label: product.name },
         ]} />
       </div>
 
-      {/* Product: 2-column grid like prototype */}
-      <div className="mt-5 grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-[30px] lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]">
-        {/* LEFT COLUMN — main image + info card */}
-        <div className="grid min-w-0 gap-[22px]">
-          {/* Main image (pp-main) */}
-          <div className="relative aspect-[1/1.04] rounded-[24px] border border-line bg-surface-soft overflow-hidden">
-            {/* Fav button top-left */}
-            <div className="absolute left-4 top-4 z-10">
-              <WishlistHeart productId={productId} initialActive={wishlisted} variant="pdp" />
-            </div>
-            {/* Badge top-right */}
-            <span className="absolute right-4 top-4 z-10 px-4 py-2 rounded-full bg-surface/90 backdrop-blur text-[13px] font-bold">
-              {product.category.name}
-            </span>
-            {main && (
-              <Image src={main.url} alt={main.alt} fill priority sizes="(min-width: 1024px) 600px, 100vw" className="object-cover" />
-            )}
+      <div className="mt-5 grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-3 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)] lg:gap-[30px]">
+        <div className="relative aspect-[1/1.04] overflow-hidden rounded-[24px] border border-line bg-surface-soft lg:col-start-1 lg:row-start-1">
+          <div className="absolute left-4 top-4 z-10">
+            <WishlistHeart productId={productId} initialActive={wishlisted} variant="pdp" />
           </div>
+          <span className="absolute right-4 top-4 z-10 rounded-full bg-surface/90 px-4 py-2 text-[13px] font-bold backdrop-blur">
+            {product.category.name}
+          </span>
+          {main && (
+            <Image src={main.url} alt={main.alt} fill priority sizes="(min-width: 1024px) 600px, 100vw" className="object-cover" />
+          )}
+        </div>
 
-          {/* Info card (pp-card) */}
+        <div className="grid grid-cols-3 gap-2 lg:col-start-2 lg:row-start-1 lg:grid-cols-2 lg:gap-3">
+          {galleryImages.map((img, index) => {
+            const isWide = index === 2;
+            return (
+              <button
+                key={img.url}
+                type="button"
+                onClick={() => setActiveIdx(index)}
+                aria-label={'Фото ' + (index + 1)}
+                aria-current={activeIdx === index}
+                className={cn(
+                  'group relative aspect-[.86/1] overflow-hidden rounded-[12px] border bg-surface-soft transition-all duration-300 lg:rounded-[18px]',
+                  isWide && 'lg:col-span-2 lg:aspect-[1.74/1]',
+                  !isWide && 'lg:aspect-[1/1.08]',
+                  activeIdx === index ? 'border-ink shadow-[0_0_0_1px_hsl(var(--color-text))]' : 'border-line hover:border-ink/30',
+                )}
+              >
+                <Image src={img.url} alt={img.alt} fill sizes="(min-width: 1024px) 300px, 30vw" className="object-cover transition-transform duration-400 group-hover:scale-105" />
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="lg:col-start-1 lg:row-start-2">
           <PurchasePanel
             key={activeColorwaySlug}
             productName={product.name}
@@ -100,64 +112,33 @@ export function ProductView({
           />
         </div>
 
-        {/* RIGHT COLUMN — thumbnails + sticky (buy bar + reviews) */}
-        <div className="grid min-w-0 gap-[22px] self-stretch content-start">
-          {/* Thumbnail gallery (pp-gallery) — 2 top + 1 wide bottom */}
-          <div className="grid grid-cols-2 gap-3">
-            {galleryImages.map((img, i) => {
-              // 3rd image (index 2) is wide
-              const isWide = i === 2;
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setActiveIdx(i)}
-                  aria-label={`Фото ${i + 1}`}
-                  aria-current={activeIdx === i}
-                  className={cn(
-                    'group relative overflow-hidden rounded-[18px] border bg-surface-soft transition-all duration-300',
-                    isWide ? 'col-span-2 aspect-[1.74/1]' : 'aspect-[1/1.08]',
-                    activeIdx === i ? 'border-ink shadow-[0_0_0_1px_hsl(var(--color-text))]' : 'border-line hover:border-ink/30'
-                  )}
-                >
-                  <Image src={img.url} alt={img.alt} fill sizes="(min-width: 1024px) 300px, 50vw" className="object-cover transition-transform duration-400 group-hover:scale-105" />
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Sticky panel (pp-sticky-panel) — buy bar + reviews together */}
-          <div className="lg:sticky lg:top-[128px] grid gap-[22px] self-start z-5">
-            {/* Buy bar (pp-buy) */}
-            <div className="flex flex-col items-stretch justify-between gap-3 rounded-[18px] border border-line bg-surface p-3.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-4">
-              <div className="flex items-baseline gap-1 font-display font-bold tracking-tight">
-                <span className="text-[18px] text-accent leading-none">₽</span>
-                <span className="text-[30px] text-accent leading-none tnum">{minPrice.toLocaleString('ru-RU')}</span>
-              </div>
-              <button type="button" className="inline-flex min-h-[52px] items-center justify-center gap-2.5 whitespace-nowrap rounded-full bg-primary px-6 text-[15px] font-bold text-primary-foreground transition-colors hover:bg-footer">
-                Купить сейчас
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              </button>
+        <div className="z-5 grid gap-[22px] self-start lg:sticky lg:top-[128px] lg:col-start-2 lg:row-start-2">
+          <div className="flex flex-col items-stretch justify-between gap-3 rounded-[18px] border border-line bg-surface p-3.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-4">
+            <div className="flex items-baseline gap-1 font-display font-bold tracking-tight">
+              <span className="text-[18px] leading-none text-accent">₽</span>
+              <span className="tnum text-[30px] leading-none text-accent">{minPrice.toLocaleString('ru-RU')}</span>
             </div>
-
-            {/* Reviews (reviews) — inside sticky, scrolls with buy bar */}
-            <ReviewsSection
-              productId={product.id}
-              avg={ratingAvg ?? 0}
-              count={ratingCount}
-              reviews={reviews}
-              state={reviewState}
-            />
+            <button type="button" className="inline-flex min-h-[52px] items-center justify-center gap-2.5 whitespace-nowrap rounded-full bg-primary px-6 text-[15px] font-bold text-primary-foreground transition-colors hover:bg-footer">
+              Купить сейчас
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </button>
           </div>
+
+          <ReviewsSection
+            productId={product.id}
+            avg={ratingAvg ?? 0}
+            count={ratingCount}
+            reviews={reviews}
+            state={reviewState}
+          />
         </div>
       </div>
 
-      {/* Related — full width below */}
       {related.length > 0 && (
         <section className="mt-[70px]">
-          <h2 className="text-center font-display font-bold text-[26px] sm:text-[40px] tracking-tight mb-7">Вам также подойдёт</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-[18px]">
-            {related.map((p) => <ProductCard key={p.slug} data={p} wishlisted={wishlistedIds.has(p.id)} />)}
+          <h2 className="mb-7 text-center font-display text-[26px] font-bold tracking-tight sm:text-[40px]">Вам также подойдёт</h2>
+          <div className="grid grid-cols-2 gap-[18px] lg:grid-cols-4">
+            {related.map((item) => <ProductCard key={item.slug} data={item} wishlisted={wishlistedIds.has(item.id)} />)}
           </div>
         </section>
       )}
