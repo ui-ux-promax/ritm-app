@@ -103,7 +103,7 @@ function FlowingMenuRow({ item, speed }: { item: FlowingMenuItem; speed: number 
     <div ref={rowRef} className="relative min-h-0 flex-1 overflow-hidden border-t border-white/20 first:border-t-0">
       <Link
         href={item.link}
-        className="relative z-[1] flex h-full min-h-[92px] items-center px-6 font-display text-[clamp(1.45rem,3.1vw,3.4rem)] font-semibold uppercase leading-none tracking-[-0.035em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white md:min-h-[122px] md:px-10"
+        className="relative z-[1] flex h-full min-h-[64px] items-center justify-center px-5 text-center font-display text-[clamp(1rem,1.8vw,1.6rem)] font-semibold uppercase leading-none tracking-[-0.02em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white md:min-h-[78px]"
         onPointerEnter={(event) => {
           if (event.pointerType === 'mouse') reveal(closestEdge(event.clientY));
         }}
@@ -124,11 +124,11 @@ function FlowingMenuRow({ item, speed }: { item: FlowingMenuItem; speed: number 
         <div ref={trackRef} className="flex h-full w-max items-center will-change-transform">
           {Array.from({ length: 5 }).map((_, index) => (
             <div key={index} className="flex shrink-0 items-center">
-              <span className="whitespace-nowrap px-[2vw] font-display text-[clamp(1.45rem,3.1vw,3.4rem)] font-semibold uppercase leading-none tracking-[-0.035em]">
+              <span className="whitespace-nowrap px-[1.5vw] font-display text-[clamp(1rem,1.8vw,1.6rem)] font-semibold uppercase leading-none tracking-[-0.02em]">
                 {item.text}
               </span>
               <span
-                className="mx-[1.5vw] h-[58px] w-[150px] shrink-0 rounded-full bg-cover bg-center md:h-[76px] md:w-[210px]"
+                className="mx-[1.2vw] h-[42px] w-[108px] shrink-0 rounded-full bg-cover bg-center md:h-[56px] md:w-[168px]"
                 style={{ backgroundImage: `url(${item.image})` }}
               />
             </div>
