@@ -59,6 +59,7 @@
     --motion-reveal: 600ms;
     --motion-ease: cubic-bezier(.22, 1, .36, 1);
   }
+  .footer-motion { display: contents; }
   .motion-scope [data-reveal] {
     transition:
       opacity var(--motion-reveal) var(--motion-ease),

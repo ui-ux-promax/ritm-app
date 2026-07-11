@@ -44,7 +44,7 @@ function FooterLink({ href, className, children }: { href: string; className?: s
 
 export function SiteFooter() {
   return (
-    <footer className="mt-[70px] bg-footer text-white">
+    <footer className="mt-[70px] overflow-hidden bg-footer pb-px text-white">
       <RevealObserver className="footer-motion">
       <div className="mx-auto max-w-[1200px] px-6">
         <div className="grid md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-8 pt-[52px] pb-9">
