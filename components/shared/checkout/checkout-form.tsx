@@ -71,7 +71,7 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
           {/* LEFT — form sections */}
           <div>
             {/* 1. Contact */}
-            <section className="border border-line rounded-[24px] bg-surface p-[22px] grid gap-4">
+            <section className="grid gap-4 rounded-[20px] border border-line bg-surface p-4 sm:rounded-[24px] sm:p-[22px]">
               <div className="flex items-center gap-3">
                 <span className="w-8 h-8 grid place-items-center rounded-full bg-primary text-primary-foreground font-display font-bold text-sm">1</span>
                 <h2 className="font-display font-bold text-[17px] tracking-tight">Контактные данные</h2>
@@ -83,7 +83,7 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
                   className="h-12 px-3.5 border border-line rounded-[14px] bg-surface text-sm outline-none transition-colors hover:border-ink/24 placeholder:text-ink-muted/70" />
                 {errors.contactEmail && <span className="text-danger text-xs font-semibold">{errors.contactEmail.message}</span>}
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="grid gap-2">
                   <label className="text-ink-muted text-xs font-bold uppercase tracking-wider" htmlFor="contactName">Имя</label>
                   <input id="contactName" type="text" autoComplete="name" placeholder="Иван Иванов"
@@ -102,7 +102,7 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
             </section>
 
             {/* 2. Address */}
-            <section className="border border-line rounded-[24px] bg-surface p-[22px] grid gap-4 mt-4">
+            <section className="mt-4 grid gap-4 rounded-[20px] border border-line bg-surface p-4 sm:rounded-[24px] sm:p-[22px]">
               <div className="flex items-center gap-3">
                 <span className="w-8 h-8 grid place-items-center rounded-full bg-primary text-primary-foreground font-display font-bold text-sm">2</span>
                 <h2 className="font-display font-bold text-[17px] tracking-tight">Адрес доставки</h2>
@@ -128,7 +128,7 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
             </section>
 
             {/* 3. Delivery */}
-            <section className="border border-line rounded-[24px] bg-surface p-[22px] grid gap-4 mt-4">
+            <section className="mt-4 grid gap-4 rounded-[20px] border border-line bg-surface p-4 sm:rounded-[24px] sm:p-[22px]">
               <div className="flex items-center gap-3">
                 <span className="w-8 h-8 grid place-items-center rounded-full bg-primary text-primary-foreground font-display font-bold text-sm">3</span>
                 <h2 className="font-display font-bold text-[17px] tracking-tight">Способ доставки</h2>
@@ -150,7 +150,7 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
             </section>
 
             {/* 4. Payment */}
-            <section className="border border-line rounded-[24px] bg-surface p-[22px] grid gap-4 mt-4">
+            <section className="mt-4 grid gap-4 rounded-[20px] border border-line bg-surface p-4 sm:rounded-[24px] sm:p-[22px]">
               <div className="flex items-center gap-3">
                 <span className="w-8 h-8 grid place-items-center rounded-full bg-primary text-primary-foreground font-display font-bold text-sm">4</span>
                 <h2 className="font-display font-bold text-[17px] tracking-tight">Способ оплаты</h2>
@@ -209,11 +209,11 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
 
                 {/* Promo */}
                 {!coupon ? (
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 min-[420px]:flex-row">
                     <input value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Промокод"
                       className="flex-1 min-w-0 h-11 px-3 border border-line rounded-[12px] bg-surface text-[13px] outline-none uppercase placeholder:normal-case placeholder:text-ink-muted/70" />
                     <button type="button" onClick={applyCoupon} disabled={couponPending}
-                      className="h-11 px-4 border border-line rounded-[12px] bg-surface-soft font-bold text-[13px] whitespace-nowrap hover:border-ink/30 transition-colors disabled:opacity-50">
+                      className="h-11 whitespace-nowrap rounded-[12px] border border-line bg-surface-soft px-4 text-[13px] font-bold transition-colors hover:border-ink/30 disabled:opacity-50">
                       {couponPending ? '...' : 'Применить'}
                     </button>
                   </div>

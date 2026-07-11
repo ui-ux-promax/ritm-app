@@ -145,7 +145,7 @@ export default async function ProductPage({ params, searchParams }: Params) {
   const breadcrumbJsonLd = buildBreadcrumbListJsonLd(breadcrumbItems);
 
   return (
-    <div className="mx-auto max-w-[1200px] px-6 pb-16">
+    <div className="mx-auto max-w-[1200px] px-4 pb-16 sm:px-6">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 

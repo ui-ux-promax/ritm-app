@@ -66,9 +66,9 @@ export function ProductView({
       </div>
 
       {/* Product: 2-column grid like prototype */}
-      <div className="grid lg:grid-cols-[1.08fr_1fr] gap-[30px] mt-5 items-start">
+      <div className="mt-5 grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-[30px] lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]">
         {/* LEFT COLUMN — main image + info card */}
-        <div className="grid gap-[22px]">
+        <div className="grid min-w-0 gap-[22px]">
           {/* Main image (pp-main) */}
           <div className="relative aspect-[1/1.04] rounded-[24px] border border-line bg-surface-soft overflow-hidden">
             {/* Fav button top-left */}
@@ -101,7 +101,7 @@ export function ProductView({
         </div>
 
         {/* RIGHT COLUMN — thumbnails + sticky (buy bar + reviews) */}
-        <div className="grid gap-[22px] self-stretch content-start">
+        <div className="grid min-w-0 gap-[22px] self-stretch content-start">
           {/* Thumbnail gallery (pp-gallery) — 2 top + 1 wide bottom */}
           <div className="grid grid-cols-2 gap-3">
             {galleryImages.map((img, i) => {
@@ -129,12 +129,12 @@ export function ProductView({
           {/* Sticky panel (pp-sticky-panel) — buy bar + reviews together */}
           <div className="lg:sticky lg:top-[128px] grid gap-[22px] self-start z-5">
             {/* Buy bar (pp-buy) */}
-            <div className="flex items-center justify-between gap-4 border border-line rounded-[18px] bg-surface p-3.5">
+            <div className="flex flex-col items-stretch justify-between gap-3 rounded-[18px] border border-line bg-surface p-3.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-4">
               <div className="flex items-baseline gap-1 font-display font-bold tracking-tight">
                 <span className="text-[18px] text-accent leading-none">₽</span>
                 <span className="text-[30px] text-accent leading-none tnum">{minPrice.toLocaleString('ru-RU')}</span>
               </div>
-              <button type="button" className="inline-flex items-center gap-2.5 min-h-[52px] px-6 rounded-full bg-primary text-primary-foreground text-[15px] font-bold whitespace-nowrap hover:bg-footer transition-colors">
+              <button type="button" className="inline-flex min-h-[52px] items-center justify-center gap-2.5 whitespace-nowrap rounded-full bg-primary px-6 text-[15px] font-bold text-primary-foreground transition-colors hover:bg-footer">
                 Купить сейчас
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
               </button>

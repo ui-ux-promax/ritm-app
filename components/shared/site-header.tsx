@@ -11,9 +11,9 @@ import { HeaderTopLinks } from './header-top-links';
 export function SiteHeader() {
   return (
     <header className="glass-header sticky top-0 z-50">
-      <div className="mx-auto max-w-[1200px] px-6">
-        <div className="grid min-h-[56px] grid-cols-[1fr_auto_1fr] items-center gap-4">
-          <div className="flex items-center gap-4">
+      <div className="mx-auto max-w-[1200px] px-3 sm:px-6">
+        <div className="grid min-h-[56px] grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-4">
             <Suspense fallback={<div className="h-[34px] w-[34px] md:hidden" aria-hidden />}>
               <MobileNav />
             </Suspense>
@@ -21,10 +21,10 @@ export function SiteHeader() {
           </div>
 
           <Link href="/" className="flex items-center justify-self-center" aria-label="Ritm">
-            <Image src="/ritm-logo.svg" alt="Ritm" width={98} height={28} priority className="h-auto w-[98px]" />
+            <Image src="/ritm-logo.svg" alt="Ritm" width={98} height={28} priority className="h-auto w-[84px] sm:w-[98px]" />
           </Link>
 
-          <div className="flex items-center justify-self-end gap-2">
+          <div className="flex min-w-0 items-center justify-self-end gap-1 sm:gap-2">
             <WishlistBadge />
             <CartBadge />
             <Suspense fallback={<div className="h-[34px] w-[34px]" aria-hidden />}>
