@@ -1,34 +1,30 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useWishlistStore } from '@/store';
+import { cn } from '@/lib/utils';
 
-// Клиентский бейдж: счётчик живёт в zustand-сторе (паттерн CartBadge), мутации сердечка
-// апдейтят стор инкрементом/декрементом — счётчик меняется мгновенно, без навигации.
-// Рефетч на смену маршрута сверяет с авторитетным значением сервера (guest→login merge, cross-tab).
 export function WishlistBadge() {
   const pathname = usePathname();
+  const [hash, setHash] = useState('');
   const count = useWishlistStore((s) => s.count);
   const fetchCount = useWishlistStore((s) => s.fetchCount);
 
+  useEffect(() => { fetchCount(); }, [pathname, fetchCount]);
   useEffect(() => {
-    fetchCount();
-  }, [pathname, fetchCount]);
+    const syncHash = () => setHash(window.location.hash);
+    syncHash();
+    window.addEventListener('hashchange', syncHash);
+    return () => window.removeEventListener('hashchange', syncHash);
+  }, [pathname]);
 
+  const active = pathname === '/profile' && hash === '#favorites';
   return (
-    <Link
-      href="/profile#favorites"
-      className="relative w-[34px] h-[34px] grid place-items-center rounded-full border border-line/72 bg-surface shadow-sm hover:border-ink/35 transition-colors"
-      aria-label={count ? `Избранное, ${count}` : 'Избранное пусто'}
-    >
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>
-      </svg>
-      {count > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 w-5 h-5 grid place-items-center text-[10px] font-bold rounded-full bg-primary text-primary-foreground tnum">{count}</span>
-      )}
+    <Link href="/profile#favorites" aria-current={active ? 'page' : undefined} className={cn('relative h-[34px] w-[34px] grid place-items-center rounded-full border bg-surface shadow-sm transition-colors', active ? 'border-primary bg-primary text-primary-foreground' : 'border-line/72 hover:border-ink/35')} aria-label={count ? `Избранное, ${count}` : 'Избранное пусто'}>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" /></svg>
+      {count > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-5 w-5 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground tnum">{count}</span>}
     </Link>
   );
 }
