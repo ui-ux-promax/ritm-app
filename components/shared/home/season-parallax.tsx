@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 
-const PARALLAX_SCALE = 1.8;
+const PARALLAX_SCALE = 1.5;
 const PARALLAX_LERP = 0.12;
 
 export function SeasonParallax() {

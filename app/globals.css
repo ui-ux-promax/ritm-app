@@ -105,7 +105,7 @@
   .landing-heart-pop { animation: landing-heart-pop 360ms var(--motion-ease) both; }
 
 .season-parallax-image {
-  transform: scale(1.8);
+  transform: scale(1.5);
   transform-origin: center;
   will-change: transform;
 }
