@@ -117,7 +117,7 @@ function AuthInner({ initialMode }: { initialMode: Mode }) {
   return (
     <div className="w-full max-w-[420px]">
       {/* Head */}
-      <div className="mb-6">
+      <div className="mb-6 text-center">
         <h1 className="font-display font-bold text-[26px] sm:text-[32px] leading-[1.05] tracking-tight">{c.title}</h1>
         <p className="mt-2 text-ink-muted text-sm">{c.subtitle}</p>
       </div>
@@ -140,8 +140,8 @@ function AuthInner({ initialMode }: { initialMode: Mode }) {
 
       {/* Social */}
       <div className="grid grid-cols-2 gap-2.5">
-        <button type="button" onClick={() => signIn('google', { redirectTo: callbackUrl })}
-          className="inline-flex items-center justify-center gap-2 h-[46px] border border-line rounded-full bg-surface text-[13.5px] font-bold hover:border-ink/30 hover:bg-surface-soft/50 transition-colors">
+        <button type="button" disabled
+          className="inline-flex h-[46px] items-center justify-center gap-2 rounded-full border border-line bg-surface text-[13.5px] font-bold opacity-50 cursor-not-allowed">
           <GoogleIcon /> Google
         </button>
         <button type="button" disabled
