@@ -104,10 +104,12 @@
   }
   .landing-heart-pop { animation: landing-heart-pop 360ms var(--motion-ease) both; }
 
-.season-parallax-image {
-  transform: translate3d(0, var(--season-parallax-y, 0px), 0) scale(1.25);
-  transform-origin: center;
-  will-change: transform;
+.season-fixed-background {
+  background-image: url('/home/season-collage.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
   @media (prefers-reduced-motion: reduce) {
@@ -117,7 +119,7 @@
       transform: none !important;
       transition: none !important;
     }
-    .season-parallax-image { transform: scale(1.08) !important; }
+    .season-fixed-background { background-attachment: scroll; }
   }
 
   .label {
