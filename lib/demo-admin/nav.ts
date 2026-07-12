@@ -13,3 +13,7 @@ export function isDemoNavActive(item: DemoAdminNavItem, pathname: string | null)
   if (item.href === '/demo-admin') return pathname === item.href;
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
+
+export function resolveDemoActiveIndex(pathname: string | null): number {
+  return DEMO_ADMIN_NAV.findIndex((item) => isDemoNavActive(item, pathname));
+}

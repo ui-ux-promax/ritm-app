@@ -16,6 +16,16 @@ describe('demo admin route contract', () => {
     expect(source).not.toMatch(/requireAdmin|@\/auth|components\/admin\/admin-shell/);
   });
 
+  it('uses the real admin shell geometry instead of a simplified demo layout', () => {
+    const source = readFileSync(join(root, 'components/demo-admin/demo-admin-shell.tsx'), 'utf8');
+    expect(source).toContain('fixed left-0 top-0');
+    expect(source).toContain('w-[286px]');
+    expect(source).toContain('admin-workspace');
+    expect(source).toContain('md:ml-[286px]');
+    expect(source).toContain('fixed inset-x-3 bottom-3');
+    expect(source).not.toContain('lg:grid-cols-[230px_minmax(0,1fr)]');
+  });
+
   it('keeps the dashboard nav item exact while nested items use prefix matching', () => {
     const [dashboard, catalog] = DEMO_ADMIN_NAV;
 

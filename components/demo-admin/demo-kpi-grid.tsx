@@ -1,3 +1,4 @@
+import { KpiCard } from '@/app/(admin)/admin/_components/kpi-card';
 import { formatPrice } from '@/lib/format';
 
 export function DemoKpiGrid({
@@ -5,21 +6,29 @@ export function DemoKpiGrid({
 }: {
   kpis: { revenue: number; orders: number; averageOrder: number; conversion: number };
 }) {
-  const cards = [
-    ['Выручка', formatPrice(kpis.revenue)],
-    ['Заказы', String(kpis.orders)],
-    ['Средний чек', formatPrice(kpis.averageOrder)],
-    ['Конверсия', `${kpis.conversion}%`],
-  ] as const;
-
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {cards.map(([label, value]) => (
-        <article key={label} className="rounded-3xl border border-admin-outline-variant bg-admin-surface p-5">
-          <span className="text-sm text-admin-on-surface-variant">{label}</span>
-          <strong className="mt-2 block text-3xl font-extrabold tabular-nums">{value}</strong>
-        </article>
-      ))}
+    <div className="grid grid-cols-1 gap-[18px] md:grid-cols-2 xl:grid-cols-3">
+      <KpiCard
+        tone="revenue"
+        label="Выручка за период"
+        value={formatPrice(kpis.revenue)}
+        trend={{ dir: 'up', pct: 12 }}
+        series={[48200, 63100, 57400, 79900, 88620, 91200, 57800]}
+      />
+      <KpiCard
+        tone="orders"
+        label="Заказы"
+        value={String(kpis.orders)}
+        trend={{ dir: 'up', pct: 8 }}
+        series={[7, 9, 8, 11, 13, 10, 6]}
+      />
+      <KpiCard
+        tone="average"
+        label="Средний чек"
+        value={formatPrice(kpis.averageOrder)}
+        trend={{ dir: 'flat', pct: 0 }}
+        series={[7200, 7600, 7310, 8020, 7880, 7990, 7599]}
+      />
     </div>
   );
 }
