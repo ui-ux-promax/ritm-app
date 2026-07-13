@@ -1,5 +1,5 @@
 import { prisma } from '../lib/prisma-client';
-import { categories, products } from './seed-data';
+import { categories, coupons, products } from './seed-data';
 import { productDenormFromColorways } from '../lib/product-aggregates';
 import { upsertAdmin } from './seed-admin';
 import { CLOTHING_SIZE_ORDER } from '../constants/config';
@@ -104,11 +104,6 @@ async function up() {
     });
   }
 
-  const coupons = [
-    { code: 'RITM10', percent: 10, active: true, expiresAt: null },
-    { code: 'WELCOME15', percent: 15, active: true, expiresAt: null },
-    { code: 'EXPIRED', percent: 50, active: true, expiresAt: new Date('2020-01-01') }, // РґР»СЏ e2e-РЅРµРіР°С‚РёРІР°
-  ];
   for (const c of coupons) {
     await prisma.coupon.upsert({ where: { code: c.code }, update: c, create: c });
   }
