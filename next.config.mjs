@@ -47,7 +47,8 @@ const nextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  silent: true,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: false,
   widenClientFileUpload: true,
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
