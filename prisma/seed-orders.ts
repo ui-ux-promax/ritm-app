@@ -70,8 +70,8 @@ async function main() {
     const email = `dashboard-demo-${index + 1}${TEST_EMAIL_DOMAIN}`;
     const user = await prisma.user.upsert({
       where: { email },
-      update: { name, phone, role: 'CUSTOMER' },
-      create: { email, name, phone, role: 'CUSTOMER' },
+      update: { name, phone, role: 'CUSTOMER', isPortfolioFixture: true },
+      create: { email, name, phone, role: 'CUSTOMER', isPortfolioFixture: true },
     });
     return user.id;
   }));

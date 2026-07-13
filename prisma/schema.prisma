@@ -136,6 +136,7 @@ model User {
   phone         String?
   birthdate     DateTime?
   role          UserRole  @default(CUSTOMER)
+  isPortfolioFixture Boolean @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
@@ -146,6 +147,7 @@ model User {
   addresses     Address[]
 
   @@index([role])
+  @@index([isPortfolioFixture])
 }
 
 model Address {

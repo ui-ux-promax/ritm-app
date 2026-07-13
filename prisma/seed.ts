@@ -126,7 +126,9 @@ async function up() {
   const reviewUserIdByEmail = new Map<string, string>();
   for (const u of demoUsers) {
     const created = await prisma.user.upsert({
-      where: { email: u.email }, update: { name: u.name }, create: { email: u.email, name: u.name },
+      where: { email: u.email },
+      update: { name: u.name, isPortfolioFixture: true },
+      create: { email: u.email, name: u.name, isPortfolioFixture: true },
     });
     reviewUserIdByEmail.set(u.email, created.id);
   }
