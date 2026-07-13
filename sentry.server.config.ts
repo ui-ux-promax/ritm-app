@@ -1,10 +1,8 @@
 import * as Sentry from '@sentry/nextjs';
+import { getSentryRuntimeOptions } from '@/lib/observability/sentry-options';
 
-const dsn = process.env.SENTRY_DSN;
-
-Sentry.init({
-  dsn,
-  enabled: Boolean(dsn), // нет DSN → Sentry выключен (fail-open, как rate-limit)
-  tracesSampleRate: 0,   // errors-only: трейсинг выключен
-  sendDefaultPii: false, // не слать cookies/headers/ip по умолчанию
-});
+Sentry.init(getSentryRuntimeOptions({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.VERCEL_ENV ?? process.env.NODE_ENV,
+  release: process.env.SENTRY_RELEASE ?? process.env.VERCEL_GIT_COMMIT_SHA,
+}));

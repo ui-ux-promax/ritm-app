@@ -1,12 +1,10 @@
 import * as Sentry from '@sentry/nextjs';
+import { getSentryRuntimeOptions } from '@/lib/observability/sentry-options';
 
-const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+Sentry.init(getSentryRuntimeOptions({
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  environment: process.env.NEXT_PUBLIC_VERCEL_ENV ?? process.env.NODE_ENV,
+  release: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
+}));
 
-Sentry.init({
-  dsn,
-  enabled: Boolean(dsn),
-  tracesSampleRate: 0, // errors-only: ни performance, ни replay
-});
-
-// App Router navigation tracing hook (нужен экспорт даже при tracing=0; вреда нет).
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

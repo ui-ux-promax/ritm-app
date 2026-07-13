@@ -1,33 +1,21 @@
-const PII_FIELD_NAMES = new Set([
-  'phone', 'email', 'address', 'password', 'fullName', 'firstName', 'lastName',
-  'cardNumber', 'token', 'secret',
-]);
 const REDACTED = '[redacted]';
+const SENSITIVE_KEY = /(email|phone|address|password|token|secret|authorization|cookie|card|full.?name)/i;
 
-function maskEmail(email: string): string {
-  const at = email.indexOf('@');
-  if (at < 1) return REDACTED;
-  return `[redacted-${email.slice(at + 1)}]`;
-}
-function maskPhone(phone: string): string {
-  if (phone.length < 4) return REDACTED;
-  return `***${phone.slice(-4)}`;
+function redact(key: string, value: unknown): string {
+  if (typeof value !== 'string') return REDACTED;
+  if (/email/i.test(key) && value.includes('@')) return `[redacted-${value.split('@')[1]}]`;
+  if (/phone/i.test(key)) return value.length >= 4 ? `***${value.slice(-4)}` : REDACTED;
+  return REDACTED;
 }
 
-export function scrubPii(obj: Record<string, unknown>): Record<string, unknown> {
-  for (const [key, value] of Object.entries(obj)) {
-    const lower = key.toLowerCase();
-    if (PII_FIELD_NAMES.has(key) || PII_FIELD_NAMES.has(lower)) {
-      if (typeof value === 'string') {
-        if (lower === 'email') obj[key] = maskEmail(value);
-        else if (lower === 'phone') obj[key] = maskPhone(value);
-        else obj[key] = REDACTED;
-      }
-      continue;
-    }
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
-      scrubPii(value as Record<string, unknown>);
-    }
-  }
-  return obj;
+export function scrubPii<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(scrubPii) as T;
+  if (!value || typeof value !== 'object') return value;
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([key, item]) => [
+      key,
+      SENSITIVE_KEY.test(key) ? redact(key, item) : scrubPii(item),
+    ]),
+  ) as T;
 }

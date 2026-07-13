@@ -1,11 +1,8 @@
-// Edge-рантайм (middleware/edge-роуты). Edge-совместимый Sentry SDK; Node-API не тянуть.
 import * as Sentry from '@sentry/nextjs';
+import { getSentryRuntimeOptions } from '@/lib/observability/sentry-options';
 
-const dsn = process.env.SENTRY_DSN;
-
-Sentry.init({
-  dsn,
-  enabled: Boolean(dsn),
-  tracesSampleRate: 0,
-  sendDefaultPii: false,
-});
+Sentry.init(getSentryRuntimeOptions({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.VERCEL_ENV ?? process.env.NODE_ENV,
+  release: process.env.SENTRY_RELEASE ?? process.env.VERCEL_GIT_COMMIT_SHA,
+}));
