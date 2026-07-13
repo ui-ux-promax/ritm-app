@@ -52,12 +52,12 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
         <span className="text-ink font-semibold">Каталог</span>
       </nav>
-      <div className="grid md:grid-cols-[240px_1fr] gap-6 lg:gap-8">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
         <FilterSidebar facets={facets} />
         <div>
           {/* Тулбар — sticky под хедером на телефоне (glassmorphism как у шапки), чтобы кнопка
               «Фильтры» была всегда на виду при скролле. С md+ статичный, фильтр в инлайн-сайдбаре. */}
-          <div className="sticky top-16 z-30 -mx-4 sm:-mx-6 md:mx-0 px-4 sm:px-6 md:px-0 py-2.5 md:py-0 mb-4 backdrop-blur-xl md:backdrop-blur-0 border-b border-line md:border-0 md:static flex items-center gap-3">
+          <div className="sticky top-[56px] z-30 -mx-4 mb-4 flex min-w-0 items-center gap-2 border-b border-line px-4 py-2.5 backdrop-blur-xl sm:-mx-6 sm:gap-3 sm:px-6 md:static md:mx-0 md:border-0 md:px-0 md:py-0 md:backdrop-blur-0">
             <Suspense><MobileFilterDrawer facets={facets} total={total} /></Suspense>
             <p className="text-sm text-ink-muted hidden sm:block">Найдено <span className="font-semibold text-ink tnum">{total}</span></p>
             <div className="flex-1" />
@@ -67,7 +67,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
           {products.length === 0 ? (
             <EmptyCatalog />
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 sm:gap-4 lg:grid-cols-3">
               {products.map((p) => <CatalogProductCard key={p.slug} data={p} wishlisted={wishlistedIds.has(p.id)} />)}
             </div>
           )}

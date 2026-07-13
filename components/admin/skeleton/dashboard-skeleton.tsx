@@ -48,7 +48,7 @@ export function DashboardBody() {
       </div>
 
       {/* Графики: area (8) + donut (4) */}
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-12">
         <CardSkeleton className="col-span-12 xl:col-span-8">
           <Skeleton rounded="line" className="h-5 w-44 mb-4" />
           <Skeleton rounded="box" delay={1} className="w-full h-72 rounded-2xl" />
@@ -71,7 +71,7 @@ export function DashboardBody() {
       </div>
 
       {/* Нижний ряд: топ-продаж (5) + низкий сток / последние заказы (7) */}
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-12">
         {/* Топ продаж */}
         <CardSkeleton className="col-span-12 lg:col-span-5">
           <Skeleton rounded="line" className="h-5 w-48 mb-4" />
@@ -96,7 +96,7 @@ export function DashboardBody() {
         </CardSkeleton>
 
         {/* Низкий сток + последние заказы */}
-        <div className="col-span-12 lg:col-span-7 space-y-6">
+        <div className="min-w-0 col-span-12 lg:col-span-7 space-y-6">
           {/* Низкий сток: сетка 2× */}
           <CardSkeleton>
             <div className="flex justify-between items-center mb-4">
@@ -127,14 +127,14 @@ export function DashboardBody() {
             <div className="p-6 pb-3">
               <Skeleton rounded="line" className="h-5 w-40" />
             </div>
-            <div className="bg-admin-surface-high border-y border-admin-outline-variant px-6 py-3 flex gap-6">
+            <div className="hidden bg-admin-surface-high border-y border-admin-outline-variant px-6 py-3 gap-6 sm:flex">
               {['w-16', 'w-20', 'w-16', 'w-14'].map((w, i) => (
                 <Skeleton key={i} rounded="line" className={`h-2.5 ${w}`} />
               ))}
             </div>
             <div className="divide-y divide-admin-outline-variant">
               {[1, 2, 3, 4].map((d) => (
-                <div key={d} className="px-6 py-3 flex items-center justify-between gap-4">
+                <div key={d} className="px-4 py-3 grid grid-cols-2 gap-3 sm:px-6 sm:flex sm:items-center sm:justify-between sm:gap-4">
                   <Skeleton rounded="line" delay={d as 1 | 2 | 3 | 4} className="h-3 w-16" />
                   <Skeleton rounded="line" delay={d as 1 | 2 | 3 | 4} className="h-3 w-28" />
                   <Skeleton rounded="pill" delay={d as 1 | 2 | 3 | 4} className="h-5 w-20" />

@@ -15,7 +15,7 @@ export function CartView({ related, wishlistedIds }: { related: ProductCardData[
   const count = items.reduce((a, i) => a + i.quantity, 0);
 
   return (
-    <div className="mx-auto max-w-[1200px] px-6 pb-16">
+    <div className="mx-auto max-w-[1200px] px-4 pb-16 sm:px-6">
       <Breadcrumbs items={[
         { label: 'Главная', href: '/' },
         { label: 'Каталог', href: '/catalog' },

@@ -317,3 +317,9 @@ export const products: SeedProduct[] = [
     ],
   },
 ];
+
+export const coupons = [
+  { code: 'RITM10', percent: 10, active: true, expiresAt: null },
+  { code: 'WELCOME15', percent: 15, active: true, expiresAt: null },
+  { code: 'EXPIRED', percent: 50, active: true, expiresAt: new Date('2020-01-01') },
+] as const;

@@ -15,8 +15,11 @@
         "prisma:generate": "prisma generate",
         "prisma:push": "prisma db push",
         "prisma:studio": "prisma studio",
-        "prisma:seed": "prisma db seed",
-        "prisma:seed-admin": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed-admin.ts",
+    "prisma:seed": "prisma db seed",
+    "prisma:seed-admin": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed-admin.ts",
+        "prisma:seed-orders": "powershell -NoProfile -Command \"$env:TS_NODE_COMPILER_OPTIONS = '{\\\"module\\\":\\\"CommonJS\\\"}'; npx ts-node prisma/seed-orders.ts\"",
+        "smoke:production": "node scripts/smoke-production.mjs",
+        "portfolio:capture": "node scripts/capture-portfolio.mjs",
         "postinstall": "prisma generate"
     },
     "prisma": {

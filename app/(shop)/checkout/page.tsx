@@ -39,7 +39,7 @@ export default async function CheckoutPage() {
   const details = getCartDetails(cart);
 
   return (
-    <main className="mx-auto max-w-[1200px] px-6 pb-16">
+    <main className="mx-auto max-w-[1200px] px-4 pb-16 sm:px-6">
       <Breadcrumbs items={[
         { label: 'Главная', href: '/' },
         { label: 'Корзина', href: '/cart' },

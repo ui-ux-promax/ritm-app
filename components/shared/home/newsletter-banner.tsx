@@ -45,22 +45,22 @@ export function NewsletterBanner() {
   };
 
   return (
-    <section className="mx-auto max-w-[1200px] px-6 my-8 md:my-[52px]">
+    <section className="mx-auto my-8 max-w-[1200px] px-4 sm:px-6 md:my-[52px]">
       <div
         ref={bannerRef}
         data-reveal="up"
-        className="rounded-[22px] text-white p-8 md:p-12 grid md:grid-cols-[1fr_0.9fr] gap-8 md:gap-11 items-end"
+        className="grid min-w-0 grid-cols-[minmax(0,1fr)] items-end gap-6 rounded-[22px] p-5 text-white sm:p-8 md:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] md:gap-11 md:p-12"
         style={{
           background:
             'radial-gradient(circle at 12% 10%, hsl(0 0% 100% / 0.1), transparent 28%), linear-gradient(135deg, hsl(220 12% 10%), hsl(220 12% 10% / 0.78))',
         }}
       >
-        <div>
+        <div className="min-w-0">
           <h2 className="font-display font-bold text-[28px] md:text-[45px] leading-[1.05] max-w-[540px]">
             <span className="sr-only">Скидка 50% на все аутфиты. Присоединяйтесь сейчас.</span>
             <span aria-hidden="true">Скидка <span className="tnum" data-testid="discount-counter">{discount}%</span> на все аутфиты. Присоединяйтесь сейчас.</span>
           </h2>
-          <form onSubmit={onSubmit} noValidate className="mt-7 w-full max-w-[420px] grid grid-cols-[1fr_auto] gap-1.5 bg-surface rounded-full p-1.5">
+          <form onSubmit={onSubmit} noValidate className="mt-7 grid w-full max-w-[420px] grid-cols-1 gap-1.5 rounded-[18px] bg-surface p-1.5 min-[420px]:grid-cols-[minmax(0,1fr)_auto] min-[420px]:rounded-full">
             <input
               type="email"
               value={email}
@@ -72,7 +72,7 @@ export function NewsletterBanner() {
             />
             <button
               type="submit"
-              className="rounded-full bg-primary text-primary-foreground px-4 min-h-[34px] text-xs font-bold transition-transform duration-200 active:scale-95 motion-reduce:transform-none"
+              className="min-h-[40px] rounded-[14px] bg-primary px-4 text-xs font-bold text-primary-foreground transition-transform duration-200 active:scale-95 motion-reduce:transform-none min-[420px]:min-h-[34px] min-[420px]:rounded-full"
             >
               Подписаться
             </button>

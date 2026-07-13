@@ -19,3 +19,6 @@ ritm-assets/
 ritm-privacy-mobile.png
 MVP_MIGRATION_PLAN.md
 e-comerce-shop-prot/
+
+.vercel
+.env*

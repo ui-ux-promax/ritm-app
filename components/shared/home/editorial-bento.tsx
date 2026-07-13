@@ -15,49 +15,49 @@ const items: BentoItem[] = [
   {
     src: '/home/hero-slide-3.png',
     alt: 'Мужской образ RITM в свободном силуэте',
-    className: 'col-span-2 h-[220px] md:col-start-1 md:row-start-1 md:h-auto',
+    className: 'col-span-2 h-[220px] min-[640px]:col-start-1 min-[640px]:row-start-1 min-[640px]:h-auto',
     x: 22,
     y: -22,
   },
   {
     src: '/home/collection-rail.png',
     alt: 'Рейл новой коллекции RITM',
-    className: 'h-[220px] md:col-start-3 md:row-start-1 md:h-auto',
+    className: 'h-[250px] min-[640px]:col-start-3 min-[640px]:row-start-1 min-[640px]:h-auto',
     x: -22,
     y: -14,
   },
   {
     src: '/home/coming-card.png',
     alt: 'Женский образ RITM в стёганой куртке',
-    className: 'h-[320px] md:col-start-4 md:row-start-1 md:row-span-2 md:h-auto',
+    className: 'h-[250px] min-[640px]:col-start-4 min-[640px]:row-start-1 min-[640px]:row-span-2 min-[640px]:h-auto',
     x: 14,
     y: -24,
   },
   {
     src: '/home/blog-wardrobe.png',
     alt: 'Детали базового гардероба RITM',
-    className: 'h-[320px] md:col-start-1 md:row-start-2 md:row-span-2 md:h-auto',
+    className: 'h-[250px] min-[640px]:col-start-1 min-[640px]:row-start-2 min-[640px]:row-span-2 min-[640px]:h-auto',
     x: -16,
     y: 24,
   },
   {
     src: '/home/blog-chic.png',
     alt: 'Повседневный многослойный образ RITM',
-    className: 'col-span-2 h-[220px] md:col-start-2 md:row-start-2 md:h-auto',
+    className: 'h-[250px] min-[640px]:col-span-2 min-[640px]:col-start-2 min-[640px]:row-start-2 min-[640px]:h-auto',
     x: 24,
     y: 14,
   },
   {
     src: '/home/season-collage.png',
     alt: 'Фактура и крой сезонной коллекции RITM',
-    className: 'col-span-2 h-[220px] md:col-start-2 md:row-start-3 md:h-auto',
+    className: 'h-[250px] min-[640px]:col-span-2 min-[640px]:col-start-2 min-[640px]:row-start-3 min-[640px]:h-auto',
     x: -20,
     y: -20,
   },
   {
     src: '/home/blog-arrival.png',
     alt: 'Новый образ из коллекции RITM',
-    className: 'col-span-2 h-[220px] md:col-span-1 md:col-start-4 md:row-start-3 md:h-auto',
+    className: 'h-[250px] min-[640px]:col-span-1 min-[640px]:col-start-4 min-[640px]:row-start-3 min-[640px]:h-auto',
     x: 18,
     y: 22,
   },
@@ -114,7 +114,7 @@ export function EditorialBento() {
     <div
       ref={gridRef}
       data-reveal="scale"
-      className="grid grid-cols-2 gap-x-4 gap-y-4 md:grid-cols-4 md:grid-rows-[230px_230px_230px] md:gap-x-5 md:gap-y-5"
+      className="grid grid-cols-2 gap-x-4 gap-y-4 min-[640px]:grid-cols-4 min-[640px]:grid-rows-[230px_230px_230px] min-[640px]:gap-x-5 min-[640px]:gap-y-5"
     >
       {items.map((item, index) => (
         <figure key={item.src} className={`relative overflow-hidden rounded-[16px] bg-surface-soft ${item.className}`}>

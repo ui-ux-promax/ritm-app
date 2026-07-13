@@ -4,16 +4,15 @@ import { describe, expect, it } from 'vitest';
 import { ADMIN_NAV } from '@/lib/admin/nav';
 import {
   ADMIN_PRIMARY_ROUTE_ORDER,
-  ADMIN_PROTOTYPES,
   ADMIN_ROUTE_SMOKE_TARGETS,
 } from '@/lib/admin/prototype-contract';
 
 const root = process.cwd();
 
 describe('admin prototype contract', () => {
-  it('keeps every visual prototype file in the repo', () => {
-    for (const file of ADMIN_PROTOTYPES) {
-      expect(existsSync(join(root, file))).toBe(true);
+  it('does not require ignored visual source files at test time', () => {
+    for (const target of ADMIN_ROUTE_SMOKE_TARGETS) {
+      expect(target).not.toHaveProperty('prototype');
     }
   });
 

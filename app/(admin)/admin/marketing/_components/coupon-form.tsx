@@ -15,7 +15,7 @@ export interface CouponFormInitial {
   code: string;
   percent: number;
   active: boolean;
-  expiresAt: string | null; // ISO; СЃСЂРµР·Р°РµРј РґРѕ YYYY-MM-DD РґР»СЏ <input type="date">
+  expiresAt: string | null; // ISO; срезаем до YYYY-MM-DD для <input type="date">
 }
 
 export function CouponForm({ initial }: { initial?: CouponFormInitial }) {
@@ -53,11 +53,10 @@ export function CouponForm({ initial }: { initial?: CouponFormInitial }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl space-y-[22px]">
       <div className="space-y-1">
-        <label className="text-[12px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">РљРѕРґ</label>
+        <label className="text-[12px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">Код</label>
         <Input
           {...register('code', {
-            // РљРѕСЃРјРµС‚РёС‡РµСЃРєРёР№ uppercase (client-safe РёРЅР»Р°Р№РЅ, С‡С‚РѕР±С‹ РЅРµ С‚СЏРЅСѓС‚СЊ @/lib/couponв†’prisma РІ Р±Р°РЅРґР»).
-            // РђРІС‚РѕСЂРёС‚РµС‚РЅР°СЏ РЅРѕСЂРјР°Р»РёР·Р°С†РёСЏ вЂ” normalizeCouponCode РІ server action РїРµСЂРµРґ РІР°Р»РёРґР°С†РёРµР№/Р‘Р”.
+            // Косметический uppercase на клиенте; сервер повторно нормализует код перед валидацией.
             onBlur: (e) => setValue('code', e.target.value.trim().toUpperCase()),
           })}
           placeholder="RITM10"
@@ -67,31 +66,31 @@ export function CouponForm({ initial }: { initial?: CouponFormInitial }) {
       </div>
 
       <div className="space-y-1">
-        <label className="text-[12px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">РЎРєРёРґРєР°, %</label>
+        <label className="text-[12px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">Скидка, %</label>
         <Input type="number" min={1} max={100} {...register('percent')} placeholder="10" />
         {errors.percent && <p className="text-sm text-admin-error">{errors.percent.message}</p>}
       </div>
 
       <div className="space-y-1">
-        <label className="text-[12px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">Р”РµР№СЃС‚РІСѓРµС‚ РґРѕ</label>
+        <label className="text-[12px] font-extrabold uppercase tracking-[.06em] text-admin-on-surface-variant">Действует до</label>
         <Input type="date" {...register('expiresAt')} />
-        <p className="text-xs text-admin-on-surface-variant">РџСѓСЃС‚Рѕ вЂ” Р±РµСЃСЃСЂРѕС‡РЅС‹Р№.</p>
+        <p className="text-xs text-admin-on-surface-variant">Оставьте пустым для бессрочного промокода.</p>
         {errors.expiresAt && <p className="text-sm text-admin-error">{errors.expiresAt.message}</p>}
       </div>
 
       <div className="flex items-center gap-3 rounded-[20px] border border-admin-outline-variant bg-admin-surface-low p-4">
         <Switch checked={active} onCheckedChange={(v) => setValue('active', v)} />
-        <span className="text-sm font-bold text-admin-on-surface">РђРєС‚РёРІРµРЅ</span>
+        <span className="text-sm font-bold text-admin-on-surface">Активен</span>
       </div>
 
       {serverError && <p className="text-sm text-admin-error">{serverError}</p>}
 
       <div className="flex flex-wrap gap-3 border-t border-admin-outline-variant pt-[22px]">
         <Button type="submit" loading={isSubmitting}>
-          {initial ? 'РЎРѕС…СЂР°РЅРёС‚СЊ' : 'РЎРѕР·РґР°С‚СЊ'}
+          {initial ? 'Сохранить' : 'Создать'}
         </Button>
         <Button type="button" variant="ghost" onClick={() => router.push('/admin/marketing')}>
-          РћС‚РјРµРЅР°
+          Отмена
         </Button>
       </div>
     </form>

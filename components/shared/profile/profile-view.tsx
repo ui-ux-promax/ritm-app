@@ -206,11 +206,11 @@ export function ProfileView({ user, initial, isAdmin, orders, wishlist, addresse
       <section className="mt-3.5 grid grid-cols-[minmax(0,1fr)_360px] items-center gap-6 max-[980px]:grid-cols-1 max-[980px]:gap-[18px]">
         <div className="flex min-w-0 flex-wrap items-center gap-5">
           {/* Avatar */}
-          <div className="grid h-[76px] w-[76px] place-items-center rounded-full border border-line bg-surface-soft font-display text-[28px] font-extrabold tracking-tight">
+          <div className="grid h-[76px] w-[76px] shrink-0 place-items-center rounded-full border border-line bg-surface-soft font-display text-[28px] font-extrabold tracking-tight">
             {initials(name, user.email)}
           </div>
           {/* Identity */}
-          <div>
+          <div className="min-w-0">
             <h1 className="font-display text-[clamp(28px,3.6vw,40px)] font-extrabold leading-none tracking-[-0.035em]">
               {name}
             </h1>
@@ -220,7 +220,7 @@ export function ProfileView({ user, initial, isAdmin, orders, wishlist, addresse
                 Ritm Club · Gold
               </span>
               <span className="h-[3px] w-[3px] rounded-full bg-ink-muted/55" />
-              <span>{user.email}</span>
+              <span className="min-w-0 break-all">{user.email}</span>
               <span className="h-[3px] w-[3px] rounded-full bg-ink-muted/55" />
               <span>С нами с {fmtDate.format(new Date(user.createdAt))}</span>
             </div>
@@ -1073,18 +1073,18 @@ function Stat({ icon, n, t }: { icon: ReactNode; n: string | number; t: string }
 function MiniOrder({ order }: { order: ProfileOrder }) {
   const first = order.items[0];
   return (
-    <div className="flex items-center gap-3.5 border-t border-line py-3 first:border-t-0">
+    <div className="flex flex-wrap items-center gap-3.5 border-t border-line py-3 first:border-t-0 sm:flex-nowrap">
       <div className="relative h-[50px] w-[46px] overflow-hidden rounded-[11px] border border-line bg-surface-soft">
         {first?.imageUrl && <Image src={first.imageUrl} alt={first.productName} fill sizes="46px" className="object-cover" />}
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-[13px] font-bold">RITM-{order.orderNumber}</div>
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-ink-muted">
+        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-ink-muted">
           <span>{fmtDate.format(new Date(order.createdAt))} · {order.items.length} поз.</span>
           <OrderStatusBadge status={order.status} paymentStatus={order.paymentStatus} />
         </div>
       </div>
-      <div className="tnum text-sm font-extrabold">{formatPrice(order.totalAmount)}</div>
+      <div className="tnum shrink-0 text-sm font-extrabold">{formatPrice(order.totalAmount)}</div>
     </div>
   );
 }
