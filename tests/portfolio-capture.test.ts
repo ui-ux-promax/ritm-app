@@ -17,4 +17,5 @@ it('captures the agreed public portfolio screens', () => {
   }
 
   expect(source).toContain('if (!response?.ok)');
+  expect(source).toContain('window.scrollTo');
 });

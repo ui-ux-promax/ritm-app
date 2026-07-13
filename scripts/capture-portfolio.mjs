@@ -21,6 +21,14 @@ try {
     const page = await browser.newPage({ viewport: shot.viewport, deviceScaleFactor: 1 });
     const response = await page.goto(new URL(shot.path, base).href, { waitUntil: 'networkidle' });
     if (!response?.ok) throw new Error(`Portfolio capture failed for ${shot.path}: HTTP ${response?.status() ?? 'unknown'}`);
+    await page.evaluate(async () => {
+      const step = Math.max(window.innerHeight, 400);
+      for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
+        window.scrollTo(0, y);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      window.scrollTo(0, 0);
+    });
     await page.screenshot({ path: `public/portfolio/${shot.file}`, fullPage: true });
     await page.close();
   }
