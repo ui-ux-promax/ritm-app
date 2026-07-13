@@ -9,7 +9,7 @@ await mkdir('public/portfolio', { recursive: true });
 
 const shots = [
   { path: '/', viewport: { width: 1440, height: 1000 }, file: 'storefront-desktop.png' },
-  { path: '/catalog', viewport: { width: 390, height: 844 }, file: 'catalog-mobile.png' },
+  { path: '/catalog', viewport: { width: 390, height: 844 }, file: 'catalog-mobile.png', fullPage: false },
   { path: '/demo-admin', viewport: { width: 1440, height: 1000 }, file: 'demo-admin-desktop.png' },
   { path: '/demo-admin/orders', viewport: { width: 390, height: 844 }, file: 'demo-admin-mobile.png' },
 ];
@@ -23,13 +23,16 @@ try {
     if (!response?.ok) throw new Error(`Portfolio capture failed for ${shot.path}: HTTP ${response?.status() ?? 'unknown'}`);
     await page.evaluate(async () => {
       const step = Math.max(window.innerHeight, 400);
+      const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+      document.documentElement.style.scrollBehavior = 'auto';
       for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
         window.scrollTo(0, y);
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
       window.scrollTo(0, 0);
+      document.documentElement.style.scrollBehavior = previousScrollBehavior;
     });
-    await page.screenshot({ path: `public/portfolio/${shot.file}`, fullPage: true });
+    await page.screenshot({ path: `public/portfolio/${shot.file}`, fullPage: shot.fullPage ?? true });
     await page.close();
   }
 } finally {

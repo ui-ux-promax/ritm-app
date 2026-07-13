@@ -18,4 +18,6 @@ it('captures the agreed public portfolio screens', () => {
 
   expect(source).toContain('if (!response?.ok)');
   expect(source).toContain('window.scrollTo');
+  expect(source).toContain("file: 'catalog-mobile.png', fullPage: false");
+  expect(source).toContain("scrollBehavior = 'auto'");
 });
