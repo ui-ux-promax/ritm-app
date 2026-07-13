@@ -31,7 +31,7 @@ After explicit authorization, an authenticated `ADMIN` may send `POST $base/api/
 
 ## Alert Setup
 
-After explicit authorization, configure an issue alert for project `ritm-app`, environment `production`, on first-seen or reopened issues, delivered to the owner's verified Sentry email. Record the alert URL here after configuration:
+After explicit authorization, configure an issue alert for the project configured by the Production DSN (currently `ritm-app`), environment `production`, on first-seen or reopened issues, delivered to the owner's verified Sentry email. Record the alert URL here after configuration:
 
 `Alert URL: not configured`
 
