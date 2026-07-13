@@ -33,6 +33,12 @@ const columns: { title: string; links: FooterLinkItem[] }[] = [
       { label: 'Блог', href: '/blog' },
     ],
   },
+  {
+    title: 'Демо',
+    links: [
+      { label: 'Демо админ-панели', href: '/demo-admin' },
+    ],
+  },
 ];
 
 function FooterLink({ href, className, children }: { href: string; className?: string; children: React.ReactNode }) {

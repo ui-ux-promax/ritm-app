@@ -1,9 +1,11 @@
 import { YooKassa, CurrencyEnum, LocaleEnum } from '@webzaytsev/yookassa-ts-sdk';
 import type { IConfirmationRedirect } from '@webzaytsev/yookassa-ts-sdk';
+import { assertPortfolioPaymentMode } from './payment-environment';
 
 let _sdk: ReturnType<typeof YooKassa> | null = null;
 
 export function getYooKassa() {
+  assertPortfolioPaymentMode(process.env);
   if (_sdk) return _sdk;
   const shop_id = process.env.YOOKASSA_SHOP_ID;
   const secret_key = process.env.YOOKASSA_SECRET_KEY;

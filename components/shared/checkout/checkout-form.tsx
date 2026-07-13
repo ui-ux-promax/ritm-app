@@ -259,6 +259,11 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
                 {error && <p className="text-danger text-sm font-semibold" role="alert">{error}</p>}
 
                 {/* Pay button */}
+                {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && paymentMethod === 'online' && (
+                  <p role="status" className="rounded-xl border border-black/10 bg-black/[.03] px-4 py-3 text-sm">
+                    <strong>Тестовая оплата.</strong> Деньги не списываются; используйте тестовый сценарий YooKassa.
+                  </p>
+                )}
                 <button type="submit" disabled={isSubmitting}
                   className="h-14 rounded-full bg-primary text-primary-foreground text-[16px] font-bold inline-flex items-center justify-center gap-2.5 w-full hover:bg-footer transition-colors disabled:opacity-50">
                   {isSubmitting ? 'Проверяем данные…' : <>Оплатить <span className="tnum">{formatPrice(total)}</span></>}
