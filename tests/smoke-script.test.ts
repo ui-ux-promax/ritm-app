@@ -14,3 +14,8 @@ it('runs smoke after a successful deployment', () => {
   expect(yaml).toContain('github.event.deployment_status.target_url');
   expect(yaml).toContain('npm run smoke:production');
 });
+
+it('runs production smoke only for production deployments', () => {
+  const yaml = readFileSync('.github/workflows/deployment-smoke.yml', 'utf8');
+  expect(yaml).toContain("github.event.deployment.environment == 'Production'");
+});
