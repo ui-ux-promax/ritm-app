@@ -1,12 +1,13 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { Badge } from '@/components/ui';
 import { useCartStore } from '@/store';
 import { WishlistHeart } from '@/components/shared/wishlist/wishlist-heart';
-import type { ProductCardData, CardColorway, CardSize } from '@/lib/product-summary';
+import type { ProductCardData } from '@/lib/product-summary';
 
 const BEIGE_BLUR =
   "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='8'%3E%3Crect%20width='8'%20height='8'%20fill='%23f1ece1'/%3E%3C/svg%3E";
@@ -32,6 +33,7 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [added, setAdded] = useState(false);
   const addCartItem = useCartStore((s) => s.addCartItem);
+  const selectedImageUrl = data.colorways[selectedColor]?.imageUrl ?? data.imageUrl;
 
   const handleAddToCart = async () => {
     if (selectedSize === null) return;
@@ -56,9 +58,9 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
           </span>
         )}
         <Link href={href} aria-label={data.name} className="absolute inset-0">
-          {data.imageUrl ? (
+          {selectedImageUrl ? (
             <Image
-              src={data.imageUrl}
+              src={selectedImageUrl}
               alt={data.imageAlt}
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
