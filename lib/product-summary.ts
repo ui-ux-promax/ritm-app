@@ -17,6 +17,7 @@ export type ProductForCard = Prisma.ProductGetPayload<{ include: typeof productC
 export interface CardColorway {
   id: string;
   name: string;
+  swatchHex: string | null;
   imageUrl: string | null;
 }
 
@@ -67,6 +68,7 @@ export function buildProductCardData(
   const colorways: CardColorway[] = product.colorways.map((cw) => ({
     id: cw.id,
     name: cw.name,
+    swatchHex: cw.swatchHex,
     imageUrl: cw.images[0]?.url ?? null,
   }));
 

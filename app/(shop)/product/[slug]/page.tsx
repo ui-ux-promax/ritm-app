@@ -121,7 +121,12 @@ export default async function ProductPage({ params, searchParams }: Params) {
   }
   const soldOut = !active.variants.some((v) => v.active && v.stock > 0);
   const galleryIsNew = !soldOut && isNewByDate(product.createdAt, now, NEW_PRODUCT_WINDOW_DAYS);
-  const panelColorways = product.colorways.map((cw) => ({ slug: cw.slug, name: cw.name, thumbUrl: cw.images[0]?.url ?? null }));
+  const panelColorways = product.colorways.map((cw) => ({
+    slug: cw.slug,
+    name: cw.name,
+    swatchHex: cw.swatchHex,
+    thumbUrl: cw.images[0]?.url ?? null,
+  }));
   const panelVariants = active.variants.map((v) => ({
     id: v.id, size: v.size, stock: v.stock, active: v.active,
     price: v.price, compareAtPrice: v.compareAtPrice,

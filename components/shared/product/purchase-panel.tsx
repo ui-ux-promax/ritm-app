@@ -9,7 +9,7 @@ import { RatingStars } from './rating-stars';
 import { ProductAccordions } from './product-accordions';
 import { cn } from '@/lib/utils';
 
-export interface PanelColorway { slug: string; name: string; thumbUrl: string | null; }
+export interface PanelColorway { slug: string; name: string; swatchHex: string | null; thumbUrl: string | null; }
 export interface PanelVariant { id: string; size: string; stock: number; active: boolean; price: number; compareAtPrice: number | null; }
 
 interface Props {
@@ -104,7 +104,7 @@ export function PurchasePanel({
                   isActive && 'outline outline-2 outline-ink outline-offset-3'
                 )}
                 style={{
-                  backgroundColor: COLOR_HSL[cw.name] ?? 'hsl(0 0% 50%)',
+                  backgroundColor: cw.swatchHex ?? 'hsl(0 0% 50%)',
                   boxShadow: 'inset 0 0 0 4px hsl(var(--color-surface))',
                 }}
               />

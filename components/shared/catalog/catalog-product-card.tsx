@@ -97,7 +97,7 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
                 aria-pressed={selectedColor === i}
                 onClick={() => setSelectedColor(i)}
                 className={`relative h-6 border rounded-[5px] transition-colors ${selectedColor === i ? 'border-ink' : 'border-line hover:border-ink/30'}`}
-                style={{ background: colorToHsl(cw.name) }}
+                style={{ background: cw.swatchHex ?? 'hsl(0 0% 50%)' }}
               >
                 {selectedColor === i && (
                   <span className="absolute left-0 right-0 -bottom-[7px] h-[3px] rounded-full bg-ink" />

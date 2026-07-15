@@ -33,6 +33,7 @@ describe('buildProductCardData', () => {
     expect(d.imageUrl).toBe('/products/a.jpeg');
     expect(d.minPrice).toBe(11240);
     expect(d.minCompareAtPrice).toBe(14990);
+    expect(d.colorways[0].swatchHex).toBe('#fff');
     expect(d.soldOut).toBe(false);
   });
   it('бейджи: скидка + новинка (товар свежий)', () => {
