@@ -20,8 +20,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   configured.mockReturnValue(true);
   resendFactory.mockReturnValue({ emails: { send: sendMock } });
-  process.env.EMAIL_FROM_TRANSACTIONAL = 'Stride <no-reply@cloudd3r.eu.cc>';
-  process.env.EMAIL_FROM_NEWSLETTER = 'Stride <hello@cloudd3r.eu.cc>';
+  process.env.EMAIL_FROM_TRANSACTIONAL = 'Ritm <no-reply@cloudd3r.eu.cc>';
+  process.env.EMAIL_FROM_NEWSLETTER = 'Ritm <hello@cloudd3r.eu.cc>';
 });
 
 const node = createElement('div', null, 'hi');
@@ -32,14 +32,14 @@ describe('sendEmail', () => {
     const r = await sendEmail({ to: 'u@x.com', subject: 'S', react: node });
     expect(r).toEqual({ ok: true, id: 'em_1' });
     expect(sendMock).toHaveBeenCalledWith(expect.objectContaining({
-      from: 'Stride <no-reply@cloudd3r.eu.cc>', to: 'u@x.com', subject: 'S',
+      from: 'Ritm <no-reply@cloudd3r.eu.cc>', to: 'u@x.com', subject: 'S',
     }));
   });
 
   it('kind:newsletter → from hello@', async () => {
     sendMock.mockResolvedValue({ data: { id: 'em_2' }, error: null });
     await sendEmail({ to: 'u@x.com', subject: 'S', react: node, kind: 'newsletter' });
-    expect(sendMock).toHaveBeenCalledWith(expect.objectContaining({ from: 'Stride <hello@cloudd3r.eu.cc>' }));
+    expect(sendMock).toHaveBeenCalledWith(expect.objectContaining({ from: 'Ritm <hello@cloudd3r.eu.cc>' }));
   });
 
   it('Resend вернул error → {ok:false}, не бросает', async () => {

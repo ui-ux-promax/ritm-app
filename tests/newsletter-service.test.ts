@@ -38,6 +38,7 @@ describe('subscribe', () => {
     expect(create).toHaveBeenCalled();
     expect(contactsCreate).toHaveBeenCalledWith(expect.objectContaining({ email: 'a@b.com', audienceId: 'aud_1' }));
     expect(send).toHaveBeenCalledOnce();
+    expect(send).toHaveBeenCalledWith(expect.objectContaining({ subject: 'Добро пожаловать в Ritm' }));
   });
 
   it('уже подписан и активен → alreadySubscribed:true, welcome не шлём повторно', async () => {

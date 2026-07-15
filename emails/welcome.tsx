@@ -5,20 +5,23 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cloudd3r.eu.cc';
 
 export function WelcomeEmail({ name }: { name?: string }) {
   return (
-    <EmailLayout preview="Добро пожаловать в STRIDE">
-      <Heading style={{ fontSize: 20, margin: '0 0 12px' }}>
-        {name ? `Привет, ${name}!` : 'Привет!'}
-      </Heading>
-      <Text style={{ fontSize: 14, color: '#444', margin: '0 0 24px' }}>
-        Почта подтверждена — аккаунт готов. Залетай за новыми дропами.
+    <EmailLayout preview="Добро пожаловать в Ritm">
+      <Text style={{ color: '#2f8f66', fontSize: 12, fontWeight: 700, letterSpacing: '1.2px', margin: '0 0 10px', textTransform: 'uppercase' }}>
+        Добро пожаловать
       </Text>
-      <Button href={`${SITE}/catalog`} style={{ backgroundColor: '#0a0a0a', color: '#fff', borderRadius: 999, padding: '12px 24px', fontSize: 14 }}>
-        Смотреть каталог
+      <Heading style={{ color: '#171717', fontSize: 26, lineHeight: '32px', margin: '0 0 12px' }}>
+        {name ? `Рады видеть вас, ${name}!` : 'Рады видеть вас в Ritm!'}
+      </Heading>
+      <Text style={{ color: '#5f5a53', fontSize: 15, lineHeight: '23px', margin: '0 0 24px' }}>
+        Почта подтверждена — аккаунт готов. Сохраняйте избранное, следите за новыми поступлениями и оформляйте заказы быстрее.
+      </Text>
+      <Button href={`${SITE}/catalog`} style={{ backgroundColor: '#171717', borderRadius: 8, color: '#ffffff', fontSize: 14, fontWeight: 700, padding: '13px 22px', textDecoration: 'none' }}>
+        Перейти в каталог
       </Button>
     </EmailLayout>
   );
 }
 
 export default function Preview() {
-  return <WelcomeEmail name="Neo" />;
+  return <WelcomeEmail name="Анна" />;
 }

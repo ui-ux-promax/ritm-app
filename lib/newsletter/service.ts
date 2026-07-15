@@ -11,17 +11,19 @@ export type SubscribeResult =
   | { ok: true; alreadySubscribed: boolean }
   | { ok: false; error: string };
 
-// Best-effort синк в Resend Audience. Сбой логируется, подписку не роняет.
 async function syncToAudience(email: string): Promise<string | null> {
   const audienceId = process.env.RESEND_AUDIENCE_ID;
   const resend = getResend();
   if (!audienceId || !resend) return null;
   try {
     const { data, error } = await resend.contacts.create({ email, audienceId, unsubscribed: false });
-    if (error || !data) { logger.warn('audience_sync_failed', { error: error?.message }); return null; }
+    if (error || !data) {
+      logger.warn('audience_sync_failed', { error: error?.message });
+      return null;
+    }
     return data.id;
-  } catch (e) {
-    logger.warn('audience_sync_threw', { err: String(e) });
+  } catch (error) {
+    logger.warn('audience_sync_threw', { err: String(error) });
     return null;
   }
 }
@@ -37,7 +39,6 @@ export async function subscribe(emailRaw: string, source: NewsletterSource = 'fo
   const resendContactId = await syncToAudience(email);
 
   if (existing) {
-    // Реактивация после отписки.
     await prisma.subscriber.update({
       where: { email },
       data: { unsubscribedAt: null, ...(resendContactId ? { resendContactId } : {}) },
@@ -46,16 +47,15 @@ export async function subscribe(emailRaw: string, source: NewsletterSource = 'fo
     await prisma.subscriber.create({ data: { email, source, resendContactId } });
   }
 
-  // Welcome — best-effort.
   try {
     await sendEmail({
       to: email,
-      subject: 'Добро пожаловать в STRIDE',
+      subject: 'Добро пожаловать в Ritm',
       kind: 'newsletter',
       react: createElement(NewsletterWelcomeEmail, { unsubscribeUrl: buildUnsubscribeUrl(email) }),
     });
-  } catch (e) {
-    logger.error('newsletter_welcome_failed', e);
+  } catch (error) {
+    logger.error('newsletter_welcome_failed', error);
   }
 
   return { ok: true, alreadySubscribed: false };

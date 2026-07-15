@@ -8,7 +8,6 @@ import { logger } from '@/lib/logger';
 
 export type ConfirmStatus = 'ok' | 'wrong' | 'expired' | 'locked';
 
-// Генерит и шлёт новый код. Старые коды этого email удаляются (один активный на email).
 export async function issueCode(email: string): Promise<void> {
   await prisma.emailVerificationCode.deleteMany({ where: { email } });
   const code = generateCode();
@@ -17,14 +16,13 @@ export async function issueCode(email: string): Promise<void> {
     data: { email, codeHash, expiresAt: new Date(Date.now() + VERIFICATION_CODE_TTL_MS) },
   });
 
-  // В dev без Resend печатаем код в лог, чтобы пройти флоу локально/в CI без реальной почты.
   if (process.env.NODE_ENV !== 'production' && !process.env.RESEND_API_KEY) {
     logger.info('verification_code_dev', { email, code });
   }
 
   await sendEmail({
     to: email,
-    subject: 'Код подтверждения STRIDE',
+    subject: 'Код подтверждения Ritm',
     react: createElement(VerificationCodeEmail, { code }),
   });
 }
@@ -48,7 +46,6 @@ export async function confirmCode(email: string, code: string): Promise<{ status
     return { status: 'wrong' };
   }
 
-  // Одноразовость: условие consumedAt:null в where закрывает гонку двойного сабмита.
   await prisma.emailVerificationCode.update({
     where: { id: row.id, consumedAt: null },
     data: { consumedAt: new Date() },

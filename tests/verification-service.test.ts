@@ -47,6 +47,7 @@ describe('issueCode', () => {
       data: expect.objectContaining({ email: 'u@x.com', codeHash: 'HASH' }),
     }));
     expect(send).toHaveBeenCalledOnce();
+    expect(send).toHaveBeenCalledWith(expect.objectContaining({ subject: 'Код подтверждения Ritm' }));
   });
 });
 
