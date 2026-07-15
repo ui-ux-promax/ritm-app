@@ -21,6 +21,7 @@ interface Props {
   fitNote: string | null;
   productSlug: string;
   description: string | null;
+  specs: Record<string, string> | null;
   ratingAvg: number | null;
   ratingCount: number;
   onColorChange: (slug: string) => void;
@@ -38,7 +39,7 @@ const COLOR_HSL: Record<string, string> = {
 
 export function PurchasePanel({
   productName, colorways, activeColorwaySlug, activeColorwayName,
-  variants, fitNote, productSlug, description, ratingAvg, ratingCount, onColorChange,
+  variants, fitNote, productSlug, description, specs, ratingAvg, ratingCount, onColorChange,
 }: Props) {
   const [sizeId, setSizeId] = useState<string | null>(null);
   const addCartItem = useCartStore((s) => s.addCartItem);
@@ -165,7 +166,7 @@ export function PurchasePanel({
       </div>
 
       {/* Accordions */}
-      <ProductAccordions description={description} />
+      <ProductAccordions description={description} specs={specs} />
     </div>
   );
 }

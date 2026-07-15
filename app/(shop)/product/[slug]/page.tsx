@@ -13,7 +13,6 @@ import { ProductCard } from '@/components/shared/product-card';
 import { Breadcrumbs } from '@/components/shared/product/breadcrumbs';
 import { ProductGallery } from '@/components/shared/product/product-gallery';
 import { PurchasePanel } from '@/components/shared/product/purchase-panel';
-import { SpecsTable } from '@/components/shared/product/specs-table';
 import { ProductView } from '@/components/shared/product/product-view';
 import { auth } from '@/auth';
 import { getReviewEligibility } from '@/lib/review';
@@ -161,7 +160,7 @@ export default async function ProductPage({ params, searchParams }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
       <ProductView
-        product={{ id: product.id, name: product.name, slug: product.slug, fitNote: product.fitNote, description: product.description, category: product.category }}
+        product={{ id: product.id, name: product.name, slug: product.slug, fitNote: product.fitNote, description: product.description, specs, category: product.category }}
         isNew={galleryIsNew}
         colorways={colorwaysForView}
         initialColorwaySlug={active.slug}

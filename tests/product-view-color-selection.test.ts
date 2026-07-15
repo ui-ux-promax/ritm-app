@@ -39,7 +39,7 @@ describe('ProductView colour selection', () => {
     render(
       React.createElement(ProductView, {
         product: {
-          id: 'p1', name: 'CABLES', slug: 'cables', fitNote: null, description: null,
+          id: 'p1', name: 'CABLES', slug: 'cables', fitNote: null, description: null, specs: null,
           category: { name: 'Knitwear', slug: 'knitwear' },
         },
         galleryImages: [{ url: '/graphite.jpg', alt: 'Graphite cardigan' }],
@@ -86,7 +86,7 @@ describe('ProductView colour selection', () => {
     render(
       React.createElement(ProductView, {
         product: {
-          id: 'p1', name: 'CABLES', slug: 'cables', fitNote: null, description: null,
+          id: 'p1', name: 'CABLES', slug: 'cables', fitNote: null, description: null, specs: null,
           category: { name: 'Knitwear', slug: 'knitwear' },
         },
         isNew: false,

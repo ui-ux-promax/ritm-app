@@ -26,6 +26,7 @@ interface Props {
     slug: string;
     fitNote: string | null;
     description: string | null;
+    specs: Record<string, string> | null;
     category: { name: string; slug: string };
   };
   isNew: boolean;
@@ -128,6 +129,7 @@ export function ProductView({
             variants={panelVariants}
             fitNote={product.fitNote}
             description={product.description}
+            specs={product.specs}
             ratingAvg={ratingAvg}
             ratingCount={ratingCount}
             onColorChange={handleColorChange}

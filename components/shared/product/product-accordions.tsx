@@ -4,9 +4,10 @@ import { ChevronDown } from 'lucide-react';
 
 interface ProductAccordionsProps {
   description: string | null;
+  specs: Record<string, string> | null;
 }
 
-export function ProductAccordions({ description }: ProductAccordionsProps) {
+export function ProductAccordions({ description, specs }: ProductAccordionsProps) {
   return (
     <div className="mt-4">
       {description && (
@@ -18,6 +19,23 @@ export function ProductAccordions({ description }: ProductAccordionsProps) {
           <div className="pb-5 px-0.5 text-ink-muted text-sm leading-[1.65]">
             <p>{description}</p>
           </div>
+        </details>
+      )}
+
+      {specs && Object.keys(specs).length > 0 && (
+        <details className="group border-t border-line">
+          <summary className="flex items-center justify-between list-none py-[18px] px-0.5 font-display font-bold text-base cursor-pointer select-none [&::-webkit-details-marker]:hidden">
+            <span>Характеристики</span>
+            <ChevronDown className="w-5 h-5 text-ink-muted transition-transform duration-300 group-open:rotate-180" />
+          </summary>
+          <dl className="pb-5 px-0.5 divide-y divide-line text-sm">
+            {Object.entries(specs).map(([key, value]) => (
+              <div key={key} className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 py-3 first:pt-0">
+                <dt className="text-ink-muted">{key}</dt>
+                <dd className="text-right font-medium text-ink">{value}</dd>
+              </div>
+            ))}
+          </dl>
         </details>
       )}
 
