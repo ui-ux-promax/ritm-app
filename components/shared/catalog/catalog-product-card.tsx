@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { Badge } from '@/components/ui';
 import { PriceTag } from '@/components/shared/price-tag';
+import { SizeGuideDialog } from '@/components/shared/product/size-guide-dialog';
 import { useCartStore } from '@/store';
 import { WishlistHeart } from '@/components/shared/wishlist/wishlist-heart';
 import type { ProductCardData } from '@/lib/product-summary';
@@ -121,7 +122,7 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
         <div className="pt-3.5 grid gap-2.5">
           <div className="flex items-center justify-between">
             <strong className="text-xs font-bold uppercase tracking-tight">Размер</strong>
-            <Link href={href} className="text-ink-muted text-xs hover:text-ink">Таблица размеров</Link>
+            <SizeGuideDialog />
           </div>
           <div className="grid grid-cols-4 gap-2">
             {data.sizes.map((s, i) => (

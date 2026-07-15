@@ -6,6 +6,7 @@ import { useCartStore } from '@/store';
 import { useCountdown } from '@/hooks/use-countdown';
 import { RatingStars } from './rating-stars';
 import { ProductAccordions } from './product-accordions';
+import { SizeGuideDialog } from './size-guide-dialog';
 import { cn } from '@/lib/utils';
 
 export interface PanelColorway { slug: string; name: string; swatchHex: string | null; thumbUrl: string | null; }
@@ -119,7 +120,7 @@ export function PurchasePanel({
           <p className="text-xs font-bold uppercase tracking-wider">
             Размер {selected && <span className="text-ink-muted font-normal normal-case ml-2">{selected.size}</span>}
           </p>
-          <a href="#" className="text-ink-muted text-[13px] hover:text-ink">Таблица размеров</a>
+          <SizeGuideDialog className="text-[13px]" />
         </div>
         <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Выбор размера">
           {variants.map((v) => {
