@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -10,8 +10,9 @@ import { calcShipping } from '@/lib/order';
 import { FREE_SHIPPING_THRESHOLD } from '@/constants/config';
 import { checkoutSchema, type CheckoutValues } from '@/services/dto/order.dto';
 import { placeOrder } from '@/app/actions/order';
-import { validateCoupon } from '@/app/actions/coupon';
 import { AddressSuggest } from './address-suggest';
+import { PromoCodeField } from '@/components/shared/promo-code-field';
+import { useCouponStore } from '@/store/coupon';
 import type { CheckoutDefaults } from '@/lib/checkout-defaults';
 import type { CartDetails } from '@/services/dto/cart.dto';
 
@@ -23,10 +24,7 @@ const SHIP_INFO = {
 export function CheckoutForm({ details, defaults }: { details: CartDetails; defaults: CheckoutDefaults }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [coupon, setCoupon] = useState<{ code: string; percent: number; discount: number } | null>(null);
-  const [couponInput, setCouponInput] = useState('');
-  const [couponError, setCouponError] = useState<string | null>(null);
-  const [couponPending, setCouponPending] = useState(false);
+  const coupon = useCouponStore((state) => state.coupon);
 
   const methods = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
@@ -38,19 +36,12 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
   const shippingMethod = watch('shippingMethod');
   const paymentMethod = watch('paymentMethod');
   const shipping = calcShipping(details.totalAmount, shippingMethod);
-  const discount = coupon?.discount ?? 0;
+  const discount = coupon ? Math.floor((details.totalAmount * coupon.percent) / 100) : 0;
   const total = details.totalAmount - discount + shipping;
 
-  const applyCoupon = async () => {
-    setCouponError(null);
-    setCouponPending(true);
-    const res = await validateCoupon(couponInput);
-    setCouponPending(false);
-    if (!res.ok) { setCoupon(null); setValue('couponCode', ''); setCouponError(res.error); return; }
-    setCoupon({ code: res.code, percent: res.percent, discount: res.discount });
-    setValue('couponCode', res.code);
-  };
-  const removeCoupon = () => { setCoupon(null); setCouponInput(''); setValue('couponCode', ''); setCouponError(null); };
+  useEffect(() => {
+    setValue('couponCode', coupon?.code ?? '');
+  }, [coupon?.code, setValue]);
 
   const onSubmit = async (v: CheckoutValues) => {
     setError(null);
@@ -208,22 +199,7 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
                 </div>
 
                 {/* Promo */}
-                {!coupon ? (
-                  <div className="flex flex-col gap-2 min-[420px]:flex-row">
-                    <input value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Промокод"
-                      className="flex-1 min-w-0 h-11 px-3 border border-line rounded-[12px] bg-surface text-[13px] outline-none uppercase placeholder:normal-case placeholder:text-ink-muted/70" />
-                    <button type="button" onClick={applyCoupon} disabled={couponPending}
-                      className="h-11 whitespace-nowrap rounded-[12px] border border-line bg-surface-soft px-4 text-[13px] font-bold transition-colors hover:border-ink/30 disabled:opacity-50">
-                      {couponPending ? '...' : 'Применить'}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-accent font-semibold">Промокод {coupon.code} ({coupon.percent}%)</span>
-                    <button type="button" onClick={removeCoupon} className="text-ink-muted hover:text-ink" aria-label="Убрать промокод">×</button>
-                  </div>
-                )}
-                {couponError && <p className="text-danger text-xs font-semibold" role="alert">{couponError}</p>}
+                <PromoCodeField />
 
                 {/* Rows */}
                 <div className="grid gap-2.5 border-t border-line pt-4">

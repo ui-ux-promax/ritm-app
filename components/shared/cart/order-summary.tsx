@@ -2,23 +2,24 @@
 import Link from 'next/link';
 import { formatPrice } from '@/lib/format';
 import { FREE_SHIPPING_THRESHOLD } from '@/constants/config';
+import { PromoCodeField } from '@/components/shared/promo-code-field';
+import { useCouponStore } from '@/store/coupon';
 
 const SHIP_COST = 390;
 
 export function OrderSummary({ totalAmount, count }: { totalAmount: number; count: number }) {
+  const coupon = useCouponStore((state) => state.coupon);
   const freeShipping = totalAmount >= FREE_SHIPPING_THRESHOLD;
   const shipping = freeShipping ? 0 : SHIP_COST;
-  const total = totalAmount + shipping;
+  const discount = coupon ? Math.floor((totalAmount * coupon.percent) / 100) : 0;
+  const total = totalAmount - discount + shipping;
 
   return (
     <div className="lg:sticky lg:top-[140px] border border-line rounded-[24px] bg-surface p-[22px] grid gap-4">
         <h2 className="font-display font-bold text-[19px] tracking-tight">Сумма заказа</h2>
 
         {/* Promo */}
-        <div className="flex gap-2">
-          <input type="text" placeholder="Промокод" aria-label="Промокод" className="flex-1 min-w-0 h-[46px] px-3.5 border border-line rounded-[13px] bg-surface text-sm outline-none uppercase placeholder:normal-case placeholder:text-ink-muted/80 hover:border-ink/24 transition-colors" />
-          <button type="button" className="h-[46px] px-5 border border-line rounded-[13px] bg-surface-soft font-bold text-[13.5px] whitespace-nowrap hover:border-ink/30 transition-colors">Применить</button>
-        </div>
+        <PromoCodeField />
 
         {/* Summary rows */}
         <div className="grid gap-2.5 border-t border-line pt-4">
@@ -26,6 +27,12 @@ export function OrderSummary({ totalAmount, count }: { totalAmount: number; coun
             <span>Подытог</span>
             <span className="text-ink font-semibold tnum">{formatPrice(totalAmount)}</span>
           </div>
+          {discount > 0 && (
+            <div className="flex items-center justify-between gap-3 text-sm text-ink-muted">
+              <span>Скидка</span>
+              <span className="text-accent font-semibold tnum">−{formatPrice(discount)}</span>
+            </div>
+          )}
           <div className="flex items-center justify-between gap-3 text-sm text-ink-muted">
             <span>Доставка</span>
             <span className={freeShipping ? 'text-accent font-bold tnum' : 'text-ink font-semibold tnum'}>
