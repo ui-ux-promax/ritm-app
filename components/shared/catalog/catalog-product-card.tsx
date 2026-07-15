@@ -33,14 +33,17 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [added, setAdded] = useState(false);
   const addCartItem = useCartStore((s) => s.addCartItem);
-  const selectedImageUrl = data.colorways[selectedColor]?.imageUrl ?? data.imageUrl;
+  const selectedColorway = data.colorways[selectedColor];
+  const selectedImageUrl = selectedColorway?.imageUrl ?? data.imageUrl;
+  const selectedSizeOption = selectedSize === null ? null : data.sizes[selectedSize];
+  const selectedVariant = selectedSizeOption
+    ? selectedColorway?.variants.find((v) => v.size === selectedSizeOption.size)
+    : null;
 
   const handleAddToCart = async () => {
-    if (selectedSize === null) return;
-    const size = data.sizes[selectedSize];
-    if (!size || !size.variantId) return;
+    if (!selectedVariant?.inStock) return;
     try {
-      await addCartItem({ productVariantId: size.variantId });
+      await addCartItem({ productVariantId: selectedVariant.variantId });
       setAdded(true);
       setTimeout(() => setAdded(false), 1200);
     } catch {
@@ -119,20 +122,26 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
           </div>
           <div className="grid grid-cols-4 gap-2">
             {data.sizes.map((s, i) => (
+              (() => {
+                const variant = selectedColorway?.variants.find((v) => v.size === s.size);
+                const disabled = !variant?.inStock;
+                return (
               <button
                 key={s.size}
                 type="button"
                 aria-pressed={selectedSize === i}
                 onClick={() => setSelectedSize(i)}
-                disabled={!s.inStock}
+                disabled={disabled}
                 className={`h-11 rounded-[13px] text-sm font-semibold transition-colors ${
                   selectedSize === i
                     ? 'bg-primary text-primary-foreground border border-primary'
                     : 'bg-surface-soft/60 border border-transparent hover:border-ink/18'
-                } ${!s.inStock ? 'opacity-40 cursor-not-allowed' : ''}`}
+                } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
               >
                 {s.size}
               </button>
+                );
+              })()
             ))}
           </div>
         </div>
@@ -143,11 +152,11 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={selectedSize === null}
+          disabled={!selectedVariant?.inStock}
           className={`min-h-[46px] rounded-full font-semibold text-sm transition-colors ${
             added
               ? 'bg-accent text-accent-foreground'
-              : selectedSize === null
+              : !selectedVariant?.inStock
                 ? 'bg-ink/20 text-surface cursor-not-allowed'
                 : 'bg-primary text-primary-foreground hover:bg-footer'
           }`}

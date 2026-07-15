@@ -19,6 +19,7 @@ export interface CardColorway {
   name: string;
   swatchHex: string | null;
   imageUrl: string | null;
+  variants: CardSize[];
 }
 
 export interface CardSize {
@@ -70,6 +71,10 @@ export function buildProductCardData(
     name: cw.name,
     swatchHex: cw.swatchHex,
     imageUrl: cw.images[0]?.url ?? null,
+    variants: cw.variants
+      .filter((v) => v.active)
+      .map((v) => ({ size: v.size, sizeOrder: v.sizeOrder, inStock: v.stock > 0, variantId: v.id }))
+      .sort((a, b) => a.sizeOrder - b.sizeOrder),
   }));
 
   // Collect unique sizes from all colorways, sorted by sizeOrder
