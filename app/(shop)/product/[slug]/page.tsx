@@ -105,32 +105,38 @@ export default async function ProductPage({ params, searchParams }: Params) {
   const wlStore = await cookies();
   const wishlistedIds = await getWishlistProductIds(session, wlStore.get(wishlistCookieName)?.value);
 
-  const galleryImages = active.images.map((im) => ({ url: im.url, alt: im.alt ?? product.name }));
-
-  // Ensure at least 3 images for bento grid (2 top + 1 wide)
-  if (galleryImages.length < 3) {
-    const fallbacks = [
-      '/products/product-white-tee.png',
-      '/products/product-black-tee.png',
-      '/products/product-soft-hoodie.png',
-    ];
+  const fallbackImages = [
+    '/products/product-white-tee.png',
+    '/products/product-black-tee.png',
+    '/products/product-soft-hoodie.png',
+  ];
+  const colorwaysForView = product.colorways.map((colorway) => {
+    const galleryImages = colorway.images.map((image) => ({ url: image.url, alt: image.alt ?? product.name }));
     while (galleryImages.length < 3) {
-      const fb = fallbacks[galleryImages.length % fallbacks.length];
-      galleryImages.push({ url: fb, alt: `${product.name} — фото ${galleryImages.length + 1}` });
+      galleryImages.push({
+        url: fallbackImages[galleryImages.length % fallbackImages.length],
+        alt: `${product.name} — фото ${galleryImages.length + 1}`,
+      });
     }
-  }
+    return {
+      slug: colorway.slug,
+      name: colorway.name,
+      swatchHex: colorway.swatchHex,
+      thumbUrl: colorway.images[0]?.url ?? null,
+      galleryImages,
+      variants: colorway.variants.map((variant) => ({
+        id: variant.id,
+        size: variant.size,
+        stock: variant.stock,
+        active: variant.active,
+        price: variant.price,
+        compareAtPrice: variant.compareAtPrice,
+      })),
+    };
+  });
+  const galleryImages = colorwaysForView.find((colorway) => colorway.slug === active.slug)?.galleryImages ?? [];
   const soldOut = !active.variants.some((v) => v.active && v.stock > 0);
   const galleryIsNew = !soldOut && isNewByDate(product.createdAt, now, NEW_PRODUCT_WINDOW_DAYS);
-  const panelColorways = product.colorways.map((cw) => ({
-    slug: cw.slug,
-    name: cw.name,
-    swatchHex: cw.swatchHex,
-    thumbUrl: cw.images[0]?.url ?? null,
-  }));
-  const panelVariants = active.variants.map((v) => ({
-    id: v.id, size: v.size, stock: v.stock, active: v.active,
-    price: v.price, compareAtPrice: v.compareAtPrice,
-  }));
   const specs = (product.specs ?? null) as Record<string, string> | null;
   const productUrl = `/product/${product.slug}${active.slug ? `?color=${active.slug}` : ''}`;
   const productJsonLd = buildProductJsonLd({
@@ -156,12 +162,9 @@ export default async function ProductPage({ params, searchParams }: Params) {
 
       <ProductView
         product={{ id: product.id, name: product.name, slug: product.slug, fitNote: product.fitNote, description: product.description, category: product.category }}
-        galleryImages={galleryImages}
         isNew={galleryIsNew}
-        panelColorways={panelColorways}
-        activeColorwaySlug={active.slug}
-        activeColorwayName={active.name}
-        panelVariants={panelVariants}
+        colorways={colorwaysForView}
+        initialColorwaySlug={active.slug}
         ratingAvg={displayCount > 0 ? displayAvg : null}
         ratingCount={displayCount}
         reviews={displayReviews}

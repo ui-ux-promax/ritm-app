@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { PurchasePanel } from './purchase-panel';
 import { WishlistHeart } from '@/components/shared/wishlist/wishlist-heart';
@@ -13,6 +13,10 @@ import type { ProductCardData } from '@/lib/product-summary';
 import { cn } from '@/lib/utils';
 
 interface GalleryImage { url: string; alt: string }
+interface ProductColorwayView extends PanelColorway {
+  galleryImages: GalleryImage[];
+  variants: PanelVariant[];
+}
 
 interface Props {
   product: {
@@ -23,12 +27,9 @@ interface Props {
     description: string | null;
     category: { name: string; slug: string };
   };
-  galleryImages: GalleryImage[];
   isNew: boolean;
-  panelColorways: PanelColorway[];
-  activeColorwaySlug: string;
-  activeColorwayName: string;
-  panelVariants: PanelVariant[];
+  colorways: ProductColorwayView[];
+  initialColorwaySlug: string;
   ratingAvg: number | null;
   ratingCount: number;
   reviews: ReviewItem[];
@@ -40,14 +41,28 @@ interface Props {
 }
 
 export function ProductView({
-  product, galleryImages, isNew, panelColorways, activeColorwaySlug,
-  activeColorwayName, panelVariants, ratingAvg, ratingCount,
+  product, isNew, colorways, initialColorwaySlug, ratingAvg, ratingCount,
   reviews, reviewState, related, wishlistedIds, wishlisted, productId,
 }: Props) {
   const [activeIdx, setActiveIdx] = useState(0);
+  const [activeColorwaySlug, setActiveColorwaySlug] = useState(initialColorwaySlug);
+  const activeColorway = colorways.find((colorway) => colorway.slug === activeColorwaySlug) ?? colorways[0];
+  if (!activeColorway) return null;
+
+  const { galleryImages, variants: panelVariants } = activeColorway;
   const main = galleryImages[activeIdx] ?? galleryImages[0];
   const availableVariants = panelVariants.filter((variant) => variant.active && variant.stock > 0);
   const minPrice = availableVariants.length ? Math.min(...availableVariants.map((variant) => variant.price)) : 0;
+
+  const handleColorChange = (slug: string) => {
+    if (slug === activeColorwaySlug) return;
+    setActiveColorwaySlug(slug);
+    setActiveIdx(0);
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('color', slug);
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+  };
 
   return (
     <>
@@ -101,14 +116,15 @@ export function ProductView({
             key={activeColorwaySlug}
             productName={product.name}
             productSlug={product.slug}
-            colorways={panelColorways}
+            colorways={colorways}
             activeColorwaySlug={activeColorwaySlug}
-            activeColorwayName={activeColorwayName}
+            activeColorwayName={activeColorway.name}
             variants={panelVariants}
             fitNote={product.fitNote}
             description={product.description}
             ratingAvg={ratingAvg}
             ratingCount={ratingCount}
+            onColorChange={handleColorChange}
           />
         </div>
 

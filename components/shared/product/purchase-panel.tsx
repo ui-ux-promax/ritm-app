@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useCartStore } from '@/store';
@@ -23,6 +22,7 @@ interface Props {
   description: string | null;
   ratingAvg: number | null;
   ratingCount: number;
+  onColorChange: (slug: string) => void;
 }
 
 const COLOR_HSL: Record<string, string> = {
@@ -37,7 +37,7 @@ const COLOR_HSL: Record<string, string> = {
 
 export function PurchasePanel({
   productName, colorways, activeColorwaySlug, activeColorwayName,
-  variants, fitNote, productSlug, description, ratingAvg, ratingCount,
+  variants, fitNote, productSlug, description, ratingAvg, ratingCount, onColorChange,
 }: Props) {
   const [sizeId, setSizeId] = useState<string | null>(null);
   const addCartItem = useCartStore((s) => s.addCartItem);
@@ -93,10 +93,10 @@ export function PurchasePanel({
           {colorways.map((cw) => {
             const isActive = cw.slug === activeColorwaySlug;
             return (
-              <Link
+              <button
                 key={cw.slug}
-                href={`/product/${productSlug}?color=${cw.slug}`}
-                scroll={false}
+                type="button"
+                onClick={() => onColorChange(cw.slug)}
                 aria-label={cw.name}
                 aria-pressed={isActive}
                 className={cn(
