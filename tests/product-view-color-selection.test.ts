@@ -50,7 +50,7 @@ describe('ProductView colour selection', () => {
         ],
         activeColorwaySlug: 'graphite',
         activeColorwayName: 'Graphite',
-        panelVariants: [{ id: 'variant-graphite', size: 'S', stock: 1, active: true, price: 5500, compareAtPrice: null }],
+        panelVariants: [{ id: 'variant-graphite', size: 'S', stock: 1, active: true, price: 5500, compareAtPrice: 6000 }],
         ratingAvg: null,
         ratingCount: 0,
         reviews: [],
@@ -63,7 +63,7 @@ describe('ProductView colour selection', () => {
           {
             slug: 'graphite', name: 'Graphite', swatchHex: '#4b5563', thumbUrl: '/graphite.jpg',
             galleryImages: [{ url: '/graphite.jpg', alt: 'Graphite cardigan' }],
-            variants: [{ id: 'variant-graphite', size: 'S', stock: 1, active: true, price: 5500, compareAtPrice: null }],
+            variants: [{ id: 'variant-graphite', size: 'S', stock: 1, active: true, price: 5500, compareAtPrice: 6000 }],
           },
           {
             slug: 'terracotta', name: 'Terracotta', swatchHex: '#b9654b', thumbUrl: '/terracotta.jpg',
@@ -78,5 +78,35 @@ describe('ProductView colour selection', () => {
 
     expect(screen.getAllByAltText('Terracotta cardigan')[0].getAttribute('src')).toBe('/terracotta.jpg');
     expect(replaceState).toHaveBeenCalledWith(null, '', '/product/cables?color=terracotta');
+  });
+
+  it('shows the previous price when the active colourway is discounted', () => {
+    window.history.replaceState(null, '', '/product/cables');
+
+    render(
+      React.createElement(ProductView, {
+        product: {
+          id: 'p1', name: 'CABLES', slug: 'cables', fitNote: null, description: null,
+          category: { name: 'Knitwear', slug: 'knitwear' },
+        },
+        isNew: false,
+        initialColorwaySlug: 'graphite',
+        ratingAvg: null,
+        ratingCount: 0,
+        reviews: [],
+        reviewState: 'guest',
+        related: [],
+        wishlistedIds: new Set<string>(),
+        wishlisted: false,
+        productId: 'p1',
+        colorways: [{
+          slug: 'graphite', name: 'Graphite', swatchHex: '#4b5563', thumbUrl: '/graphite.jpg',
+          galleryImages: [{ url: '/graphite.jpg', alt: 'Graphite cardigan' }],
+          variants: [{ id: 'variant-graphite', size: 'S', stock: 1, active: true, price: 5500, compareAtPrice: 6000 }],
+        }],
+      }),
+    );
+
+    expect(screen.getByText(/6[\s\u00a0]000 ₽/)).toBeTruthy();
   });
 });

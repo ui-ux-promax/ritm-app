@@ -7,6 +7,7 @@ import { WishlistHeart } from '@/components/shared/wishlist/wishlist-heart';
 import { ReviewsSection } from './reviews-section';
 import { Breadcrumbs } from './breadcrumbs';
 import { ProductCard } from '@/components/shared/product-card';
+import { PriceTag } from '@/components/shared/price-tag';
 import type { ReviewItem } from './review-list';
 import type { PanelColorway, PanelVariant } from './purchase-panel';
 import type { ProductCardData } from '@/lib/product-summary';
@@ -52,7 +53,12 @@ export function ProductView({
   const { galleryImages, variants: panelVariants } = activeColorway;
   const main = galleryImages[activeIdx] ?? galleryImages[0];
   const availableVariants = panelVariants.filter((variant) => variant.active && variant.stock > 0);
-  const minPrice = availableVariants.length ? Math.min(...availableVariants.map((variant) => variant.price)) : 0;
+  const cheapestVariant = availableVariants.reduce<PanelVariant | null>(
+    (cheapest, variant) => cheapest === null || variant.price < cheapest.price ? variant : cheapest,
+    null,
+  );
+  const minPrice = cheapestVariant?.price ?? 0;
+  const minCompareAtPrice = cheapestVariant?.compareAtPrice ?? null;
 
   const handleColorChange = (slug: string) => {
     if (slug === activeColorwaySlug) return;
@@ -130,10 +136,11 @@ export function ProductView({
 
         <div className="z-5 grid gap-[22px] self-start lg:sticky lg:top-[128px] lg:col-start-2 lg:row-start-2">
           <div className="flex flex-col items-stretch justify-between gap-3 rounded-[18px] border border-line bg-surface p-3.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-4">
-            <div className="flex items-baseline gap-1 font-display font-bold tracking-tight">
-              <span className="text-[18px] leading-none text-accent">₽</span>
-              <span className="tnum text-[30px] leading-none text-accent">{minPrice.toLocaleString('ru-RU')}</span>
-            </div>
+            <PriceTag
+              price={minPrice}
+              compareAtPrice={minCompareAtPrice}
+              className="font-display text-[30px] leading-none tracking-tight text-accent"
+            />
             <button type="button" className="inline-flex min-h-[52px] items-center justify-center gap-2.5 whitespace-nowrap rounded-full bg-primary px-6 text-[15px] font-bold text-primary-foreground transition-colors hover:bg-footer">
               Купить сейчас
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1"><path d="M5 12h14M13 6l6 6-6 6" /></svg>

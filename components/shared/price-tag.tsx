@@ -1,3 +1,4 @@
+import React from 'react';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 

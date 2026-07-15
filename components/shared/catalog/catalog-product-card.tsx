@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { Badge } from '@/components/ui';
+import { PriceTag } from '@/components/shared/price-tag';
 import { useCartStore } from '@/store';
 import { WishlistHeart } from '@/components/shared/wishlist/wishlist-heart';
 import type { ProductCardData } from '@/lib/product-summary';
@@ -82,9 +83,11 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
         <h3 className="font-display font-bold text-[26px] leading-[0.95] tracking-tight">
           <Link href={href} className="hover:underline underline-offset-2">{data.name}</Link>
         </h3>
-        <span className="text-accent font-bold text-[15px] whitespace-nowrap tnum">
-          {data.minPrice.toLocaleString('ru-RU')} ₽
-        </span>
+        <PriceTag
+          price={data.minPrice}
+          compareAtPrice={data.minCompareAtPrice}
+          className="shrink-0 whitespace-nowrap text-[15px] text-accent"
+        />
       </div>
 
       {/* Color selection */}

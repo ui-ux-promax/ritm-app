@@ -40,7 +40,7 @@ const data: ProductCardData = {
   imageUrl: '/images/graphite.jpg',
   imageAlt: 'CABLES cardigan',
   minPrice: 5500,
-  minCompareAtPrice: null,
+  minCompareAtPrice: 6000,
   badges: [],
   soldOut: false,
   colorways: [
@@ -63,6 +63,12 @@ const data: ProductCardData = {
 };
 
 describe('CatalogProductCard', () => {
+  it('shows the previous price when the product is discounted', () => {
+    render(React.createElement(CatalogProductCard, { data }));
+
+    expect(screen.getByText(/6[\s\u00a0]000 ₽/)).toBeTruthy();
+  });
+
   it('changes the product image when a colorway is selected', async () => {
     render(React.createElement(CatalogProductCard, { data }));
 
