@@ -66,7 +66,7 @@ describe('CatalogProductCard', () => {
   it('shows the previous price when the product is discounted', () => {
     render(React.createElement(CatalogProductCard, { data }));
 
-    expect(screen.getByText(/6[\s\u00a0]000 ₽/)).toBeTruthy();
+    expect(screen.getByText(/6[\s\u00a0]000 ₽/).className).toContain('self-end');
   });
 
   it('changes the product image when a colorway is selected', async () => {
