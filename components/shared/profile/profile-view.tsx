@@ -377,13 +377,13 @@ function Loyalty({ name, createdAt }: { name: string; createdAt: string }) {
   const p = Math.min(100, Math.round((POINTS / 2000) * 100));
   return (
     <div className="relative isolate grid gap-3.5 overflow-hidden rounded-[24px] bg-footer px-[22px] py-5 text-primary-foreground shadow-[0_22px_70px_hsl(var(--color-text)/.08)] max-[980px]:max-w-[460px]">
-      {/* Watermark — Ritm logo outline */}
-      <svg className="absolute -right-3.5 -bottom-[18px] h-auto w-[190px] text-primary-foreground opacity-[.08] pointer-events-none" viewBox="0 0 120 34" fill="none" aria-hidden="true">
-        <path d="M6 25L17 8L27 25L36 8L46 25" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M58 9V25M70 9V25" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/>
-        <path d="M82 25V9L99 25V9" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M112 10L104 18L113 25M103 9V25" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
+      {/* Watermark — Ritm wordmark */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-1 -bottom-4 select-none font-display text-[124px] font-extrabold leading-none tracking-[-0.11em] text-primary-foreground opacity-[.08]"
+      >
+        Ritm
+      </span>
 
       {/* Top: eyebrow + gold badge */}
       <div className="z-[1] flex justify-between">
