@@ -1,11 +1,13 @@
+import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { DemoAdminShell } from '@/components/demo-admin/demo-admin-shell';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: {
     default: 'Demo Admin · RITM',
     template: '%s · Demo Admin · RITM',
   },
+  robots: { index: false, follow: false },
 };
 
 export default function DemoAdminLayout({ children }: { children: ReactNode }) {
