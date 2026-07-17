@@ -12,9 +12,10 @@ describe('homepage image performance contract', () => {
     expect(source).not.toContain('priority={index === active}');
   });
 
-  it('uses responsive image sizes for the editorial grid', () => {
-    expect(read('components/shared/home/editorial-bento.tsx')).toContain(
-      'sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 25vw"',
-    );
+  it('matches editorial image sizes to card spans', () => {
+    const source = read('components/shared/home/editorial-bento.tsx');
+    expect(source).toContain('sizes: \'(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 50vw\'');
+    expect(source).toContain('sizes: \'(max-width: 639px) 50vw, (max-width: 1023px) 50vw, 25vw\'');
+    expect(source).toContain('sizes={item.sizes}');
   });
 });
