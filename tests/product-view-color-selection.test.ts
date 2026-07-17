@@ -86,6 +86,7 @@ describe('ProductView colour selection', () => {
     const preloadedImage = document.querySelector('img[data-preload-image="/terracotta.jpg"]');
 
     expect(preloadedImage?.getAttribute('sizes')).toBe('(min-width: 1024px) 600px, 100vw');
+    expect(preloadedImage?.getAttribute('loading')).toBe('eager');
     expect(preloadedImage?.getAttribute('data-test-priority')).toBe('false');
     expect(document.querySelectorAll('img[data-preload-image="/terracotta.jpg"]')).toHaveLength(1);
 

@@ -107,6 +107,7 @@ export function ProductView({
                 data-preload-image={image.url}
                 width={1}
                 height={1}
+                loading="eager"
                 sizes="(min-width: 1024px) 600px, 100vw"
               />
             ))}
