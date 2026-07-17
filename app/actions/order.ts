@@ -3,7 +3,7 @@
 import { auth } from '@/auth';
 import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma-client';
 import { cartInclude } from '@/lib/cart-details';
 import { cartCookieName } from '@/lib/cart-cookie';
@@ -73,22 +73,15 @@ export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
 
   const decremented: { id: string; qty: number }[] = [];
   for (const it of snapshot.items) {
-    // Проверка стока + атомарный декремент. `updateMany`/$executeRaw не работают
-    // на прод-Neon (транзакционны — P9), поэтому findUnique + одиночный update
-    // c `decrement` (доказанно рабочий, probe). Риск гонки между read и decrement
-    // приемлем для MVP (как и в Фазе 1).
-    const v = await prisma.productVariant.findUnique({
-      where: { id: it.productVariantId },
-      select: { stock: true },
+    // A conditional update reserves stock without a read-then-write race.
+    const updated = await prisma.productVariant.updateMany({
+      where: { id: it.productVariantId, stock: { gte: it.quantity } },
+      data: { stock: { decrement: it.quantity } },
     });
-    if (!v || v.stock < it.quantity) {
+    if (updated.count === 0) {
       await restoreStock(decremented);
       return { ok: false, error: `Товар «${it.productName}» закончился, обновите корзину` };
     }
-    await prisma.productVariant.update({
-      where: { id: it.productVariantId },
-      data: { stock: { decrement: it.quantity } },
-    });
     decremented.push({ id: it.productVariantId, qty: it.quantity });
   }
 
@@ -148,9 +141,7 @@ export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
       // return_url ДОЛЖЕН вести на тот же деплой, где оформлен заказ: там сессия, кука и
       // нужная ветка Neon (БД заводит ветку на каждое окружение, P7). Поэтому приоритет —
       // host текущего запроса; NEXT_PUBLIC_SITE_URL — только фолбэк для localhost.
-      const host = (await headers()).get('host') || '';
-      const baseUrl = host ? `https://${host}` : (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
-      const pay = await createPayment({ orderNumber, amountRub: totalAmount, baseUrl });
+      const pay = await createPayment({ orderNumber, amountRub: totalAmount });
       await prisma.payment.create({
         data: { id: pay.id, orderId, amount: totalAmount, confirmationUrl: pay.confirmationUrl, status: 'pending' },
       });

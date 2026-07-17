@@ -8,7 +8,7 @@
 ## Vercel and environment
 
 - [ ] Production URL is `https://ritm-app-eight.vercel.app` and points to the reviewed commit SHA.
-- [ ] Vercel Production contains demo/sandbox Neon, YooKassa, Upstash, Sentry, Resend, Cloudinary, `DEMO_MODE=true`, and `CRON_SECRET`; no value is copied into this document.
+- [ ] Vercel Production contains demo/sandbox Neon, YooKassa, Upstash, Sentry, Resend, Cloudinary, `DEMO_MODE=true`, `CRON_SECRET`, and `AUTH_TRUST_HOST=true`; enable host trust only behind Vercel or another trusted reverse proxy. No value is copied into this document.
 
 ## Storefront and payment
 

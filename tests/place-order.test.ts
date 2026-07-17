@@ -11,7 +11,7 @@ vi.mock('@/lib/cart', () => ({
 vi.mock('@/lib/prisma-client', () => ({
   prisma: {
     cart: { findFirst: vi.fn() },
-    productVariant: { findUnique: vi.fn(), update: vi.fn() },
+    productVariant: { updateMany: vi.fn(), update: vi.fn() },
     order: { create: vi.fn(), delete: vi.fn() },
     orderItem: { create: vi.fn() },
     cartItem: { deleteMany: vi.fn() },
@@ -26,7 +26,7 @@ import { prisma } from '@/lib/prisma-client';
 const authMock = auth as unknown as ReturnType<typeof vi.fn>;
 const cookiesMock = cookies as unknown as ReturnType<typeof vi.fn>;
 const cartFindFirst = prisma.cart.findFirst as unknown as ReturnType<typeof vi.fn>;
-const variantFindUnique = prisma.productVariant.findUnique as unknown as ReturnType<typeof vi.fn>;
+const variantUpdateMany = prisma.productVariant.updateMany as unknown as ReturnType<typeof vi.fn>;
 const variantUpdate = prisma.productVariant.update as unknown as ReturnType<typeof vi.fn>;
 const orderCreate = prisma.order.create as unknown as ReturnType<typeof vi.fn>;
 const orderItemCreate = prisma.orderItem.create as unknown as ReturnType<typeof vi.fn>;
@@ -57,7 +57,7 @@ beforeEach(() => {
   authMock.mockResolvedValue({ user: { id: 'u1' } });
   cookiesMock.mockResolvedValue({ get: () => ({ value: 't' }) });
   variantUpdate.mockResolvedValue({});
-  variantFindUnique.mockResolvedValue({ stock: 9 });
+  variantUpdateMany.mockResolvedValue({ count: 1 });
   cartItemDeleteMany.mockResolvedValue({ count: 1 });
   orderItemCreate.mockResolvedValue({});
   orderDelete.mockResolvedValue({});
@@ -69,8 +69,10 @@ describe('placeOrder', () => {
     orderCreate.mockResolvedValue({ id: 'o1', orderNumber: 1025 });
     const r = await placeOrder(validForm);
     expect(r).toEqual({ ok: true, orderNumber: 1025 });
-    expect(variantFindUnique).toHaveBeenCalledTimes(1);
-    expect(variantUpdate).toHaveBeenCalledWith({ where: { id: 'v1' }, data: { stock: { decrement: 1 } } });
+    expect(variantUpdateMany).toHaveBeenCalledWith({
+      where: { id: 'v1', stock: { gte: 1 } },
+      data: { stock: { decrement: 1 } },
+    });
     expect(orderCreate).toHaveBeenCalledOnce();
     expect(orderItemCreate).toHaveBeenCalledTimes(1);
     expect(cartItemDeleteMany).toHaveBeenCalledOnce();
@@ -78,7 +80,7 @@ describe('placeOrder', () => {
 
   it('нехватка на 2-й позиции — компенсация 1-й, заказ НЕ создан', async () => {
     cartFindFirst.mockResolvedValue(cartWith('v1', 'v2'));
-    variantFindUnique.mockResolvedValueOnce({ stock: 9 }).mockResolvedValueOnce({ stock: 0 });
+    variantUpdateMany.mockResolvedValueOnce({ count: 1 }).mockResolvedValueOnce({ count: 0 });
     const r = await placeOrder(validForm);
     expect(r.ok).toBe(false);
     expect(variantUpdate).toHaveBeenCalledWith({ where: { id: 'v1' }, data: { stock: { increment: 1 } } });
@@ -90,7 +92,7 @@ describe('placeOrder', () => {
     orderCreate.mockRejectedValue(new Error('db down'));
     const r = await placeOrder(validForm);
     expect(r.ok).toBe(false);
-    expect(variantUpdate).toHaveBeenCalledTimes(4); // 2 decrement + 2 increment restore
+    expect(variantUpdate).toHaveBeenCalledTimes(2);
     expect(orderItemCreate).not.toHaveBeenCalled();
   });
 
@@ -101,14 +103,14 @@ describe('placeOrder', () => {
     const r = await placeOrder(validForm);
     expect(r.ok).toBe(false);
     expect(orderDelete).toHaveBeenCalledWith({ where: { id: 'o1' } });
-    expect(variantUpdate).toHaveBeenCalledTimes(4); // 2 decrement + 2 increment restore
+    expect(variantUpdate).toHaveBeenCalledTimes(2);
   });
 
   it('пустая корзина — ошибка, без записи', async () => {
     cartFindFirst.mockResolvedValue({ id: 'c1', token: 't', items: [] });
     const r = await placeOrder(validForm);
     expect(r).toEqual({ ok: false, error: 'Корзина пуста' });
-    expect(variantFindUnique).not.toHaveBeenCalled();
+    expect(variantUpdateMany).not.toHaveBeenCalled();
   });
 
   it('неактивный товар — отказ до проверки стока', async () => {
@@ -117,7 +119,7 @@ describe('placeOrder', () => {
     cartFindFirst.mockResolvedValue(cart);
     const r = await placeOrder(validForm);
     expect(r.ok).toBe(false);
-    expect(variantFindUnique).not.toHaveBeenCalled();
+    expect(variantUpdateMany).not.toHaveBeenCalled();
     expect(orderCreate).not.toHaveBeenCalled();
   });
 

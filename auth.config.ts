@@ -5,7 +5,7 @@ import Credentials from 'next-auth/providers/credentials';
 type Role = 'CUSTOMER' | 'ADMIN';
 
 export default {
-  trustHost: true,
+  trustHost: process.env.AUTH_TRUST_HOST === 'true',
   pages: { signIn: '/login' },
   providers: [
     // allowDangerousEmailAccountLinking НЕ включаем: иначе Google-вход авто-линковался бы к
