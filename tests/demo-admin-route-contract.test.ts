@@ -16,6 +16,11 @@ describe('demo admin route contract', () => {
     expect(source).not.toMatch(/requireAdmin|@\/auth|components\/admin\/admin-shell/);
   });
 
+  it('marks every public demo-admin route as non-indexable', () => {
+    const source = readFileSync(join(root, 'app/(demo-admin)/demo-admin/layout.tsx'), 'utf8');
+    expect(source).toMatch(/robots:\s*\{\s*index:\s*false,\s*follow:\s*false\s*\}/);
+  });
+
   it('uses the real admin shell geometry instead of a simplified demo layout', () => {
     const source = readFileSync(join(root, 'components/demo-admin/demo-admin-shell.tsx'), 'utf8');
     expect(source).toContain('fixed left-0 top-0');
