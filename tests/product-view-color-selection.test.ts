@@ -9,7 +9,8 @@ import { ProductView } from '@/components/shared/product/product-view';
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 vi.mock('next/image', () => ({
-  default: ({ src, alt }: { src: string; alt: string }) => React.createElement('img', { src, alt }),
+  default: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement> & { src: string }) =>
+    React.createElement('img', { src, alt, ...props }),
 }));
 
 vi.mock('@/components/shared/product/purchase-panel', () => ({
@@ -73,6 +74,11 @@ describe('ProductView colour selection', () => {
         ],
       } as never),
     );
+
+    const preloadedImage = document.querySelector('img[data-preload-image="/terracotta.jpg"]');
+
+    expect(preloadedImage?.getAttribute('sizes')).toBe('(min-width: 1024px) 600px, 100vw');
+    expect(preloadedImage?.getAttribute('fetchpriority')).not.toBe('high');
 
     fireEvent.click(screen.getByRole('button', { name: 'Terracotta' }));
 

@@ -53,6 +53,11 @@ export function ProductView({
 
   const { galleryImages, variants: panelVariants } = activeColorway;
   const main = galleryImages[activeIdx] ?? galleryImages[0];
+  const activeImageUrls = new Set(galleryImages.map((image) => image.url));
+  const preloadImages = colorways.flatMap((colorway) => colorway.galleryImages)
+    .filter((image, index, images) =>
+      !activeImageUrls.has(image.url) && images.findIndex(({ url }) => url === image.url) === index,
+    );
   const availableVariants = panelVariants.filter((variant) => variant.active && variant.stock > 0);
   const cheapestVariant = availableVariants.reduce<PanelVariant | null>(
     (cheapest, variant) => cheapest === null || variant.price < cheapest.price ? variant : cheapest,
@@ -93,6 +98,19 @@ export function ProductView({
           {main && (
             <Image src={main.url} alt={main.alt} fill priority sizes="(min-width: 1024px) 600px, 100vw" className="object-cover" />
           )}
+          <div aria-hidden className="sr-only">
+            {preloadImages.map((image) => (
+              <Image
+                key={image.url}
+                src={image.url}
+                alt=""
+                data-preload-image={image.url}
+                width={1}
+                height={1}
+                sizes="(min-width: 1024px) 600px, 100vw"
+              />
+            ))}
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2 lg:col-start-2 lg:row-start-1 lg:grid-cols-2 lg:gap-3">
