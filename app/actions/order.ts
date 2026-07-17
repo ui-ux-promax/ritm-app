@@ -1,7 +1,6 @@
 'use server';
 
 import { auth } from '@/auth';
-import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma-client';
@@ -201,38 +200,30 @@ export async function cancelOrder(orderId: string): Promise<CancelOrderResult> {
     return { ok: false, error: 'Этот заказ нельзя отменить' };
   }
 
-  // Атомарный переход PENDING→CANCELLED (одиночный UPDATE ... WHERE id AND userId AND status):
-  // гарантирует, что побочные эффекты (возврат стока, откат salesCount, отмена платежа)
-  // применятся РОВНО ОДИН РАЗ даже в гонке с вебхуком ЮKassa, который мог отменить платёж
-  // между findUnique и этим update. P2025 = заказ уже не PENDING → ничего не откатываем.
-  try {
-    await prisma.order.update({
+  // The status transition and stock restoration must commit together. Otherwise a
+  // transient database failure can leave a CANCELLED order with stock still reserved.
+  const cancelled = await prisma.$transaction(async (tx) => {
+    const result = await tx.order.updateMany({
       where: { id: orderId, userId, status: 'PENDING' },
       data: { status: 'CANCELLED' },
     });
-  } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { ok: false, error: 'Этот заказ нельзя отменить' };
+    if (result.count === 0) return false;
+
+    for (const item of order.items) {
+      await tx.productVariant.update({
+        where: { id: item.productVariantId },
+        data: { stock: { increment: item.quantity } },
+      });
     }
-    throw e;
-  }
+    return true;
+  });
+  if (!cancelled) return { ok: false, error: 'Этот заказ нельзя отменить' };
 
   if (order.payment && order.payment.status === 'pending') {
     try {
       await cancelPayment(order.payment.id);
     } catch (e) {
       logger.error('cancel_payment_failed', e, { orderId, paymentId: order.payment.id });
-    }
-  }
-
-  for (const item of order.items) {
-    try {
-      await prisma.productVariant.update({
-        where: { id: item.productVariantId },
-        data: { stock: { increment: item.quantity } },
-      });
-    } catch (e) {
-      logger.error('cancel_stock_restore_failed', e, { orderId, variantId: item.productVariantId });
     }
   }
 
