@@ -102,9 +102,9 @@ describe('homepage image performance contract', () => {
 
   it('matches editorial image sizes to card spans', () => {
     const source = read('components/shared/home/editorial-bento.tsx');
-    expect(source).toContain('sizes: \'(max-width: 639px) 100vw, 50vw\'');
-    expect(source).toContain('sizes: \'(max-width: 639px) 50vw, 25vw\'');
-    expect(source).toContain('sizes: \'(max-width: 639px) 50vw, 50vw\'');
+    expect(source).toContain('first-card-size');
+    expect(source).toContain('desktop-single-size');
+    expect(source).toContain('desktop-double-size');
     expect(source).toContain('sizes={item.sizes}');
   });
 });
@@ -124,7 +124,7 @@ In `components/shared/home/hero.tsx`, replace the priority condition:
 priority={index === 0}
 ```
 
-In `components/shared/home/editorial-bento.tsx`, add a `sizes: string` field to `BentoItem`. The first card has `col-span-2` at every breakpoint, so use `'(max-width: 639px) 100vw, 50vw'`. Every other card is one column below 640px; use `'(max-width: 639px) 50vw, 25vw'` for those that occupy one desktop column. For the three cards whose `col-span-2` begins at `min-[640px]`, use `'(max-width: 639px) 50vw, 50vw'`. Pass the field to the image:
+In `components/shared/home/editorial-bento.tsx`, define three named size constants and store the matching constant in each `BentoItem`: `FIRST_CARD_SIZES = '(max-width: 639px) 100vw, (max-width: 1240px) calc(50vw - 34px), 586px'`; `DESKTOP_SINGLE_SIZES = '(max-width: 639px) 50vw, (max-width: 1240px) calc(25vw - 27px), 283px'`; `DESKTOP_DOUBLE_SIZES = '(max-width: 639px) 50vw, (max-width: 1240px) calc(50vw - 34px), 586px'`. Use the first constant only for the base `col-span-2` card, the single constant for cards that remain one desktop column, and the double constant for cards whose `col-span-2` begins at `min-[640px]`. Update the test to assert the exact card-to-constant mapping rather than merely searching for strings. Pass the field to the image:
 
 ```tsx
 sizes={item.sizes}
