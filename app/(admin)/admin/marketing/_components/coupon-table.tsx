@@ -37,17 +37,24 @@ const STATUS_META: Record<CouponStatus, { label: string; cls: string }> = {
 
 export function CouponTable({ rows }: { rows: CouponRow[] }) {
   const router = useRouter();
-  const [pending, setPending] = React.useState<string | null>(null);
+  const [pending, setPending] = React.useState<ReadonlySet<string>>(() => new Set());
   const [toDelete, setToDelete] = React.useState<CouponRow | null>(null);
   const [deleting, setDeleting] = React.useState(false);
   const [blockMsg, setBlockMsg] = React.useState<string | null>(null);
 
   async function handleToggle(row: CouponRow, next: boolean) {
-    setPending(row.id);
-    const res = await toggleCoupon(row.id, next);
-    if (!res.ok) setBlockMsg(res.error);
-    else router.refresh();
-    setPending(null);
+    setPending((current) => new Set(current).add(row.id));
+    try {
+      const res = await toggleCoupon(row.id, next);
+      if (!res.ok) setBlockMsg(res.error);
+      else router.refresh();
+    } finally {
+      setPending((current) => {
+        const updated = new Set(current);
+        updated.delete(row.id);
+        return updated;
+      });
+    }
   }
 
   async function handleDelete() {
@@ -91,11 +98,11 @@ export function CouponTable({ rows }: { rows: CouponRow[] }) {
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={row.active}
-                      disabled={pending === row.id}
-                      aria-busy={pending === row.id || undefined}
+                      disabled={pending.has(row.id)}
+                      aria-busy={pending.has(row.id) || undefined}
                       onCheckedChange={(v) => handleToggle(row, v)}
                     />
-                    {pending === row.id && (
+                    {pending.has(row.id) && (
                       <Loader2 role="status" aria-label="Загрузка статуса купона" className="h-4 w-4 animate-spin" />
                     )}
                   </div>
@@ -141,11 +148,11 @@ export function CouponTable({ rows }: { rows: CouponRow[] }) {
                 <label className="flex items-center gap-2 text-sm text-admin-on-surface-variant">
                   <Switch
                     checked={row.active}
-                    disabled={pending === row.id}
-                    aria-busy={pending === row.id || undefined}
+                    disabled={pending.has(row.id)}
+                    aria-busy={pending.has(row.id) || undefined}
                     onCheckedChange={(v) => handleToggle(row, v)}
                   />
-                  {pending === row.id && (
+                  {pending.has(row.id) && (
                     <Loader2 role="status" aria-label="Загрузка статуса купона" className="h-4 w-4 animate-spin" />
                   )}
                   Активен

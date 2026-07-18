@@ -164,13 +164,13 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
           disabled={!selectedVariant?.inStock || adding}
           aria-busy={adding || undefined}
           aria-label={adding ? 'Добавляем в корзину' : undefined}
-          className={`min-h-[46px] rounded-full font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+          className={`min-h-[46px] rounded-full font-semibold text-sm transition-colors ${
             added
               ? 'bg-accent text-accent-foreground'
               : !selectedVariant?.inStock
                 ? 'bg-ink/20 text-surface cursor-not-allowed'
                 : 'bg-primary text-primary-foreground hover:bg-footer'
-          }`}
+          } ${adding ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {adding ? <Loader2 className="h-5 w-5 animate-spin" role="status" aria-label="Добавляем в корзину" /> : added ? 'Добавлено ✓' : 'Добавить в корзину'}
         </button>

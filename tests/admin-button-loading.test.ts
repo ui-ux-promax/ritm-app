@@ -106,4 +106,67 @@ describe('admin row loading states', () => {
     request.resolve({ ok: true });
     await waitFor(() => expect(switches[0].hasAttribute('disabled')).toBe(false));
   });
+
+  it('keeps each concurrent category row busy until its own move settles', async () => {
+    const first = deferred<{ ok: true }>();
+    const second = deferred<{ ok: true }>();
+    moveCategoryMock
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise);
+
+    render(React.createElement(CategoryTable, {
+      rows: [
+        { id: 'cat-1', name: 'First', slug: 'first', tagline: null, coverImage: null, productCount: 0 },
+        { id: 'cat-2', name: 'Second', slug: 'second', tagline: null, coverImage: null, productCount: 0 },
+        { id: 'cat-3', name: 'Third', slug: 'third', tagline: null, coverImage: null, productCount: 0 },
+      ],
+    }));
+
+    const desktopDownButtons = screen.getAllByRole('button', { name: /вниз/i }).slice(0, 3);
+    fireEvent.click(desktopDownButtons[0]);
+    fireEvent.click(desktopDownButtons[1]);
+
+    await waitFor(() => {
+      expect(desktopDownButtons[0].getAttribute('aria-busy')).toBe('true');
+      expect(desktopDownButtons[1].getAttribute('aria-busy')).toBe('true');
+    });
+
+    first.resolve({ ok: true });
+    await waitFor(() => expect(desktopDownButtons[0].getAttribute('aria-busy')).not.toBe('true'));
+    expect(desktopDownButtons[1].getAttribute('aria-busy')).toBe('true');
+
+    second.resolve({ ok: true });
+    await waitFor(() => expect(desktopDownButtons[1].getAttribute('aria-busy')).not.toBe('true'));
+  });
+
+  it('keeps each concurrent coupon row busy until its own toggle settles', async () => {
+    const first = deferred<{ ok: true }>();
+    const second = deferred<{ ok: true }>();
+    toggleCouponMock
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise);
+
+    render(React.createElement(CouponTable, {
+      rows: [
+        { id: 'coupon-1', code: 'SAVE10', percent: 10, active: true, status: 'active', expiresLabel: 'Never', createdLabel: 'Today' },
+        { id: 'coupon-2', code: 'SAVE20', percent: 20, active: false, status: 'inactive', expiresLabel: 'Never', createdLabel: 'Today' },
+      ],
+    }));
+
+    const desktopSwitches = screen.getAllByRole('switch').slice(0, 2);
+    fireEvent.click(desktopSwitches[0]);
+    fireEvent.click(desktopSwitches[1]);
+
+    await waitFor(() => {
+      expect(desktopSwitches[0].getAttribute('aria-busy')).toBe('true');
+      expect(desktopSwitches[1].getAttribute('aria-busy')).toBe('true');
+    });
+
+    first.resolve({ ok: true });
+    await waitFor(() => expect(desktopSwitches[0].getAttribute('aria-busy')).not.toBe('true'));
+    expect(desktopSwitches[1].getAttribute('aria-busy')).toBe('true');
+
+    second.resolve({ ok: true });
+    await waitFor(() => expect(desktopSwitches[1].getAttribute('aria-busy')).not.toBe('true'));
+  });
 });

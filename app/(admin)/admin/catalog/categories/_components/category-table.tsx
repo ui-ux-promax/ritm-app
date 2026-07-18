@@ -29,22 +29,33 @@ export interface CategoryRow {
 
 export function CategoryTable({ rows }: { rows: CategoryRow[] }) {
   const router = useRouter();
-  const [pending, setPending] = React.useState<{ id: string; dir: 'up' | 'down' } | null>(null);
+  const [pending, setPending] = React.useState<ReadonlySet<string>>(() => new Set());
   const [toDelete, setToDelete] = React.useState<CategoryRow | null>(null);
   const [deleting, setDeleting] = React.useState(false);
   // Сообщение-блокировка показывается в отдельной модалке (категория с товарами / ошибка действия).
   const [blockMsg, setBlockMsg] = React.useState<string | null>(null);
 
   async function handleMove(id: string, dir: 'up' | 'down') {
-    setPending({ id, dir });
-    const res = await moveCategory(id, dir);
-    if (!res.ok) {
-      setBlockMsg(res.error);
-    } else {
-      router.refresh();
+    const key = `${id}:${dir}`;
+    setPending((current) => new Set(current).add(key));
+    try {
+      const res = await moveCategory(id, dir);
+      if (!res.ok) {
+        setBlockMsg(res.error);
+      } else {
+        router.refresh();
+      }
+    } finally {
+      setPending((current) => {
+        const next = new Set(current);
+        next.delete(key);
+        return next;
+      });
     }
-    setPending(null);
   }
+
+  const isPending = (id: string, dir: 'up' | 'down') => pending.has(`${id}:${dir}`);
+  const isRowPending = (id: string) => isPending(id, 'up') || isPending(id, 'down');
 
   // Клик «Удалить»: категория с товарами — сразу модалка-блок (без confirm); иначе — confirm.
   function requestDelete(row: CategoryRow) {
@@ -103,12 +114,12 @@ export function CategoryTable({ rows }: { rows: CategoryRow[] }) {
                     <button
                       type="button"
                       aria-label="Вверх"
-                      disabled={i === 0 || pending?.id === row.id}
-                      aria-busy={pending?.id === row.id && pending.dir === 'up' || undefined}
+                      disabled={i === 0 || isRowPending(row.id)}
+                      aria-busy={isPending(row.id, 'up') || undefined}
                       onClick={() => handleMove(row.id, 'up')}
                       className="grid h-9 w-9 place-items-center rounded-full text-admin-on-surface-variant hover:bg-admin-surface-low hover:text-admin-on-surface disabled:opacity-30"
                     >
-                      {pending?.id === row.id && pending.dir === 'up' ? (
+                      {isPending(row.id, 'up') ? (
                         <Loader2 role="status" aria-label="Перемещаем категорию" className="h-4 w-4 animate-spin" />
                       ) : (
                         <Icon name="arrow_upward" />
@@ -117,12 +128,12 @@ export function CategoryTable({ rows }: { rows: CategoryRow[] }) {
                     <button
                       type="button"
                       aria-label="Вниз"
-                      disabled={i === rows.length - 1 || pending?.id === row.id}
-                      aria-busy={pending?.id === row.id && pending.dir === 'down' || undefined}
+                      disabled={i === rows.length - 1 || isRowPending(row.id)}
+                      aria-busy={isPending(row.id, 'down') || undefined}
                       onClick={() => handleMove(row.id, 'down')}
                       className="grid h-9 w-9 place-items-center rounded-full text-admin-on-surface-variant hover:bg-admin-surface-low hover:text-admin-on-surface disabled:opacity-30"
                     >
-                      {pending?.id === row.id && pending.dir === 'down' ? (
+                      {isPending(row.id, 'down') ? (
                         <Loader2 role="status" aria-label="Перемещаем категорию" className="h-4 w-4 animate-spin" />
                       ) : (
                         <Icon name="arrow_downward" />
@@ -168,12 +179,12 @@ export function CategoryTable({ rows }: { rows: CategoryRow[] }) {
                   <button
                     type="button"
                     aria-label="Вверх"
-                    disabled={i === 0 || pending?.id === row.id}
-                    aria-busy={pending?.id === row.id && pending.dir === 'up' || undefined}
+                    disabled={i === 0 || isRowPending(row.id)}
+                    aria-busy={isPending(row.id, 'up') || undefined}
                     onClick={() => handleMove(row.id, 'up')}
                     className="grid h-9 w-9 place-items-center rounded-full text-admin-on-surface-variant hover:bg-admin-surface-low hover:text-admin-on-surface disabled:opacity-30"
                   >
-                    {pending?.id === row.id && pending.dir === 'up' ? (
+                    {isPending(row.id, 'up') ? (
                       <Loader2 role="status" aria-label="Перемещаем категорию" className="h-4 w-4 animate-spin" />
                     ) : (
                       <Icon name="arrow_upward" />
@@ -182,12 +193,12 @@ export function CategoryTable({ rows }: { rows: CategoryRow[] }) {
                   <button
                     type="button"
                     aria-label="Вниз"
-                    disabled={i === rows.length - 1 || pending?.id === row.id}
-                    aria-busy={pending?.id === row.id && pending.dir === 'down' || undefined}
+                    disabled={i === rows.length - 1 || isRowPending(row.id)}
+                    aria-busy={isPending(row.id, 'down') || undefined}
                     onClick={() => handleMove(row.id, 'down')}
                     className="grid h-9 w-9 place-items-center rounded-full text-admin-on-surface-variant hover:bg-admin-surface-low hover:text-admin-on-surface disabled:opacity-30"
                   >
-                    {pending?.id === row.id && pending.dir === 'down' ? (
+                    {isPending(row.id, 'down') ? (
                       <Loader2 role="status" aria-label="Перемещаем категорию" className="h-4 w-4 animate-spin" />
                     ) : (
                       <Icon name="arrow_downward" />

@@ -102,7 +102,18 @@ describe('CatalogProductCard', () => {
     expect(pendingButton.hasAttribute('disabled')).toBe(true);
     expect(pendingButton.getAttribute('aria-busy')).toBe('true');
     expect(screen.getByRole('status', { name: '\u0414\u043e\u0431\u0430\u0432\u043b\u044f\u0435\u043c \u0432 \u043a\u043e\u0440\u0437\u0438\u043d\u0443' })).not.toBeNull();
+    expect(pendingButton.className.split(/\s+/)).toContain('opacity-50');
+    expect(pendingButton.className.split(/\s+/)).not.toContain('disabled:opacity-50');
 
     resolveAdd!();
+  });
+
+  it('does not apply the request-loading style to the static size-selection state', () => {
+    render(React.createElement(CatalogProductCard, { data }));
+
+    const addButton = screen.getByRole('button', { name: 'Добавить в корзину' });
+    expect(addButton.hasAttribute('disabled')).toBe(true);
+    expect(addButton.className.split(/\s+/)).not.toContain('disabled:opacity-50');
+    expect(addButton.className).toContain('bg-ink/20');
   });
 });

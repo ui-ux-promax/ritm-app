@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toggleWishlist } from '@/app/actions/wishlist';
@@ -21,32 +21,33 @@ export function WishlistHeart({ productId, initialActive, variant = 'card', land
   const fetchCount = useWishlistStore((s) => s.fetchCount);
   const [active, setActive] = useState(initialActive);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, setPending] = useState(false);
 
-  const onClick = () => {
+  const onClick = async () => {
     if (pending) return;
+    setPending(true);
     const next = !active;
     setActive(next); // оптимистично
     if (next) increment(); else decrement(); // бейдж обновляем мгновенно
     setError(null);
-    startTransition(async () => {
-      try {
-        const res = await toggleWishlist({ productId });
-        if (!res.ok) {
-          setActive(!next); // откат
-          if (next) decrement(); else increment(); // откат бейджа
-          setError('Не удалось обновить избранное');
-          return;
-        }
-        setActive(res.active);
-        fetchCount(); // сверяем с авторитетным счётчиком сервера
-        router.refresh(); // обновить список на /profile#favorites
-      } catch {
-        setActive(!next); // откат при сбое экшена (сеть/сервер)
+    try {
+      const res = await toggleWishlist({ productId });
+      if (!res.ok) {
+        setActive(!next); // откат
         if (next) decrement(); else increment(); // откат бейджа
         setError('Не удалось обновить избранное');
+        return;
       }
-    });
+      setActive(res.active);
+      fetchCount(); // сверяем с авторитетным счётчиком сервера
+      router.refresh(); // обновить список на /profile#favorites
+    } catch {
+      setActive(!next); // откат при сбое экшена (сеть/сервер)
+      if (next) decrement(); else increment(); // откат бейджа
+      setError('Не удалось обновить избранное');
+    } finally {
+      setPending(false);
+    }
   };
 
   const label = active ? 'Убрать из избранного' : 'В избранное';

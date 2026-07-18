@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
-import { useEffect, useMemo, useState, useTransition, type ReactNode } from 'react';
+import React, { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { updatePassword, updateProfile } from '@/app/actions/profile';
 import { toggleWishlist } from '@/app/actions/wishlist';
@@ -783,20 +783,40 @@ function Favorites({ favorites, onRemove }: {
 function Addresses({ addresses }: { addresses: SavedAddress[] }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ label: 'Дом', city: '', street: '', comment: '' });
-  const [pending, startAdd] = useTransition();
+  const [adding, setAdding] = useState(false);
+  const [pendingActions, setPendingActions] = useState<ReadonlySet<string>>(() => new Set());
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    startAdd(async () => {
+    setAdding(true);
+    try {
       await addAddress(form);
       setForm({ label: 'Дом', city: '', street: '', comment: '' });
       setShowForm(false);
-    });
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const runAddressAction = async (key: string, action: () => Promise<unknown>) => {
+    setPendingActions((current) => new Set(current).add(key));
+    try {
+      await action();
+    } finally {
+      setPendingActions((current) => {
+        const next = new Set(current);
+        next.delete(key);
+        return next;
+      });
+    }
   };
 
   return (
     <div className="grid grid-cols-2 gap-4 max-[560px]:grid-cols-1">
-      {addresses.map((a) => (
+      {addresses.map((a) => {
+        const makingDefault = pendingActions.has(`default:${a.id}`);
+        const deleting = pendingActions.has(`delete:${a.id}`);
+        return (
         <div key={a.id} className={cn('relative grid gap-2 rounded-[24px] border border-line bg-surface p-5', a.isDefault && 'border-accent/45 shadow-[inset_0_0_0_1px_hsl(var(--color-accent)/.2)]')}>
           {a.isDefault && (
             <span className="absolute right-4 top-4 rounded-full border border-accent/30 bg-accent/12 px-[9px] py-[3px] text-[10.5px] font-bold uppercase tracking-[.04em] text-[hsl(151_48%_24%)]">
@@ -816,16 +836,31 @@ function Addresses({ addresses }: { addresses: SavedAddress[] }) {
           </p>
           <div className="mt-1.5 flex flex-wrap gap-2">
             {!a.isDefault && (
-              <button type="button" onClick={() => setDefaultAddress(a.id)} className="h-9 rounded-full border border-line bg-surface px-3.5 text-[12.5px] font-bold hover:border-ink/30">
-                По умолчанию
+              <button
+                type="button"
+                onClick={() => runAddressAction(`default:${a.id}`, () => setDefaultAddress(a.id))}
+                disabled={makingDefault}
+                aria-busy={makingDefault || undefined}
+                aria-label={makingDefault ? 'Делаем адрес основным' : undefined}
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-full border border-line bg-surface px-3.5 text-[12.5px] font-bold hover:border-ink/30 disabled:opacity-60"
+              >
+                {makingDefault ? <Loader2 role="status" aria-label="Делаем адрес основным" className="h-4 w-4 animate-spin" /> : 'По умолчанию'}
               </button>
             )}
-            <button type="button" onClick={() => deleteAddress(a.id)} className="h-9 rounded-full border border-line bg-surface px-3.5 text-[12.5px] font-bold text-danger hover:border-danger/40">
-              Удалить
+            <button
+              type="button"
+              onClick={() => runAddressAction(`delete:${a.id}`, () => deleteAddress(a.id))}
+              disabled={deleting}
+              aria-busy={deleting || undefined}
+              aria-label={deleting ? 'Удаляем адрес' : undefined}
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-full border border-line bg-surface px-3.5 text-[12.5px] font-bold text-danger hover:border-danger/40 disabled:opacity-60"
+            >
+              {deleting ? <Loader2 role="status" aria-label="Удаляем адрес" className="h-4 w-4 animate-spin" /> : 'Удалить'}
             </button>
           </div>
         </div>
-      ))}
+        );
+      })}
 
       {/* Add address tile or form */}
       {showForm ? (
@@ -836,8 +871,14 @@ function Addresses({ addresses }: { addresses: SavedAddress[] }) {
           <input value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} placeholder="Улица, дом, квартира" required className="h-12 rounded-[14px] border border-line bg-surface px-3.5 text-sm outline-none" />
           <input value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} placeholder="Комментарий (необязательно)" className="h-12 rounded-[14px] border border-line bg-surface px-3.5 text-sm outline-none" />
           <div className="flex gap-2">
-            <button type="submit" disabled={pending} className="h-[42px] rounded-full bg-primary px-5 text-[13px] font-bold text-primary-foreground disabled:opacity-60">
-              {pending ? 'Сохраняем…' : 'Сохранить'}
+            <button
+              type="submit"
+              disabled={adding}
+              aria-busy={adding || undefined}
+              aria-label={adding ? 'Сохраняем адрес' : undefined}
+              className="inline-flex h-[42px] items-center justify-center gap-2 rounded-full bg-primary px-5 text-[13px] font-bold text-primary-foreground disabled:opacity-60"
+            >
+              {adding ? <Loader2 role="status" aria-label="Сохраняем адрес" className="h-4 w-4 animate-spin" /> : 'Сохранить'}
             </button>
             <button type="button" onClick={() => setShowForm(false)} className="h-[42px] rounded-full border border-line px-5 text-[13px] font-bold">
               Отмена
@@ -879,9 +920,9 @@ function Personal({ user, initial, toast }: {
   const [first, last] = splitName(initial.name ?? '');
   const [f, setF] = useState({ name: first, surname: last, phone: initial.phone ?? '', birthdate: initial.birthdate ?? '', email: user.email });
   const [err, setErr] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, setPending] = useState(false);
 
-  const submit = (e: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const parsed = profileSchema.safeParse({
       name: [f.name, f.surname].filter(Boolean).join(' ').trim(),
@@ -890,10 +931,13 @@ function Personal({ user, initial, toast }: {
     });
     if (!parsed.success) { setErr(true); return; }
     setErr(false);
-    start(async () => {
+    setPending(true);
+    try {
       const r = await updateProfile(parsed.data);
       toast(r.ok ? 'Изменения сохранены' : r.error);
-    });
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
@@ -907,7 +951,7 @@ function Personal({ user, initial, toast }: {
           <Field id="set-birthdate" label="Дата рождения" value={f.birthdate} set={(v) => setF({ ...f, birthdate: v })} type="date" />
         </div>
         <Field id="set-email" label="E-mail" value={f.email} set={(v) => setF({ ...f, email: v })} type="email" disabled />
-        <Submit pending={pending}>{pending ? 'Сохраняем...' : 'Сохранить изменения'}</Submit>
+        <Submit pending={pending}>Сохранить изменения</Submit>
       </form>
     </Card>
   );
@@ -917,10 +961,10 @@ function Password({ toast }: { toast: (s: string) => void }) {
   const [v, setV] = useState({ current: '', next: '', repeat: '' });
   const [show, setShow] = useState({ current: false, next: false, repeat: false });
   const [bad, setBad] = useState<ReadonlySet<keyof typeof v>>(() => new Set());
-  const [pending, start] = useTransition();
+  const [pending, setPending] = useState(false);
   const str = strength(v.next);
 
-  const submit = (e: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const b = new Set<keyof typeof v>();
     if (!v.current) b.add('current');
@@ -928,7 +972,8 @@ function Password({ toast }: { toast: (s: string) => void }) {
     if (v.repeat !== v.next || v.repeat.length < 8) b.add('repeat');
     setBad(b);
     if (b.size === 0) {
-      start(async () => {
+      setPending(true);
+      try {
         const r = await updatePassword({
           currentPassword: v.current,
           newPassword: v.next,
@@ -943,7 +988,9 @@ function Password({ toast }: { toast: (s: string) => void }) {
         }
         setV({ current: '', next: '', repeat: '' });
         toast('Пароль обновлён');
-      });
+      } finally {
+        setPending(false);
+      }
     }
   };
 
@@ -969,7 +1016,7 @@ function Password({ toast }: { toast: (s: string) => void }) {
         <Pass id="pw-repeat" label="Повторите пароль" value={v.repeat}
           set={(x) => setV({ ...v, repeat: x })} show={show.repeat}
           toggle={() => setShow({ ...show, repeat: !show.repeat })} error={bad.has('repeat')} />
-        <Submit pending={pending}>{pending ? 'Обновляем...' : 'Обновить пароль'}</Submit>
+        <Submit pending={pending}>Обновить пароль</Submit>
       </form>
     </Card>
   );

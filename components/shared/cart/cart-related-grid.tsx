@@ -2,26 +2,30 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useCartStore } from '@/store';
 import type { ProductCardData } from '@/lib/product-summary';
 
 export function CartRelatedGrid({ items }: { items: ProductCardData[] }) {
   const addCartItem = useCartStore((s) => s.addCartItem);
-  const [addingSlug, setAddingSlug] = useState<string | null>(null);
+  const [addingSlugs, setAddingSlugs] = useState<ReadonlySet<string>>(() => new Set());
 
   const handleAddToCart = async (product: ProductCardData) => {
     const variant = product.sizes.find((size) => size.inStock);
     if (!variant?.variantId) return;
 
-    setAddingSlug(product.slug);
+    setAddingSlugs((current) => new Set(current).add(product.slug));
     try {
       await addCartItem({ productVariantId: variant.variantId });
     } catch {
       /* store sets error */
     } finally {
-      setAddingSlug(null);
+      setAddingSlugs((current) => {
+        const next = new Set(current);
+        next.delete(product.slug);
+        return next;
+      });
     }
   };
 
@@ -32,7 +36,7 @@ export function CartRelatedGrid({ items }: { items: ProductCardData[] }) {
       <h2 className="font-display font-bold text-[22px] sm:text-[30px] tracking-tight">Добавить к заказу</h2>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
         {items.map((p) => {
-          const adding = addingSlug === p.slug;
+          const adding = addingSlugs.has(p.slug);
           return (
           <article
             key={p.slug}
