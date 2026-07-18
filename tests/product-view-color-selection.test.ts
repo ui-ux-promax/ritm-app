@@ -11,7 +11,11 @@ import { ProductView } from '@/components/shared/product/product-view';
 const routerPush = vi.hoisted(() => vi.fn());
 
 vi.mock('next/image', () => ({
-  default: ({ src, alt }: { src: string; alt: string }) => React.createElement('img', { src, alt }),
+  default: ({ src, alt, fill: _fill, priority, ...props }: React.ImgHTMLAttributes<HTMLImageElement> & {
+    src: string;
+    fill?: boolean;
+    priority?: boolean;
+  }) => React.createElement('img', { src, alt, ...props, 'data-test-priority': priority ? 'true' : 'false' }),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -89,9 +93,21 @@ describe('ProductView colour selection', () => {
             galleryImages: [{ url: '/terracotta.jpg', alt: 'Terracotta cardigan' }],
             variants: [{ id: 'variant-terracotta', size: 'S', stock: 1, active: true, price: 5500, compareAtPrice: null }],
           },
+          {
+            slug: 'clay', name: 'Clay', swatchHex: '#a05a42', thumbUrl: '/terracotta.jpg',
+            galleryImages: [{ url: '/terracotta.jpg', alt: 'Clay cardigan' }],
+            variants: [{ id: 'variant-clay', size: 'S', stock: 1, active: true, price: 5500, compareAtPrice: null }],
+          },
         ],
       } as never),
     );
+
+    const preloadedImage = document.querySelector('img[data-preload-image="/terracotta.jpg"]');
+
+    expect(preloadedImage?.getAttribute('sizes')).toBe('(min-width: 1024px) 600px, 100vw');
+    expect(preloadedImage?.getAttribute('loading')).toBe('eager');
+    expect(preloadedImage?.getAttribute('data-test-priority')).toBe('false');
+    expect(document.querySelectorAll('img[data-preload-image="/terracotta.jpg"]')).toHaveLength(1);
 
     fireEvent.click(screen.getByRole('button', { name: 'Terracotta' }));
 
