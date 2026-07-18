@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCartStore } from '@/store';
@@ -7,6 +8,7 @@ import type { ProductCardData } from '@/lib/product-summary';
 
 export function CartRelatedGrid({ items }: { items: ProductCardData[] }) {
   const addCartItem = useCartStore((s) => s.addCartItem);
+  const [addingProductIds, setAddingProductIds] = useState<Set<string>>(new Set());
 
   if (items.length === 0) return null;
 
@@ -14,8 +16,10 @@ export function CartRelatedGrid({ items }: { items: ProductCardData[] }) {
     <section className="mt-14">
       <h2 className="font-display font-bold text-[22px] sm:text-[30px] tracking-tight">Добавить к заказу</h2>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
-        {items.map((p) => (
-          <article
+        {items.map((p) => {
+          const isAdding = addingProductIds.has(p.id);
+          return (
+            <article
             key={p.slug}
             className="border border-line rounded-[18px] bg-surface p-2.5 transition-all hover:border-ink/20 hover:-translate-y-[3px] hover:shadow-[0_16px_36px_hsl(220_12%_10%_/_0.07)]"
           >
@@ -43,19 +47,36 @@ export function CartRelatedGrid({ items }: { items: ProductCardData[] }) {
                 type="button"
                 aria-label={`Добавить ${p.name}`}
                 onClick={async () => {
+                  if (isAdding) return;
                   // Add first available variant
                   const variant = p.sizes.find((s) => s.inStock);
                   if (variant?.variantId) {
-                    try { await addCartItem({ productVariantId: variant.variantId }); } catch { /* */ }
+                    setAddingProductIds((ids) => new Set(ids).add(p.id));
+                    try { await addCartItem({ productVariantId: variant.variantId }); } catch { /* store sets error */ }
+                    finally {
+                      setAddingProductIds((ids) => {
+                        const next = new Set(ids);
+                        next.delete(p.id);
+                        return next;
+                      });
+                    }
                   }
                 }}
+                disabled={isAdding}
+                aria-busy={isAdding}
                 className="w-[34px] h-[34px] shrink-0 grid place-items-center rounded-full border border-line bg-surface text-ink transition-colors hover:bg-primary hover:text-primary-foreground hover:border-primary"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+                {isAdding ? (
+                  <svg aria-hidden="true" className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" />
+                    <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                  </svg>
+                ) : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>}
               </button>
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
