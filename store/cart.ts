@@ -3,22 +3,28 @@ import { Api } from '@/services/api-client';
 import { getCartDetails } from '@/lib/cart-details';
 import type { CartStateItem, CreateCartItemValues } from '@/services/dto/cart.dto';
 
+export type CartPendingAction = {
+  itemId: string;
+  kind: 'quantity' | 'remove';
+  control?: 'decrease' | 'increase';
+};
+
 export interface CartState {
   loading: boolean;
   error: boolean;
-  pendingAction: { itemId: string; kind: 'quantity' | 'remove' } | null;
+  pendingActions: Record<string, CartPendingAction>;
   totalAmount: number;
   items: CartStateItem[];
   fetchCartItems: () => Promise<void>;
   addCartItem: (values: CreateCartItemValues) => Promise<void>;
-  updateItemQuantity: (id: string, quantity: number) => Promise<void>;
+  updateItemQuantity: (id: string, quantity: number, control?: 'decrease' | 'increase') => Promise<void>;
   removeCartItem: (id: string) => Promise<void>;
 }
 
 export const useCartStore = create<CartState>((set) => ({
   items: [],
   error: false,
-  pendingAction: null,
+  pendingActions: {},
   loading: true,
   totalAmount: 0,
 
@@ -49,29 +55,40 @@ export const useCartStore = create<CartState>((set) => ({
     }
   },
 
-  updateItemQuantity: async (id, quantity) => {
+  updateItemQuantity: async (id, quantity, control) => {
+    const action: CartPendingAction = { itemId: id, kind: 'quantity', control };
+    const actionKey = `${id}:quantity:${control ?? 'unknown'}`;
     try {
-      set({ loading: true, error: false, pendingAction: { itemId: id, kind: 'quantity' } });
+      set((state) => ({ loading: true, error: false, pendingActions: { ...state.pendingActions, [actionKey]: action } }));
       const data = await Api.cart.updateItemQuantity(id, quantity);
       set(getCartDetails(data));
     } catch (e) {
       console.error(e);
       set({ error: true });
     } finally {
-      set((state) => ({ loading: false, pendingAction: state.pendingAction?.itemId === id ? null : state.pendingAction }));
+      set((state) => {
+        const pendingActions = { ...state.pendingActions };
+        delete pendingActions[actionKey];
+        return { loading: Object.keys(pendingActions).length > 0, pendingActions };
+      });
     }
   },
 
   removeCartItem: async (id) => {
+    const actionKey = `${id}:remove`;
     try {
-      set((state) => ({ loading: true, error: false, pendingAction: { itemId: id, kind: 'remove' }, items: state.items.map((i) => i.id === id ? { ...i, disabled: true } : i) }));
+      set((state) => ({ loading: true, error: false, pendingActions: { ...state.pendingActions, [actionKey]: { itemId: id, kind: 'remove' } } }));
       const data = await Api.cart.removeCartItem(id);
       set(getCartDetails(data));
     } catch (e) {
       console.error(e);
       set({ error: true });
     } finally {
-      set((state) => ({ loading: false, pendingAction: state.pendingAction?.itemId === id ? null : state.pendingAction, items: state.items.map((i) => ({ ...i, disabled: false })) }));
+      set((state) => {
+        const pendingActions = { ...state.pendingActions };
+        delete pendingActions[actionKey];
+        return { loading: Object.keys(pendingActions).length > 0, pendingActions };
+      });
     }
   },
 }));

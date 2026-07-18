@@ -54,3 +54,43 @@ Tests  586 passed (586)
 - Confirmed product success copy and 429 cooldown handling remain in place.
 - Confirmed cart API methods, item-disable behavior, and error handling remain unchanged except for bracketing per-row pending state.
 - Confirmed the new tests cover the requested pending catalog action and active cart-remove spinner/disabled controls.
+
+## Review follow-up: concurrent, control-scoped cart pending state
+
+Review identified that the original single `pendingAction` value could be overwritten by a second row request, and that a row-wide `disabled` flag muted controls that did not start the request.
+
+### Root cause and correction
+
+- Replaced the single value with `pendingActions`, keyed by request control. Each cart request adds only its own descriptor and removes that descriptor in `finally`, so another row remains pending when the first request settles.
+- Quantity requests carry their initiating direction (`increase` or `decrease`). `CartLineItem` renders the labelled `Loader2` and disables only that matching control; the other quantity control and removal action remain usable.
+- Removal no longer mutates the row's `disabled` flag. It marks only its own remove button busy/disabled, preserving the API/error flow while avoiding unrelated disabled controls.
+
+### RED
+
+Before the correction, ran:
+
+```powershell
+npm test -- tests/cart-line-item-loading.test.ts tests/cart-pending-actions.test.ts
+```
+
+Result: 3 failures. The store had no `pendingActions` collection, and cart rows ignored the concurrent/control-specific pending descriptors, so the expected labelled spinners were absent.
+
+### GREEN and final verification
+
+After the targeted fix, ran:
+
+```powershell
+npm test -- tests/cart-line-item-loading.test.ts tests/cart-pending-actions.test.ts tests/cart.test.ts
+```
+
+Result: 3 files / 9 tests passed.
+
+Then ran:
+
+```powershell
+npm test
+```
+
+Result: 112 files / 588 tests passed.
+
+`git diff --check` passed. `npm run typecheck` remains blocked only by the pre-existing `tests/button-loading.test.ts:16` incompatible `ForwardRefExoticComponent` union diagnostic; no Task 3 file appears in that output.
