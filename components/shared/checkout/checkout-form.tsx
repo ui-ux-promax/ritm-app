@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -240,9 +241,9 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
                     <strong>Тестовая оплата.</strong> Деньги не списываются; используйте тестовый сценарий YooKassa.
                   </p>
                 )}
-                <button type="submit" disabled={isSubmitting}
+                <button type="submit" disabled={isSubmitting} aria-busy={isSubmitting || undefined} aria-label={isSubmitting ? 'Оформляем заказ' : undefined}
                   className="h-14 rounded-full bg-primary text-primary-foreground text-[16px] font-bold inline-flex items-center justify-center gap-2.5 w-full hover:bg-footer transition-colors disabled:opacity-50">
-                  {isSubmitting ? 'Проверяем данные…' : <>Оплатить <span className="tnum">{formatPrice(total)}</span></>}
+                  {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" role="status" aria-label="Загрузка" /> : <>Оплатить <span className="tnum">{formatPrice(total)}</span></>}
                   {!isSubmitting && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>}
                 </button>
               </div>

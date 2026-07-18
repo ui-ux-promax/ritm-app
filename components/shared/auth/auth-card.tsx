@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { ensureVerificationGate } from '@/app/actions/verification';
 import { registerUser } from '@/app/actions/auth';
 import { safeCallbackUrl } from '@/lib/safe-redirect';
@@ -194,9 +194,9 @@ function AuthInner({ initialMode }: { initialMode: Mode }) {
             <a href="#" className="text-ink-muted text-[13.5px] font-semibold hover:text-ink transition-colors">Забыли пароль?</a>
           </div>
           {loginError && <p className="text-danger text-sm font-semibold" role="alert">{loginError}</p>}
-          <button type="submit" disabled={loginForm.formState.isSubmitting}
+          <button type="submit" disabled={loginForm.formState.isSubmitting} aria-busy={loginForm.formState.isSubmitting || undefined} aria-label={loginForm.formState.isSubmitting ? 'Вход выполняется' : undefined}
             className="h-[52px] rounded-full bg-primary text-primary-foreground text-[15px] font-bold inline-flex items-center justify-center gap-2.5 hover:bg-footer transition-colors disabled:opacity-50">
-            {loginForm.formState.isSubmitting ? 'Входим…' : 'Войти'}
+            {loginForm.formState.isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" role="status" aria-label="Загрузка" /> : 'Войти'}
             {!loginForm.formState.isSubmitting && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1"><path d="M5 12h14M13 6l6 6-6 6"/></svg>}
           </button>
         </form>
@@ -235,9 +235,9 @@ function AuthInner({ initialMode }: { initialMode: Mode }) {
           </label>
           {regForm.formState.errors.agree && <span className="text-danger text-xs font-semibold">{regForm.formState.errors.agree.message}</span>}
           {regError && <p className="text-danger text-sm font-semibold" role="alert">{regError}{retry > 0 ? ` Попробуйте через ${retry} сек` : ''}</p>}
-          <button type="submit" disabled={regForm.formState.isSubmitting || retry > 0}
+          <button type="submit" disabled={regForm.formState.isSubmitting || retry > 0} aria-busy={regForm.formState.isSubmitting || undefined} aria-label={regForm.formState.isSubmitting ? 'Создаём аккаунт' : undefined}
             className="h-[52px] rounded-full bg-primary text-primary-foreground text-[15px] font-bold inline-flex items-center justify-center gap-2.5 hover:bg-footer transition-colors disabled:opacity-50">
-            {regForm.formState.isSubmitting ? 'Создаём…' : 'Создать аккаунт'}
+            {regForm.formState.isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" role="status" aria-label="Загрузка" /> : 'Создать аккаунт'}
             {!regForm.formState.isSubmitting && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1"><path d="M5 12h14M13 6l6 6-6 6"/></svg>}
           </button>
         </form>

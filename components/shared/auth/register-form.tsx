@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -94,9 +95,9 @@ export function RegisterForm() {
       {error && <p className="text-danger text-sm font-semibold" role="alert">{error}{retry > 0 ? ` Попробуйте через ${retry} сек` : ''}</p>}
 
       {/* Submit */}
-      <button type="submit" disabled={isSubmitting || retry > 0}
+      <button type="submit" disabled={isSubmitting || retry > 0} aria-busy={isSubmitting || undefined} aria-label={isSubmitting ? 'Создаём аккаунт' : undefined}
         className="h-[52px] rounded-full bg-primary text-primary-foreground text-[15px] font-bold inline-flex items-center justify-center gap-2.5 hover:bg-footer transition-colors disabled:opacity-50">
-        {isSubmitting ? 'Создаём…' : 'Создать аккаунт'}
+        {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" role="status" aria-label="Загрузка" /> : 'Создать аккаунт'}
         {!isSubmitting && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1"><path d="M5 12h14M13 6l6 6-6 6"/></svg>}
       </button>
     </form>
