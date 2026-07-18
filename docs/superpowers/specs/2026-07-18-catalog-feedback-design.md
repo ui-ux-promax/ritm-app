@@ -18,7 +18,7 @@ While a cart-line quantity update is pending, only that line's minus and plus co
 
 ## Product-page feedback
 
-The primary product-page add-to-cart button follows the same feedback pattern: while its existing cart request is pending, it is disabled and renders a spinner with `Добавляем`. Once the request settles, the existing successful `Добавлено ✓` or default state is shown again, preserving the button's size and all current cooldown behavior.
+The primary product-page add-to-cart button follows the same feedback pattern: while its existing cart request is pending, it is disabled, changes from its dark primary surface to a neutral muted surface, and renders a spinner with `Добавляем`. Once the request settles, the existing successful `Добавлено ✓` or default state is shown again, preserving the button's size and all current cooldown behavior.
 
 ## Accessibility and verification
 
