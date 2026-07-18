@@ -24,6 +24,7 @@ interface Props {
   specs: Record<string, string> | null;
   ratingAvg: number | null;
   ratingCount: number;
+  onSelectedVariantChange?: (variantId: string | null) => void;
   onColorChange: (slug: string) => void;
 }
 
@@ -39,7 +40,7 @@ const COLOR_HSL: Record<string, string> = {
 
 export function PurchasePanel({
   productName, colorways, activeColorwaySlug, activeColorwayName,
-  variants, fitNote, productSlug, description, specs, ratingAvg, ratingCount, onColorChange,
+  variants, fitNote, productSlug, description, specs, ratingAvg, ratingCount, onSelectedVariantChange, onColorChange,
 }: Props) {
   const [sizeId, setSizeId] = useState<string | null>(null);
   const addCartItem = useCartStore((s) => s.addCartItem);
@@ -139,7 +140,10 @@ export function PurchasePanel({
                 )}
                 disabled={disabled}
                 aria-pressed={v.id === sizeId}
-                onClick={() => setSizeId(v.id)}
+                onClick={() => {
+                  setSizeId(v.id);
+                  onSelectedVariantChange?.(v.id);
+                }}
               >
                 {v.size}
               </button>

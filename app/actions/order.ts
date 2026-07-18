@@ -9,7 +9,7 @@ import { cartInclude } from '@/lib/cart-details';
 import { cartCookieName } from '@/lib/cart-cookie';
 import { recalcCartTotalByToken, resolveOwnerCart } from '@/lib/cart';
 import { checkoutSchema } from '@/services/dto/order.dto';
-import { buildOrderSnapshot, calcShipping } from '@/lib/order';
+import { buildOrderSnapshot, calcShipping, type OrderSnapshot } from '@/lib/order';
 import { checkCoupon, calcCouponDiscount } from '@/lib/coupon';
 import { logger } from '@/lib/logger';
 import { createPayment, cancelPayment } from '@/lib/yookassa';
@@ -37,25 +37,65 @@ export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
   if (!parsed.success) return { ok: false, error: 'Проверьте поля формы' };
   const form = parsed.data;
 
-  const store = await cookies();
-  const token = store.get(cartCookieName)?.value;
-  // Корзина залогиненного резолвится по userId (не по cookie) — заказ всегда из своей корзины.
-  const owner = await resolveOwnerCart(userId, token, { create: false });
-  if (!owner) return { ok: false, error: 'Корзина пуста' };
-  const cart = await prisma.cart.findFirst({ where: { id: owner.id }, include: cartInclude });
-  if (!cart || cart.items.length === 0) return { ok: false, error: 'Корзина пуста' };
+  let snapshot: OrderSnapshot;
+  let cartId: string | null = null;
+  let cartToken: string | null = null;
+  let salesItems: { productId: string; quantity: number }[];
 
-  const inactive = cart.items.find(
-    (i) => !i.productVariant.active || !i.productVariant.colorway.product.active,
-  );
-  if (inactive) {
-    return {
-      ok: false,
-      error: `Товар «${inactive.productVariant.colorway.product.name}» больше недоступен, удалите его из корзины`,
+  if (form.buyNowVariantId) {
+    const variant = await prisma.productVariant.findUnique({
+      where: { id: form.buyNowVariantId },
+      include: {
+        colorway: {
+          include: {
+            product: { select: { id: true, name: true, slug: true, active: true } },
+            images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+          },
+        },
+      },
+    });
+    if (!variant || !variant.active || variant.stock <= 0 || !variant.colorway.product.active) {
+      return { ok: false, error: '\u0422\u043e\u0432\u0430\u0440 \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d' };
+    }
+    snapshot = {
+      items: [{
+        productVariantId: variant.id,
+        sku: variant.sku,
+        productName: variant.colorway.product.name,
+        colorwayName: variant.colorway.name,
+        size: variant.size,
+        imageUrl: variant.colorway.images[0]?.url ?? null,
+        unitPrice: variant.price,
+        quantity: 1,
+        lineTotal: variant.price,
+      }],
+      itemsTotal: variant.price,
     };
-  }
+    salesItems = [{ productId: variant.colorway.product.id, quantity: 1 }];
+  } else {
+    const store = await cookies();
+    const token = store.get(cartCookieName)?.value;
+  // Корзина залогиненного резолвится по userId (не по cookie) — заказ всегда из своей корзины.
+    const owner = await resolveOwnerCart(userId, token, { create: false });
+    if (!owner) return { ok: false, error: 'Корзина пуста' };
+    const cart = await prisma.cart.findFirst({ where: { id: owner.id }, include: cartInclude });
+    if (!cart || cart.items.length === 0) return { ok: false, error: 'Корзина пуста' };
 
-  const snapshot = buildOrderSnapshot(cart);
+    const inactive = cart.items.find(
+      (i) => !i.productVariant.active || !i.productVariant.colorway.product.active,
+    );
+    if (inactive) {
+      return {
+        ok: false,
+        error: `Товар «${inactive.productVariant.colorway.product.name}» больше недоступен, удалите его из корзины`,
+      };
+    }
+
+    snapshot = buildOrderSnapshot(cart);
+    cartId = cart.id;
+    cartToken = cart.token;
+    salesItems = cart.items.map((i) => ({ productId: i.productVariant.colorway.product.id, quantity: i.quantity }));
+  }
 
   // Купон — повторная валидация на сервере (источник истины; клиентскому couponCode не доверяем).
   // До декремента стока → при отказе откатывать нечего.
@@ -169,16 +209,15 @@ export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
 
   // Популярность: +продажи по товарам заказа (как списанный сток). После всех точек отката —
   // если дошли сюда, заказ создан и сток списан, инкремент симметричен. Best-effort внутри.
-  await adjustSalesCount(
-    cart.items.map((i) => ({ productId: i.productVariant.colorway.product.id, quantity: i.quantity })),
-    1,
-  );
+  await adjustSalesCount(salesItems, 1);
 
-  try {
-    await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
-    await recalcCartTotalByToken(cart.token);
-  } catch (e) {
-    logger.error('order_cart_cleanup_failed', e, { orderNumber });
+  if (cartId && cartToken) {
+    try {
+      await prisma.cartItem.deleteMany({ where: { cartId } });
+      await recalcCartTotalByToken(cartToken);
+    } catch (e) {
+      logger.error('order_cart_cleanup_failed', e, { orderNumber });
+    }
   }
 
   // Save address to user's address book (dedup by city+street)

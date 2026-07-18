@@ -41,7 +41,7 @@ const validForm = {
 function variant(id: string, stock = 9) {
   return {
     id, sku: `SKU-${id}`, price: 5000, size: 'M', stock, active: true,
-    colorway: { name: 'Black', product: { name: `P-${id}`, slug: id, active: true }, images: [{ url: `/i/${id}.jpg` }] },
+    colorway: { name: 'Black', product: { id: `p-${id}`, name: `P-${id}`, slug: id, active: true }, images: [{ url: `/i/${id}.jpg` }] },
   };
 }
 function cartWith(...ids: string[]) {
@@ -124,5 +124,31 @@ describe('placeOrder', () => {
   it('paymentMethod != cod — отказ', async () => {
     const r = await placeOrder({ ...validForm, paymentMethod: 'card' });
     expect(r.ok).toBe(false);
+  });
+
+  it('buy now creates a one-item order without reading or clearing the existing cart', async () => {
+    const buyNowVariantId = 'ckbuyvariant000000000000001';
+    variantFindUnique
+      .mockResolvedValueOnce(variant(buyNowVariantId))
+      .mockResolvedValueOnce({ stock: 9 });
+    orderCreate.mockResolvedValue({ id: 'o1', orderNumber: 2027 });
+
+    const r = await placeOrder({ ...validForm, buyNowVariantId });
+
+    expect(r).toEqual({ ok: true, orderNumber: 2027 });
+    expect(cartFindFirst).not.toHaveBeenCalled();
+    expect(cartItemDeleteMany).not.toHaveBeenCalled();
+    expect(orderItemCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        orderId: 'o1',
+        productVariantId: buyNowVariantId,
+        quantity: 1,
+        lineTotal: 5000,
+      }),
+    });
+    expect(variantUpdate).toHaveBeenCalledWith({
+      where: { id: buyNowVariantId },
+      data: { stock: { decrement: 1 } },
+    });
   });
 });
