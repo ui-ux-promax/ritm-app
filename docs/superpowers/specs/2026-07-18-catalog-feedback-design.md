@@ -12,6 +12,10 @@ When an enabled product-card add-to-cart button is clicked, its local action ent
 
 The current page keeps its dark primary background. Every selectable page-number or navigation button uses a white surface, dark text, and the existing subtle border. Disabled navigation controls retain their disabled visual state and cannot be selected.
 
+## Cart feedback
+
+While a cart-line quantity update is pending, only that line's minus and plus controls are disabled and the quantity number is replaced by a compact spinner. The previous quantity stays visible again when the request completes or fails. The related-product add button similarly disables only itself and replaces its plus icon with a spinner during its `addCartItem` request. Other cart lines and related-product cards remain interactive.
+
 ## Accessibility and verification
 
-The pending add-to-cart button remains disabled while processing and exposes a loading state to assistive technology. Pagination controls preserve their existing labels and disabled semantics. Automated tests will cover the pending button content/disabled state and selectable pagination surface styling; a focused browser check will confirm the rendered result.
+The pending add-to-cart controls remain disabled while processing and expose a loading state to assistive technology. Pagination controls preserve their existing labels and disabled semantics. Automated tests will cover catalog and cart pending states, and selectable pagination surface styling; a focused browser check will confirm the rendered result.
