@@ -10,7 +10,7 @@ vi.mock('@/lib/cart', () => ({
 vi.mock('@/lib/prisma-client', () => ({
   prisma: {
     cart: { findFirst: vi.fn() },
-    productVariant: { findUnique: vi.fn(), update: vi.fn() },
+    productVariant: { updateMany: vi.fn(), update: vi.fn() },
     order: { create: vi.fn(), delete: vi.fn() },
     orderItem: { create: vi.fn() },
     cartItem: { deleteMany: vi.fn() },
@@ -26,7 +26,7 @@ import { prisma } from '@/lib/prisma-client';
 const authMock = auth as unknown as ReturnType<typeof vi.fn>;
 const cookiesMock = cookies as unknown as ReturnType<typeof vi.fn>;
 const cartFindFirst = prisma.cart.findFirst as unknown as ReturnType<typeof vi.fn>;
-const variantFindUnique = prisma.productVariant.findUnique as unknown as ReturnType<typeof vi.fn>;
+const variantUpdateMany = prisma.productVariant.updateMany as unknown as ReturnType<typeof vi.fn>;
 const variantUpdate = prisma.productVariant.update as unknown as ReturnType<typeof vi.fn>;
 const orderCreate = prisma.order.create as unknown as ReturnType<typeof vi.fn>;
 const orderItemCreate = prisma.orderItem.create as unknown as ReturnType<typeof vi.fn>;
@@ -57,7 +57,7 @@ beforeEach(() => {
   authMock.mockResolvedValue({ user: { id: 'u1' } });
   cookiesMock.mockResolvedValue({ get: () => ({ value: 't' }) });
   variantUpdate.mockResolvedValue({});
-  variantFindUnique.mockResolvedValue({ stock: 9 });
+  variantUpdateMany.mockResolvedValue({ count: 1 });
   cartItemDeleteMany.mockResolvedValue({ count: 1 });
   orderItemCreate.mockResolvedValue({});
 });
@@ -86,7 +86,7 @@ describe('placeOrder + РєСѓРїРѕРЅ', () => {
 
     expect(r.ok).toBe(false);
     expect(orderCreate).not.toHaveBeenCalled();
-    expect(variantFindUnique).not.toHaveBeenCalled();
+    expect(variantUpdateMany).not.toHaveBeenCalled();
   });
 
   it('Р±РµР· РєСѓРїРѕРЅР° вЂ” discountAmount=0, couponCode=null, Р‘Р” РєСѓРїРѕРЅРѕРІ РЅРµ С‚СЂРѕРіР°РµС‚СЃСЏ (СЂРµРіСЂРµСЃСЃРёСЏ)', async () => {

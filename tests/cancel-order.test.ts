@@ -7,7 +7,8 @@ vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: 
 vi.mock('@/lib/cart', () => ({ recalcCartTotalByToken: vi.fn() }));
 vi.mock('@/lib/prisma-client', () => ({
   prisma: {
-    order: { findUnique: vi.fn(), update: vi.fn() },
+    $transaction: vi.fn(),
+    order: { findUnique: vi.fn(), updateMany: vi.fn() },
     productVariant: { update: vi.fn() },
     product: { update: vi.fn() },
   },
@@ -25,9 +26,10 @@ const pruneMock = pruneReviewsAfterCancel as unknown as ReturnType<typeof vi.fn>
 
 const authMock = auth as unknown as ReturnType<typeof vi.fn>;
 const findUnique = prisma.order.findUnique as unknown as ReturnType<typeof vi.fn>;
-const orderUpdate = prisma.order.update as unknown as ReturnType<typeof vi.fn>;
+const orderUpdateMany = prisma.order.updateMany as unknown as ReturnType<typeof vi.fn>;
 const variantUpdate = prisma.productVariant.update as unknown as ReturnType<typeof vi.fn>;
 const productUpdate = prisma.product.update as unknown as ReturnType<typeof vi.fn>;
+const transaction = prisma.$transaction as unknown as ReturnType<typeof vi.fn>;
 
 function pendingOrder() {
   return {
@@ -44,9 +46,10 @@ beforeEach(() => {
   vi.clearAllMocks();
   authMock.mockResolvedValue({ user: { id: 'u1' } });
   variantUpdate.mockResolvedValue({});
-  orderUpdate.mockResolvedValue({});
+  orderUpdateMany.mockResolvedValue({ count: 1 });
   productUpdate.mockResolvedValue({});
   cancelPaymentMock.mockResolvedValue(undefined);
+  transaction.mockImplementation(async (callback: (tx: typeof prisma) => unknown) => callback(prisma));
 });
 
 describe('cancelOrder', () => {
@@ -55,7 +58,7 @@ describe('cancelOrder', () => {
     const r = await cancelOrder('o1');
     expect(r).toEqual({ ok: true });
     // Атомарный гейт: переход разрешён только для своего PENDING-заказа (идемпотентность побочек).
-    expect(orderUpdate).toHaveBeenCalledWith({ where: { id: 'o1', userId: 'u1', status: 'PENDING' }, data: { status: 'CANCELLED' } });
+    expect(orderUpdateMany).toHaveBeenCalledWith({ where: { id: 'o1', userId: 'u1', status: 'PENDING' }, data: { status: 'CANCELLED' } });
     expect(variantUpdate).toHaveBeenCalledTimes(2);
     expect(variantUpdate).toHaveBeenCalledWith({ where: { id: 'v1' }, data: { stock: { increment: 2 } } });
     // salesCount откатывается по товарам (популярность ↓ симметрично возврату стока).
@@ -69,7 +72,7 @@ describe('cancelOrder', () => {
     findUnique.mockResolvedValue({ ...pendingOrder(), userId: 'other' });
     const r = await cancelOrder('o1');
     expect(r.ok).toBe(false);
-    expect(orderUpdate).not.toHaveBeenCalled();
+    expect(orderUpdateMany).not.toHaveBeenCalled();
     expect(variantUpdate).not.toHaveBeenCalled();
     expect(pruneMock).not.toHaveBeenCalled();
   });
@@ -78,7 +81,7 @@ describe('cancelOrder', () => {
     findUnique.mockResolvedValue({ ...pendingOrder(), status: 'SHIPPED' });
     const r = await cancelOrder('o1');
     expect(r.ok).toBe(false);
-    expect(orderUpdate).not.toHaveBeenCalled();
+    expect(orderUpdateMany).not.toHaveBeenCalled();
   });
 
   it('неавторизован — отказ', async () => {
@@ -94,5 +97,12 @@ describe('cancelOrder', () => {
     expect(r).toEqual({ ok: true });
     expect(cancelPaymentMock).toHaveBeenCalledWith('pay_1');
     expect(variantUpdate).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not confirm cancellation when stock restoration fails', async () => {
+    findUnique.mockResolvedValue(pendingOrder());
+    variantUpdate.mockRejectedValueOnce(new Error('database unavailable'));
+
+    await expect(cancelOrder('o1')).rejects.toThrow('database unavailable');
   });
 });

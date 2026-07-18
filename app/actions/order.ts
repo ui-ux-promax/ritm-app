@@ -1,9 +1,8 @@
 'use server';
 
 import { auth } from '@/auth';
-import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma-client';
 import { cartInclude } from '@/lib/cart-details';
 import { cartCookieName } from '@/lib/cart-cookie';
@@ -73,22 +72,15 @@ export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
 
   const decremented: { id: string; qty: number }[] = [];
   for (const it of snapshot.items) {
-    // Проверка стока + атомарный декремент. `updateMany`/$executeRaw не работают
-    // на прод-Neon (транзакционны — P9), поэтому findUnique + одиночный update
-    // c `decrement` (доказанно рабочий, probe). Риск гонки между read и decrement
-    // приемлем для MVP (как и в Фазе 1).
-    const v = await prisma.productVariant.findUnique({
-      where: { id: it.productVariantId },
-      select: { stock: true },
+    // A conditional update reserves stock without a read-then-write race.
+    const updated = await prisma.productVariant.updateMany({
+      where: { id: it.productVariantId, stock: { gte: it.quantity } },
+      data: { stock: { decrement: it.quantity } },
     });
-    if (!v || v.stock < it.quantity) {
+    if (updated.count === 0) {
       await restoreStock(decremented);
       return { ok: false, error: `Товар «${it.productName}» закончился, обновите корзину` };
     }
-    await prisma.productVariant.update({
-      where: { id: it.productVariantId },
-      data: { stock: { decrement: it.quantity } },
-    });
     decremented.push({ id: it.productVariantId, qty: it.quantity });
   }
 
@@ -148,9 +140,7 @@ export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
       // return_url ДОЛЖЕН вести на тот же деплой, где оформлен заказ: там сессия, кука и
       // нужная ветка Neon (БД заводит ветку на каждое окружение, P7). Поэтому приоритет —
       // host текущего запроса; NEXT_PUBLIC_SITE_URL — только фолбэк для localhost.
-      const host = (await headers()).get('host') || '';
-      const baseUrl = host ? `https://${host}` : (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
-      const pay = await createPayment({ orderNumber, amountRub: totalAmount, baseUrl });
+      const pay = await createPayment({ orderNumber, amountRub: totalAmount });
       await prisma.payment.create({
         data: { id: pay.id, orderId, amount: totalAmount, confirmationUrl: pay.confirmationUrl, status: 'pending' },
       });
@@ -210,38 +200,30 @@ export async function cancelOrder(orderId: string): Promise<CancelOrderResult> {
     return { ok: false, error: 'Этот заказ нельзя отменить' };
   }
 
-  // Атомарный переход PENDING→CANCELLED (одиночный UPDATE ... WHERE id AND userId AND status):
-  // гарантирует, что побочные эффекты (возврат стока, откат salesCount, отмена платежа)
-  // применятся РОВНО ОДИН РАЗ даже в гонке с вебхуком ЮKassa, который мог отменить платёж
-  // между findUnique и этим update. P2025 = заказ уже не PENDING → ничего не откатываем.
-  try {
-    await prisma.order.update({
+  // The status transition and stock restoration must commit together. Otherwise a
+  // transient database failure can leave a CANCELLED order with stock still reserved.
+  const cancelled = await prisma.$transaction(async (tx) => {
+    const result = await tx.order.updateMany({
       where: { id: orderId, userId, status: 'PENDING' },
       data: { status: 'CANCELLED' },
     });
-  } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { ok: false, error: 'Этот заказ нельзя отменить' };
+    if (result.count === 0) return false;
+
+    for (const item of order.items) {
+      await tx.productVariant.update({
+        where: { id: item.productVariantId },
+        data: { stock: { increment: item.quantity } },
+      });
     }
-    throw e;
-  }
+    return true;
+  });
+  if (!cancelled) return { ok: false, error: 'Этот заказ нельзя отменить' };
 
   if (order.payment && order.payment.status === 'pending') {
     try {
       await cancelPayment(order.payment.id);
     } catch (e) {
       logger.error('cancel_payment_failed', e, { orderId, paymentId: order.payment.id });
-    }
-  }
-
-  for (const item of order.items) {
-    try {
-      await prisma.productVariant.update({
-        where: { id: item.productVariantId },
-        data: { stock: { increment: item.quantity } },
-      });
-    } catch (e) {
-      logger.error('cancel_stock_restore_failed', e, { orderId, variantId: item.productVariantId });
     }
   }
 
