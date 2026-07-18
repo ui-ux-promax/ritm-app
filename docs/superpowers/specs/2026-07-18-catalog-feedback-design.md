@@ -16,6 +16,10 @@ The current page keeps its dark primary background. Every selectable page-number
 
 While a cart-line quantity update is pending, only that line's minus and plus controls are disabled and the quantity number is replaced by a compact spinner. The previous quantity stays visible again when the request completes or fails. The related-product add button similarly disables only itself and replaces its plus icon with a spinner during its `addCartItem` request. Other cart lines and related-product cards remain interactive.
 
+## Product-page feedback
+
+The primary product-page add-to-cart button follows the same feedback pattern: while its existing cart request is pending, it is disabled and renders a spinner with `Добавляем`. Once the request settles, the existing successful `Добавлено ✓` or default state is shown again, preserving the button's size and all current cooldown behavior.
+
 ## Accessibility and verification
 
-The pending add-to-cart controls remain disabled while processing and expose a loading state to assistive technology. Pagination controls preserve their existing labels and disabled semantics. Automated tests will cover catalog and cart pending states, and selectable pagination surface styling; a focused browser check will confirm the rendered result.
+The pending add-to-cart controls remain disabled while processing and expose a loading state to assistive technology. Pagination controls preserve their existing labels and disabled semantics. Automated tests will cover catalog, cart, and product-page pending states, and selectable pagination surface styling; a focused browser check will confirm the rendered result.
