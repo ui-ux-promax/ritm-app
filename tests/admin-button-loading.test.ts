@@ -60,6 +60,7 @@ describe('admin row loading states', () => {
     await waitFor(() => expect(downButtons[0].getAttribute('aria-busy')).toBe('true'));
     expect(downButtons[0].hasAttribute('disabled')).toBe(true);
     expect(downButtons[0].querySelector('[role="status"]')).not.toBeNull();
+    expect(screen.getAllByRole('status', { name: /перемещаем категорию/i })).toHaveLength(2);
     expect(downButtons[1].getAttribute('aria-busy')).not.toBe('true');
     expect(downButtons[1].querySelector('[role="status"]')).toBeNull();
 
@@ -98,6 +99,7 @@ describe('admin row loading states', () => {
     fireEvent.click(switches[0]);
 
     await waitFor(() => expect(switches[0].hasAttribute('disabled')).toBe(true));
+    expect(switches[0].getAttribute('aria-busy')).toBe('true');
     expect(screen.getAllByRole('status', { name: /загрузка статуса купона/i })).toHaveLength(2);
     expect(switches[1].hasAttribute('disabled')).toBe(false);
 

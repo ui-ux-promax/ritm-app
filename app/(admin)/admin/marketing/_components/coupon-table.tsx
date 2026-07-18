@@ -92,6 +92,7 @@ export function CouponTable({ rows }: { rows: CouponRow[] }) {
                     <Switch
                       checked={row.active}
                       disabled={pending === row.id}
+                      aria-busy={pending === row.id || undefined}
                       onCheckedChange={(v) => handleToggle(row, v)}
                     />
                     {pending === row.id && (
@@ -141,6 +142,7 @@ export function CouponTable({ rows }: { rows: CouponRow[] }) {
                   <Switch
                     checked={row.active}
                     disabled={pending === row.id}
+                    aria-busy={pending === row.id || undefined}
                     onCheckedChange={(v) => handleToggle(row, v)}
                   />
                   {pending === row.id && (
