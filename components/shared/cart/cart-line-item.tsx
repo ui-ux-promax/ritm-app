@@ -21,8 +21,9 @@ export function CartLineItem({ item, wishlisted = false }: { item: CartStateItem
       setIsUpdatingQuantity(false);
     }
   };
+  const maximumQuantity = Math.min(item.stock, 99);
   const dec = () => item.quantity > 1 && void updateQuantity(item.quantity - 1);
-  const inc = () => item.quantity < 99 && void updateQuantity(item.quantity + 1);
+  const inc = () => item.quantity < maximumQuantity && void updateQuantity(item.quantity + 1);
 
   return (
     <article className={cn(
@@ -67,7 +68,7 @@ export function CartLineItem({ item, wishlisted = false }: { item: CartStateItem
                 </svg>
               </span>
             ) : <span className="min-w-[30px] text-center font-bold tnum text-sm">{item.quantity}</span>}
-            <button type="button" onClick={inc} disabled={item.disabled || isUpdatingQuantity} aria-label="Больше" className="w-[38px] h-full grid place-items-center rounded-full hover:bg-surface-soft disabled:opacity-35 disabled:cursor-not-allowed">
+            <button type="button" onClick={inc} disabled={item.quantity >= maximumQuantity || item.disabled || isUpdatingQuantity} aria-label="Больше" className="w-[38px] h-full grid place-items-center rounded-full hover:bg-surface-soft disabled:opacity-35 disabled:cursor-not-allowed">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 5v14M5 12h14"/></svg>
             </button>
           </div>

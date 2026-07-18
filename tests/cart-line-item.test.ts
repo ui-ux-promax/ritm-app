@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CartLineItem } from '@/components/shared/cart/cart-line-item';
 import type { CartStateItem } from '@/services/dto/cart.dto';
 
@@ -24,7 +24,18 @@ const item: CartStateItem = {
   colorwayName: 'Sage', size: 'M', imageUrl: null, unitPrice: 5400, lineTotal: 5400, stock: 5, available: true,
 };
 
+afterEach(() => {
+  cleanup();
+  updateItemQuantity.mockClear();
+});
+
 describe('CartLineItem', () => {
+  it('disables increment when the cart already contains every unit in stock', () => {
+    render(React.createElement(CartLineItem, { item: { ...item, stock: 1 } }));
+
+    expect((screen.getByRole('button', { name: 'Больше' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
   it('shows a local spinner while increasing its quantity', () => {
     updateItemQuantity.mockReturnValueOnce(new Promise<void>(() => {}));
     render(React.createElement(CartLineItem, { item }));
