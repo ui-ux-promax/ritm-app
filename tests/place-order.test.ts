@@ -11,7 +11,7 @@ vi.mock('@/lib/cart', () => ({
 vi.mock('@/lib/prisma-client', () => ({
   prisma: {
     cart: { findFirst: vi.fn() },
-    productVariant: { updateMany: vi.fn(), update: vi.fn() },
+    productVariant: { findUnique: vi.fn(), updateMany: vi.fn(), update: vi.fn() },
     order: { create: vi.fn(), delete: vi.fn() },
     orderItem: { create: vi.fn() },
     cartItem: { deleteMany: vi.fn() },
@@ -26,6 +26,7 @@ import { prisma } from '@/lib/prisma-client';
 const authMock = auth as unknown as ReturnType<typeof vi.fn>;
 const cookiesMock = cookies as unknown as ReturnType<typeof vi.fn>;
 const cartFindFirst = prisma.cart.findFirst as unknown as ReturnType<typeof vi.fn>;
+const productVariantFindUniqueMock = prisma.productVariant.findUnique as unknown as ReturnType<typeof vi.fn>;
 const variantUpdateMany = prisma.productVariant.updateMany as unknown as ReturnType<typeof vi.fn>;
 const variantUpdate = prisma.productVariant.update as unknown as ReturnType<typeof vi.fn>;
 const orderCreate = prisma.order.create as unknown as ReturnType<typeof vi.fn>;
@@ -41,7 +42,7 @@ const validForm = {
 function variant(id: string, stock = 9) {
   return {
     id, sku: `SKU-${id}`, price: 5000, size: 'M', stock, active: true,
-    colorway: { name: 'Black', product: { name: `P-${id}`, slug: id, active: true }, images: [{ url: `/i/${id}.jpg` }] },
+    colorway: { name: 'Black', product: { id: `p-${id}`, name: `P-${id}`, slug: id, active: true }, images: [{ url: `/i/${id}.jpg` }] },
   };
 }
 function cartWith(...ids: string[]) {
@@ -57,6 +58,7 @@ beforeEach(() => {
   authMock.mockResolvedValue({ user: { id: 'u1' } });
   cookiesMock.mockResolvedValue({ get: () => ({ value: 't' }) });
   variantUpdate.mockResolvedValue({});
+  productVariantFindUniqueMock.mockResolvedValue(null);
   variantUpdateMany.mockResolvedValue({ count: 1 });
   cartItemDeleteMany.mockResolvedValue({ count: 1 });
   orderItemCreate.mockResolvedValue({});
@@ -126,5 +128,29 @@ describe('placeOrder', () => {
   it('paymentMethod != cod — отказ', async () => {
     const r = await placeOrder({ ...validForm, paymentMethod: 'card' });
     expect(r.ok).toBe(false);
+  });
+
+  it('buy now creates a one-item order without reading or clearing the existing cart', async () => {
+    const buyNowVariantId = 'ckbuyvariant000000000000001';
+    productVariantFindUniqueMock.mockResolvedValueOnce(variant(buyNowVariantId));
+    orderCreate.mockResolvedValue({ id: 'o1', orderNumber: 2027 });
+
+    const r = await placeOrder({ ...validForm, buyNowVariantId });
+
+    expect(r).toEqual({ ok: true, orderNumber: 2027 });
+    expect(cartFindFirst).not.toHaveBeenCalled();
+    expect(cartItemDeleteMany).not.toHaveBeenCalled();
+    expect(orderItemCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        orderId: 'o1',
+        productVariantId: buyNowVariantId,
+        quantity: 1,
+        lineTotal: 5000,
+      }),
+    });
+    expect(variantUpdateMany).toHaveBeenCalledWith({
+      where: { id: buyNowVariantId, stock: { gte: 1 } },
+      data: { stock: { decrement: 1 } },
+    });
   });
 });

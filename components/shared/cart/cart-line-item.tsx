@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -9,9 +10,20 @@ import type { CartStateItem } from '@/services/dto/cart.dto';
 export function CartLineItem({ item, wishlisted = false }: { item: CartStateItem; wishlisted?: boolean }) {
   const updateItemQuantity = useCartStore((s) => s.updateItemQuantity);
   const removeCartItem = useCartStore((s) => s.removeCartItem);
+  const [isUpdatingQuantity, setIsUpdatingQuantity] = useState(false);
 
-  const dec = () => item.quantity > 1 && updateItemQuantity(item.id, item.quantity - 1);
-  const inc = () => item.quantity < 99 && updateItemQuantity(item.id, item.quantity + 1);
+  const updateQuantity = async (quantity: number) => {
+    if (isUpdatingQuantity) return;
+    setIsUpdatingQuantity(true);
+    try {
+      await updateItemQuantity(item.id, quantity);
+    } finally {
+      setIsUpdatingQuantity(false);
+    }
+  };
+  const maximumQuantity = Math.min(item.stock, 99);
+  const dec = () => item.quantity > 1 && void updateQuantity(item.quantity - 1);
+  const inc = () => item.quantity < maximumQuantity && void updateQuantity(item.quantity + 1);
 
   return (
     <article className={cn(
@@ -45,11 +57,18 @@ export function CartLineItem({ item, wishlisted = false }: { item: CartStateItem
         <div className="mt-auto flex flex-col items-start justify-between gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3">
           {/* Stepper */}
           <div className="inline-flex items-center border border-line rounded-full bg-surface h-10">
-            <button type="button" onClick={dec} disabled={item.quantity <= 1 || item.disabled} aria-label="Меньше" className="w-[38px] h-full grid place-items-center rounded-full hover:bg-surface-soft disabled:opacity-35 disabled:cursor-not-allowed">
+            <button type="button" onClick={dec} disabled={item.quantity <= 1 || item.disabled || isUpdatingQuantity} aria-label="Меньше" className="w-[38px] h-full grid place-items-center rounded-full hover:bg-surface-soft disabled:opacity-35 disabled:cursor-not-allowed">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14"/></svg>
             </button>
-            <span className="min-w-[30px] text-center font-bold tnum text-sm">{item.quantity}</span>
-            <button type="button" onClick={inc} disabled={item.disabled} aria-label="Больше" className="w-[38px] h-full grid place-items-center rounded-full hover:bg-surface-soft disabled:opacity-35 disabled:cursor-not-allowed">
+            {isUpdatingQuantity ? (
+              <span aria-label="Обновляем количество" className="min-w-[30px] grid place-items-center">
+                <svg aria-hidden="true" className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" />
+                  <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                </svg>
+              </span>
+            ) : <span className="min-w-[30px] text-center font-bold tnum text-sm">{item.quantity}</span>}
+            <button type="button" onClick={inc} disabled={item.quantity >= maximumQuantity || item.disabled || isUpdatingQuantity} aria-label="Больше" className="w-[38px] h-full grid place-items-center rounded-full hover:bg-surface-soft disabled:opacity-35 disabled:cursor-not-allowed">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 5v14M5 12h14"/></svg>
             </button>
           </div>

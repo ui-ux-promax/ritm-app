@@ -6,7 +6,7 @@ export function Pagination({ page, totalPages }: { page: number; totalPages: num
   const { setPage } = useCatalogUrl();
   if (totalPages <= 1) return null;
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-  const cell = 'w-9 h-9 grid place-items-center rounded-lg border border-line hover:border-ink tnum';
+  const cell = 'w-9 h-9 grid place-items-center rounded-lg border border-line bg-surface hover:border-ink tnum';
   return (
     <nav className="flex justify-center mt-10" aria-label="Пагинация">
       <div className="flex items-center gap-1.5 text-sm">

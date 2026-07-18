@@ -34,6 +34,7 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [added, setAdded] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const addCartItem = useCartStore((s) => s.addCartItem);
   const selectedColorway = data.colorways[selectedColor];
   const selectedImageUrl = selectedColorway?.imageUrl ?? data.imageUrl;
@@ -43,13 +44,16 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
     : null;
 
   const handleAddToCart = async () => {
-    if (!selectedVariant?.inStock) return;
+    if (!selectedVariant?.inStock || isAdding) return;
+    setIsAdding(true);
     try {
       await addCartItem({ productVariantId: selectedVariant.variantId });
       setAdded(true);
       setTimeout(() => setAdded(false), 1200);
     } catch {
       /* store sets error */
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -156,16 +160,25 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={!selectedVariant?.inStock}
-          className={`min-h-[46px] rounded-full font-semibold text-sm transition-colors ${
+          disabled={!selectedVariant?.inStock || isAdding}
+          aria-busy={isAdding}
+          className={`min-h-[46px] rounded-full inline-flex items-center justify-center gap-2 font-semibold text-sm transition-colors ${
             added
               ? 'bg-accent text-accent-foreground'
-              : !selectedVariant?.inStock
+              : !selectedVariant?.inStock || isAdding
                 ? 'bg-ink/20 text-surface cursor-not-allowed'
                 : 'bg-primary text-primary-foreground hover:bg-footer'
           }`}
         >
-          {added ? 'Добавлено ✓' : 'Добавить в корзину'}
+          {isAdding ? (
+            <>
+              <svg aria-hidden="true" className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" />
+                <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+              </svg>
+              Добавляем
+            </>
+          ) : added ? 'Добавлено ✓' : 'Добавить в корзину'}
         </button>
         <WishlistHeart productId={data.id} initialActive={wishlisted} variant="catalog" />
       </div>

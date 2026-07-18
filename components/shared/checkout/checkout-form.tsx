@@ -21,7 +21,15 @@ const SHIP_INFO = {
   pickup: { label: 'Пункт выдачи', desc: '2–5 дней', extra: `Бесплатно от ${formatPrice(FREE_SHIPPING_THRESHOLD)}` },
 } as const;
 
-export function CheckoutForm({ details, defaults }: { details: CartDetails; defaults: CheckoutDefaults }) {
+export function CheckoutForm({
+  details,
+  defaults,
+  buyNowVariantId,
+}: {
+  details: CartDetails;
+  defaults: CheckoutDefaults;
+  buyNowVariantId?: string;
+}) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const coupon = useCouponStore((state) => state.coupon);
@@ -45,7 +53,7 @@ export function CheckoutForm({ details, defaults }: { details: CartDetails; defa
 
   const onSubmit = async (v: CheckoutValues) => {
     setError(null);
-    const res = await placeOrder(v);
+    const res = await placeOrder({ ...v, buyNowVariantId });
     if (!res.ok) { setError(res.error); return; }
     if (res.paymentUrl) { window.location.href = res.paymentUrl; return; }
     router.push(`/orders/${res.orderNumber}`);

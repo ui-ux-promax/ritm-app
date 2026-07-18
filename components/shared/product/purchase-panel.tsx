@@ -24,6 +24,7 @@ interface Props {
   specs: Record<string, string> | null;
   ratingAvg: number | null;
   ratingCount: number;
+  onSelectedVariantChange?: (variantId: string | null) => void;
   onColorChange: (slug: string) => void;
 }
 
@@ -39,7 +40,7 @@ const COLOR_HSL: Record<string, string> = {
 
 export function PurchasePanel({
   productName, colorways, activeColorwaySlug, activeColorwayName,
-  variants, fitNote, productSlug, description, specs, ratingAvg, ratingCount, onColorChange,
+  variants, fitNote, productSlug, description, specs, ratingAvg, ratingCount, onSelectedVariantChange, onColorChange,
 }: Props) {
   const [sizeId, setSizeId] = useState<string | null>(null);
   const addCartItem = useCartStore((s) => s.addCartItem);
@@ -139,7 +140,10 @@ export function PurchasePanel({
                 )}
                 disabled={disabled}
                 aria-pressed={v.id === sizeId}
-                onClick={() => setSizeId(v.id)}
+                onClick={() => {
+                  setSizeId(v.id);
+                  onSelectedVariantChange?.(v.id);
+                }}
               >
                 {v.size}
               </button>
@@ -155,13 +159,22 @@ export function PurchasePanel({
           type="button"
           onClick={onAdd}
           disabled={!selected || soldOut || cooldown > 0 || adding}
+          aria-busy={adding}
           className={cn(
-            'w-full min-h-[48px] rounded-full font-bold text-sm transition-colors',
-            added ? 'bg-accent text-accent-foreground' : 'bg-primary text-primary-foreground hover:bg-footer',
+            'w-full min-h-[48px] rounded-full inline-flex items-center justify-center gap-2 font-bold text-sm transition-colors',
+            adding ? 'bg-ink/20 text-surface cursor-not-allowed' : added ? 'bg-accent text-accent-foreground' : 'bg-primary text-primary-foreground hover:bg-footer',
             (!selected || soldOut) && 'opacity-50 cursor-not-allowed'
           )}
         >
-          {added ? 'Добавлено ✓' : cooldown > 0 ? `Подождите ${cooldown} сек` : 'Добавить в корзину'}
+          {adding ? (
+            <>
+              <svg aria-hidden="true" className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" />
+                <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+              </svg>
+              Добавляем
+            </>
+          ) : added ? 'Добавлено ✓' : cooldown > 0 ? `Подождите ${cooldown} сек` : 'Добавить в корзину'}
         </button>
       </div>
 
