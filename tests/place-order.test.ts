@@ -128,7 +128,8 @@ describe('placeOrder', () => {
 
   it('buy now creates a one-item order without reading or clearing the existing cart', async () => {
     const buyNowVariantId = 'ckbuyvariant000000000000001';
-    variantFindUnique
+    const buyNowVariantFindUnique = prisma.productVariant.findUnique as unknown as ReturnType<typeof vi.fn>;
+    buyNowVariantFindUnique
       .mockResolvedValueOnce(variant(buyNowVariantId))
       .mockResolvedValueOnce({ stock: 9 });
     orderCreate.mockResolvedValue({ id: 'o1', orderNumber: 2027 });
