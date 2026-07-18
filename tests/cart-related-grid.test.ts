@@ -33,7 +33,7 @@ describe('CartRelatedGrid', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Добавить Hoodie' }));
 
     const button = screen.getByRole('button', { name: 'Добавить Hoodie' });
-    expect(button.disabled).toBe(true);
+    expect((button as HTMLButtonElement).disabled).toBe(true);
     expect(button.getAttribute('aria-busy')).toBe('true');
     expect(button.querySelector('svg.animate-spin')).not.toBeNull();
   });

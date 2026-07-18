@@ -31,8 +31,8 @@ describe('CartLineItem', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Больше' }));
 
-    expect(screen.getByRole('button', { name: 'Меньше' }).disabled).toBe(true);
-    expect(screen.getByRole('button', { name: 'Больше' }).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Меньше' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Больше' }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByLabelText('Обновляем количество').querySelector('svg.animate-spin')).not.toBeNull();
   });
 });
