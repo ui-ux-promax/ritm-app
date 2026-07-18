@@ -20,6 +20,10 @@ While a cart-line quantity update is pending, only that line's minus and plus co
 
 The primary product-page add-to-cart button follows the same feedback pattern: while its existing cart request is pending, it is disabled, changes from its dark primary surface to a neutral muted surface, and renders a spinner with `Добавляем`. Once the request settles, the existing successful `Добавлено ✓` or default state is shown again, preserving the button's size and all current cooldown behavior.
 
+## Buy now checkout
+
+`Купить сейчас` requires a selected, in-stock variant. It opens `/checkout?buyNow=<variantId>` without adding the product to the cart. The checkout page and order action independently load and validate that variant, then display and create an order containing quantity one of that variant only. The existing cart is neither read into the buy-now checkout nor changed when its order succeeds; standard cart checkout remains unchanged.
+
 ## Accessibility and verification
 
-The pending add-to-cart controls remain disabled while processing and expose a loading state to assistive technology. Pagination controls preserve their existing labels and disabled semantics. Automated tests will cover catalog, cart, and product-page pending states, and selectable pagination surface styling; a focused browser check will confirm the rendered result.
+The pending add-to-cart controls remain disabled while processing and expose a loading state to assistive technology. Pagination controls preserve their existing labels and disabled semantics. Automated tests will cover catalog, cart, product-page, and buy-now isolation behavior; a focused browser check will confirm the rendered result.
