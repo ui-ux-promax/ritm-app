@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/admin/ui/table';
 import { Button } from '@/components/admin/ui/button';
 import { Switch } from '@/components/admin/ui/switch';
@@ -87,11 +88,16 @@ export function CouponTable({ rows }: { rows: CouponRow[] }) {
                   </span>
                 </TableCell>
                 <TableCell>
-                  <Switch
-                    checked={row.active}
-                    disabled={pending === row.id}
-                    onCheckedChange={(v) => handleToggle(row, v)}
-                  />
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={row.active}
+                      disabled={pending === row.id}
+                      onCheckedChange={(v) => handleToggle(row, v)}
+                    />
+                    {pending === row.id && (
+                      <Loader2 role="status" aria-label="Загрузка статуса купона" className="h-4 w-4 animate-spin" />
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="text-admin-on-surface-variant">{row.expiresLabel}</TableCell>
                 <TableCell className="text-admin-on-surface-variant">{row.createdLabel}</TableCell>
@@ -137,6 +143,9 @@ export function CouponTable({ rows }: { rows: CouponRow[] }) {
                     disabled={pending === row.id}
                     onCheckedChange={(v) => handleToggle(row, v)}
                   />
+                  {pending === row.id && (
+                    <Loader2 role="status" aria-label="Загрузка статуса купона" className="h-4 w-4 animate-spin" />
+                  )}
                   Активен
                 </label>
                 <div className="flex gap-2">

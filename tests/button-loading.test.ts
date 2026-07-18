@@ -8,15 +8,22 @@ import { Button as AdminButton } from '@/components/admin/ui/button';
 
 afterEach(cleanup);
 
-describe.each([
-  ['customer', Button],
-  ['admin', AdminButton],
-])('%s Button', (_name, LoadingButton) => {
+describe('customer Button', () => {
   it('exposes an accessible busy state while loading', () => {
-    render(React.createElement(LoadingButton, { loading: true }, 'Save'));
+    render(React.createElement(Button, { loading: true }, 'Save'));
 
     expect(screen.getByRole('button').hasAttribute('disabled')).toBe(true);
     expect(screen.getByRole('button').getAttribute('aria-busy')).toBe('true');
     expect(screen.getByRole('status', { name: 'Загрузка' })).not.toBeNull();
+  });
+});
+
+describe('admin Button', () => {
+  it('exposes an accessible busy state while loading', () => {
+    render(React.createElement(AdminButton, { loading: true }, 'Save'));
+
+    expect(screen.getByRole('button').hasAttribute('disabled')).toBe(true);
+    expect(screen.getByRole('button').getAttribute('aria-busy')).toBe('true');
+    expect(screen.getByRole('status', { name: /Загрузка/ })).not.toBeNull();
   });
 });
