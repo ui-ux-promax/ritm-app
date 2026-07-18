@@ -6,6 +6,7 @@ import type { CartStateItem, CreateCartItemValues } from '@/services/dto/cart.dt
 export interface CartState {
   loading: boolean;
   error: boolean;
+  pendingAction: { itemId: string; kind: 'quantity' | 'remove' } | null;
   totalAmount: number;
   items: CartStateItem[];
   fetchCartItems: () => Promise<void>;
@@ -17,6 +18,7 @@ export interface CartState {
 export const useCartStore = create<CartState>((set) => ({
   items: [],
   error: false,
+  pendingAction: null,
   loading: true,
   totalAmount: 0,
 
@@ -49,27 +51,27 @@ export const useCartStore = create<CartState>((set) => ({
 
   updateItemQuantity: async (id, quantity) => {
     try {
-      set({ loading: true, error: false });
+      set({ loading: true, error: false, pendingAction: { itemId: id, kind: 'quantity' } });
       const data = await Api.cart.updateItemQuantity(id, quantity);
       set(getCartDetails(data));
     } catch (e) {
       console.error(e);
       set({ error: true });
     } finally {
-      set({ loading: false });
+      set((state) => ({ loading: false, pendingAction: state.pendingAction?.itemId === id ? null : state.pendingAction }));
     }
   },
 
   removeCartItem: async (id) => {
     try {
-      set((state) => ({ loading: true, error: false, items: state.items.map((i) => i.id === id ? { ...i, disabled: true } : i) }));
+      set((state) => ({ loading: true, error: false, pendingAction: { itemId: id, kind: 'remove' }, items: state.items.map((i) => i.id === id ? { ...i, disabled: true } : i) }));
       const data = await Api.cart.removeCartItem(id);
       set(getCartDetails(data));
     } catch (e) {
       console.error(e);
       set({ error: true });
     } finally {
-      set((state) => ({ loading: false, items: state.items.map((i) => ({ ...i, disabled: false })) }));
+      set((state) => ({ loading: false, pendingAction: state.pendingAction?.itemId === id ? null : state.pendingAction, items: state.items.map((i) => ({ ...i, disabled: false })) }));
     }
   },
 }));

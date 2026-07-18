@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Loader2 } from 'lucide-react';
 import { useCartStore } from '@/store';
 import { useCountdown } from '@/hooks/use-countdown';
 import { RatingStars } from './rating-stars';
@@ -155,13 +156,15 @@ export function PurchasePanel({
           type="button"
           onClick={onAdd}
           disabled={!selected || soldOut || cooldown > 0 || adding}
+          aria-busy={adding || undefined}
+          aria-label={adding ? 'Добавляем в корзину' : undefined}
           className={cn(
-            'w-full min-h-[48px] rounded-full font-bold text-sm transition-colors',
+            'w-full min-h-[48px] rounded-full font-bold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
             added ? 'bg-accent text-accent-foreground' : 'bg-primary text-primary-foreground hover:bg-footer',
             (!selected || soldOut) && 'opacity-50 cursor-not-allowed'
           )}
         >
-          {added ? 'Добавлено ✓' : cooldown > 0 ? `Подождите ${cooldown} сек` : 'Добавить в корзину'}
+          {adding ? <Loader2 className="h-5 w-5 animate-spin" role="status" aria-label="Добавляем в корзину" /> : added ? 'Добавлено ✓' : cooldown > 0 ? `Подождите ${cooldown} сек` : 'Добавить в корзину'}
         </button>
       </div>
 

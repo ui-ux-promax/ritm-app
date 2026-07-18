@@ -89,4 +89,20 @@ describe('CatalogProductCard', () => {
 
     expect(addCartItem).toHaveBeenCalledWith({ productVariantId: 'variant-terracotta-s' });
   });
+
+  it('shows a busy, disabled add action while the catalog request is pending', async () => {
+    let resolveAdd: () => void;
+    addCartItem.mockReturnValue(new Promise<void>((resolve) => { resolveAdd = resolve; }));
+    render(React.createElement(CatalogProductCard, { data }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'S' }));
+    fireEvent.click(screen.getByRole('button', { name: '\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0432 \u043a\u043e\u0440\u0437\u0438\u043d\u0443' }));
+
+    const pendingButton = await screen.findByRole('button', { name: '\u0414\u043e\u0431\u0430\u0432\u043b\u044f\u0435\u043c \u0432 \u043a\u043e\u0440\u0437\u0438\u043d\u0443' });
+    expect(pendingButton.hasAttribute('disabled')).toBe(true);
+    expect(pendingButton.getAttribute('aria-busy')).toBe('true');
+    expect(screen.getByRole('status', { name: '\u0414\u043e\u0431\u0430\u0432\u043b\u044f\u0435\u043c \u0432 \u043a\u043e\u0440\u0437\u0438\u043d\u0443' })).not.toBeNull();
+
+    resolveAdd!();
+  });
 });

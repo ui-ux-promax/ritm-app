@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui';
 import { PriceTag } from '@/components/shared/price-tag';
 import { SizeGuideDialog } from '@/components/shared/product/size-guide-dialog';
@@ -33,6 +34,7 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
   const href = `/product/${data.slug}`;
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
+  const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const addCartItem = useCartStore((s) => s.addCartItem);
   const selectedColorway = data.colorways[selectedColor];
@@ -44,12 +46,15 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
 
   const handleAddToCart = async () => {
     if (!selectedVariant?.inStock) return;
+    setAdding(true);
     try {
       await addCartItem({ productVariantId: selectedVariant.variantId });
       setAdded(true);
       setTimeout(() => setAdded(false), 1200);
     } catch {
       /* store sets error */
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -156,8 +161,10 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={!selectedVariant?.inStock}
-          className={`min-h-[46px] rounded-full font-semibold text-sm transition-colors ${
+          disabled={!selectedVariant?.inStock || adding}
+          aria-busy={adding || undefined}
+          aria-label={adding ? 'Добавляем в корзину' : undefined}
+          className={`min-h-[46px] rounded-full font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
             added
               ? 'bg-accent text-accent-foreground'
               : !selectedVariant?.inStock
@@ -165,7 +172,7 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
                 : 'bg-primary text-primary-foreground hover:bg-footer'
           }`}
         >
-          {added ? 'Добавлено ✓' : 'Добавить в корзину'}
+          {adding ? <Loader2 className="h-5 w-5 animate-spin" role="status" aria-label="Добавляем в корзину" /> : added ? 'Добавлено ✓' : 'Добавить в корзину'}
         </button>
         <WishlistHeart productId={data.id} initialActive={wishlisted} variant="catalog" />
       </div>

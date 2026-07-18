@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toggleWishlist } from '@/app/actions/wishlist';
 import { useWishlistStore } from '@/store';
@@ -55,16 +56,18 @@ export function WishlistHeart({ productId, initialActive, variant = 'card', land
       <button
         type="button"
         onClick={onClick}
+        disabled={pending}
+        aria-busy={pending || undefined}
         aria-pressed={active}
-        aria-label={label}
+        aria-label={pending ? 'Обновляем избранное' : label}
         className={cn(
-          'w-[46px] h-[46px] grid place-items-center rounded-full border transition-colors',
+          'w-[46px] h-[46px] grid place-items-center rounded-full border transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
           active ? 'border-danger text-danger' : 'border-line text-ink hover:border-danger/50 hover:text-danger',
         )}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+        {pending ? <Loader2 className="h-5 w-5 animate-spin" role="status" aria-label="Обновляем избранное" /> : <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
           <path d="M12 20.5s-7.25-4.45-7.25-10.2A4.35 4.35 0 0 1 12 7.25a4.35 4.35 0 0 1 7.25 3.05C19.25 16.05 12 20.5 12 20.5Z"/>
-        </svg>
+        </svg>}
         <span className="sr-only" role="status" aria-live="polite">{error ?? ''}</span>
       </button>
     );
@@ -75,16 +78,18 @@ export function WishlistHeart({ productId, initialActive, variant = 'card', land
       <button
         type="button"
         onClick={onClick}
+        disabled={pending}
+        aria-busy={pending || undefined}
         aria-pressed={active}
-        aria-label={label}
+        aria-label={pending ? 'Обновляем избранное' : label}
         className={cn(
-          'w-[42px] h-[42px] rounded-full bg-surface/90 backdrop-blur grid place-items-center border transition-colors',
+          'w-[42px] h-[42px] rounded-full bg-surface/90 backdrop-blur grid place-items-center border transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
           active ? 'border-danger text-danger' : 'border-line hover:border-danger/50 hover:text-danger',
         )}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" aria-hidden="true" className={active ? 'text-[#e23b4e]' : ''}>
+        {pending ? <Loader2 className="h-5 w-5 animate-spin" role="status" aria-label="Обновляем избранное" /> : <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" aria-hidden="true" className={active ? 'text-[#e23b4e]' : ''}>
           <path d="M12 20.5s-7.25-4.45-7.25-10.2A4.35 4.35 0 0 1 12 7.25a4.35 4.35 0 0 1 7.25 3.05C19.25 16.05 12 20.5 12 20.5Z"/>
-        </svg>
+        </svg>}
         <span className="sr-only" role="status" aria-live="polite">{error ?? ''}</span>
       </button>
     );
@@ -94,13 +99,15 @@ export function WishlistHeart({ productId, initialActive, variant = 'card', land
     <button
       type="button"
       onClick={onClick}
+      disabled={pending}
+      aria-busy={pending || undefined}
       aria-pressed={active}
-      aria-label={label}
-      className={cn('w-[34px] h-[34px] rounded-full border border-line bg-surface text-ink grid place-items-center hover:border-ink transition-[transform,border-color,color] duration-200', landingMotion && 'active:scale-90 motion-reduce:transform-none')}
+      aria-label={pending ? 'Обновляем избранное' : label}
+      className={cn('w-[34px] h-[34px] rounded-full border border-line bg-surface text-ink grid place-items-center hover:border-ink transition-[transform,border-color,color] duration-200 disabled:opacity-50 disabled:cursor-not-allowed', landingMotion && 'active:scale-90 motion-reduce:transform-none')}
     >
-      <svg width="15" height="15" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9" aria-hidden="true" className={cn(active && 'text-[#e23b4e]', landingMotion && active && 'landing-heart-pop')}>
+      {pending ? <Loader2 className="h-4 w-4 animate-spin" role="status" aria-label="Обновляем избранное" /> : <svg width="15" height="15" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9" aria-hidden="true" className={cn(active && 'text-[#e23b4e]', landingMotion && active && 'landing-heart-pop')}>
         <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>
-      </svg>
+      </svg>}
       <span className="sr-only" role="status" aria-live="polite">{error ?? ''}</span>
     </button>
   );
