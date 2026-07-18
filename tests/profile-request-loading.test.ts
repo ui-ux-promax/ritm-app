@@ -126,6 +126,9 @@ describe('profile request loading', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Сохранить изменения' }));
     const personalSubmit = screen.getAllByRole('button', { name: 'Загрузка' })[0];
     expect(personalSubmit.getAttribute('aria-busy')).toBe('true');
+    expect(personalSubmit.textContent).toContain('Сохранить изменения');
+    expect(personalSubmit.querySelector('[aria-hidden="true"]')?.className).toContain('invisible');
+    expect(personalSubmit.querySelector('[role="status"]')?.getAttribute('class')).toContain('absolute');
     await act(async () => Promise.resolve());
     expect(personalSubmit.getAttribute('aria-busy')).toBe('true');
 

@@ -1195,9 +1195,21 @@ function Submit({ children, pending }: { children: ReactNode; pending?: boolean 
       type="submit"
       disabled={pending}
       aria-busy={pending || undefined}
-      className="inline-flex h-[52px] items-center justify-center gap-2.5 justify-self-start rounded-full bg-primary px-7 text-[15px] font-bold text-primary-foreground hover:bg-footer disabled:opacity-60"
+      className={cn(
+        'inline-flex h-[52px] items-center justify-center gap-2.5 justify-self-start rounded-full bg-primary px-7 text-[15px] font-bold text-primary-foreground hover:bg-footer disabled:opacity-60',
+        pending && 'relative',
+      )}
     >
-      {pending ? <Loader2 role="status" aria-label="Загрузка" className="h-5 w-5 animate-spin" /> : children}
+      {pending ? (
+        <>
+          <span aria-hidden="true" className="contents invisible">{children}</span>
+          <Loader2
+            role="status"
+            aria-label="Загрузка"
+            className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 animate-spin"
+          />
+        </>
+      ) : children}
     </button>
   );
 }

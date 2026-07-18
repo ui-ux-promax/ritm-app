@@ -97,3 +97,32 @@ Result: passed with no whitespace errors. Git emitted only the repository's Wind
 - No known functional or type-safety concerns remain in the owned scope.
 - The pre-existing Radix Dialog accessibility warning noted above remains intentionally unchanged because it is not required by an Important finding.
 - An independent final diff review reported no Critical or Important findings. Its two optional minors (React imports required by the current Vitest JSX transform, and additional rejected-promise coverage) were not changed because the brief explicitly excludes minors unless needed by an Important fix.
+
+## Follow-up: loading-button geometry
+
+The final Minor geometry review found that replacing button children with a spinner allowed intrinsic-width controls to shrink while loading. The customer shared Button, admin shared Button, and ProfileView local Submit helper now:
+
+- add a loading-only relative positioning context;
+- keep the original children in layout through an `aria-hidden` `contents invisible` span;
+- absolutely center the existing labelled `Loader2` over the preserved child geometry;
+- render the original children unchanged when not loading.
+
+Focused assertions were added before the implementation and failed because loading buttons no longer contained their original label. After the fix:
+
+```powershell
+npm test -- tests/button-loading.test.ts tests/profile-request-loading.test.ts
+```
+
+Result: 2 test files passed, 5 tests passed.
+
+```powershell
+npm run typecheck
+```
+
+Result: passed (`tsc --noEmit`, exit 0).
+
+```powershell
+git diff --check
+```
+
+Result: passed with no whitespace errors; only expected Windows LF-to-CRLF conversion notices were emitted. Per instruction, no e2e run was attempted because the local environment is blocked.

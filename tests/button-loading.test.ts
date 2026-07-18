@@ -14,7 +14,9 @@ describe('customer Button', () => {
 
     expect(screen.getByRole('button').hasAttribute('disabled')).toBe(true);
     expect(screen.getByRole('button').getAttribute('aria-busy')).toBe('true');
-    expect(screen.getByRole('status', { name: 'Загрузка' })).not.toBeNull();
+    expect(screen.getByRole('button').textContent).toContain('Save');
+    expect(screen.getByRole('button').querySelector('[aria-hidden="true"]')?.className).toContain('invisible');
+    expect(screen.getByRole('status', { name: 'Загрузка' }).getAttribute('class')).toContain('absolute');
   });
 });
 
@@ -24,6 +26,8 @@ describe('admin Button', () => {
 
     expect(screen.getByRole('button').hasAttribute('disabled')).toBe(true);
     expect(screen.getByRole('button').getAttribute('aria-busy')).toBe('true');
-    expect(screen.getByRole('status', { name: /Загрузка/ })).not.toBeNull();
+    expect(screen.getByRole('button').textContent).toContain('Save');
+    expect(screen.getByRole('button').querySelector('[aria-hidden="true"]')?.className).toContain('invisible');
+    expect(screen.getByRole('status', { name: /Загрузка/ }).getAttribute('class')).toContain('absolute');
   });
 });

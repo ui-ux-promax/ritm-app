@@ -37,11 +37,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || loading}
         aria-busy={loading || undefined}
-        className={cn(buttonVariants({ variant, size }), className)}
+        className={cn(buttonVariants({ variant, size }), loading && 'relative', className)}
         {...props}
       >
         {loading ? (
-          <Loader2 role="status" aria-label="Загрузка" className="w-5 h-5 animate-spin" />
+          <>
+            <span aria-hidden="true" className="contents invisible">{children}</span>
+            <Loader2
+              role="status"
+              aria-label="Загрузка"
+              className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 animate-spin"
+            />
+          </>
         ) : children}
       </Comp>
     );
