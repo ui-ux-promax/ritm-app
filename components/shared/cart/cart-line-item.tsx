@@ -59,11 +59,11 @@ export function CartLineItem({ item, wishlisted = false }: { item: CartStateItem
         <div className="mt-auto flex flex-col items-start justify-between gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3">
           {/* Stepper */}
           <div className="inline-flex items-center border border-line rounded-full bg-surface h-10">
-            <button type="button" onClick={dec} disabled={item.quantity <= 1 || item.disabled || decreaseBusy} aria-label={decreaseBusy ? 'Обновляем количество' : 'Меньше'} className="w-[38px] h-full grid place-items-center rounded-full hover:bg-surface-soft disabled:opacity-35 disabled:cursor-not-allowed">
+            <button type="button" onClick={dec} disabled={item.quantity <= 1 || item.disabled || decreaseBusy} aria-busy={decreaseBusy || undefined} aria-label={decreaseBusy ? 'Обновляем количество' : 'Меньше'} className="w-[38px] h-full grid place-items-center rounded-full hover:bg-surface-soft disabled:opacity-35 disabled:cursor-not-allowed">
               {decreaseBusy ? <Loader2 className="h-4 w-4 animate-spin" role="status" aria-label="Обновляем количество" /> : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14"/></svg>}
             </button>
             <span className="min-w-[30px] text-center font-bold tnum text-sm">{item.quantity}</span>
-            <button type="button" onClick={inc} disabled={item.disabled || increaseBusy} aria-label={increaseBusy ? 'Обновляем количество' : 'Больше'} className="w-[38px] h-full grid place-items-center rounded-full hover:bg-surface-soft disabled:opacity-35 disabled:cursor-not-allowed">
+            <button type="button" onClick={inc} disabled={item.disabled || increaseBusy} aria-busy={increaseBusy || undefined} aria-label={increaseBusy ? 'Обновляем количество' : 'Больше'} className="w-[38px] h-full grid place-items-center rounded-full hover:bg-surface-soft disabled:opacity-35 disabled:cursor-not-allowed">
               {increaseBusy ? <Loader2 className="h-4 w-4 animate-spin" role="status" aria-label="Обновляем количество" /> : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 5v14M5 12h14"/></svg>}
             </button>
           </div>

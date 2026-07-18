@@ -94,3 +94,17 @@ npm test
 Result: 112 files / 588 tests passed.
 
 `git diff --check` passed. `npm run typecheck` remains blocked only by the pre-existing `tests/button-loading.test.ts:16` incompatible `ForwardRefExoticComponent` union diagnostic; no Task 3 file appears in that output.
+
+## Review follow-up: quantity button busy state
+
+Added `aria-busy` to both quantity controls, bound to their respective `decreaseBusy` and `increaseBusy` states. The loading regression now asserts that the active increase control exposes `aria-busy="true"`; removal behavior was left unchanged.
+
+TDD evidence:
+
+```powershell
+npm test -- tests/cart-line-item-loading.test.ts tests/cart-pending-actions.test.ts
+```
+
+RED: the new assertion received `null` instead of `"true"` for `aria-busy`.
+
+GREEN: 2 files / 3 tests passed after the minimal attribute additions.
