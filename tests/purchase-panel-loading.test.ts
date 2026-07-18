@@ -30,5 +30,6 @@ describe('PurchasePanel', () => {
     expect(button.disabled).toBe(true);
     expect(button.getAttribute('aria-busy')).toBe('true');
     expect(button.querySelector('svg.animate-spin')).not.toBeNull();
+    expect(button.className).toContain('bg-ink/20');
   });
 });

@@ -12,6 +12,7 @@
 
 - Do not change cart-store APIs, product data, cooldown handling, or dependencies.
 - While `adding`, the button remains disabled, uses `aria-busy="true"`, and displays a 16px `animate-spin` SVG with `Добавляем`.
+- While `adding`, the button uses the neutral muted surface class `bg-ink/20` instead of its dark primary surface.
 - Preserve the existing button dimensions, default copy, and `Добавлено ✓` success state.
 
 ---
@@ -35,6 +36,7 @@ const button = screen.getByRole('button', { name: 'Добавляем' }) as HTM
 expect(button.disabled).toBe(true);
 expect(button.getAttribute('aria-busy')).toBe('true');
 expect(button.querySelector('svg.animate-spin')).not.toBeNull();
+expect(button.className).toContain('bg-ink/20');
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -45,9 +47,11 @@ Expected: FAIL because `PurchasePanel` currently leaves the default label visibl
 
 - [ ] **Step 3: Write minimal implementation**
 
-On the existing button, add `aria-busy={adding}` and `inline-flex items-center justify-center gap-2` to its class. Give `adding` priority over the existing labels:
+On the existing button, add `aria-busy={adding}` and `inline-flex items-center justify-center gap-2` to its class. Give `adding` priority over the existing labels, and give its background class the same priority:
 
 ```tsx
+{adding ? 'bg-ink/20 text-surface cursor-not-allowed' : added ? 'bg-accent text-accent-foreground' : 'bg-primary text-primary-foreground hover:bg-footer'}
+
 {adding ? (
   <>
     <svg aria-hidden="true" className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">...</svg>
@@ -74,4 +78,3 @@ Expected: the focused suite passes and TypeScript exits with code 0.
 git add tests/purchase-panel-loading.test.ts components/shared/product/purchase-panel.tsx
 git commit -m "feat: show product cart loading state"
 ```
-

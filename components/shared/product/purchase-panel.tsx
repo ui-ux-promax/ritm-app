@@ -158,7 +158,7 @@ export function PurchasePanel({
           aria-busy={adding}
           className={cn(
             'w-full min-h-[48px] rounded-full inline-flex items-center justify-center gap-2 font-bold text-sm transition-colors',
-            added ? 'bg-accent text-accent-foreground' : 'bg-primary text-primary-foreground hover:bg-footer',
+            adding ? 'bg-ink/20 text-surface cursor-not-allowed' : added ? 'bg-accent text-accent-foreground' : 'bg-primary text-primary-foreground hover:bg-footer',
             (!selected || soldOut) && 'opacity-50 cursor-not-allowed'
           )}
         >
