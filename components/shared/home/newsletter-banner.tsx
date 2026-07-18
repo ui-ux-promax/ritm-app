@@ -60,7 +60,7 @@ export function NewsletterBanner() {
             <span className="sr-only">Скидка 50% на все аутфиты. Присоединяйтесь сейчас.</span>
             <span aria-hidden="true">Скидка <span className="tnum" data-testid="discount-counter">{discount}%</span> на все аутфиты. Присоединяйтесь сейчас.</span>
           </h2>
-          <form onSubmit={onSubmit} noValidate className="mt-7 grid w-full max-w-[420px] grid-cols-1 gap-1.5 rounded-[18px] bg-surface p-1.5 min-[420px]:grid-cols-[minmax(0,1fr)_auto] min-[420px]:rounded-full">
+          <form onSubmit={onSubmit} noValidate className="mt-7 grid w-full max-w-[420px] grid-cols-1 gap-1.5 rounded-[18px] bg-surface p-1.5 transition-shadow focus-within:shadow-[0_0_0_2px_hsl(var(--color-surface)),0_0_0_4px_hsl(var(--color-primary))] min-[420px]:grid-cols-[minmax(0,1fr)_auto] min-[420px]:rounded-full">
             <input
               type="email"
               value={email}
@@ -68,7 +68,7 @@ export function NewsletterBanner() {
               placeholder="Введите ваш email..."
               aria-label="Email для подписки"
               required
-              className="min-w-0 border-0 outline-none bg-transparent px-4 text-[13px] text-ink"
+              className="min-w-0 border-0 outline-none bg-transparent px-4 text-[13px] text-ink focus-visible:!shadow-none"
             />
             <button
               type="submit"

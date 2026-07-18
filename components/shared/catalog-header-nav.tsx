@@ -26,7 +26,7 @@ export function CatalogHeaderNav() {
 
   return (
     <>
-      <Link href="/catalog" aria-current={catalogActive ? 'page' : undefined} className={cn('h-[42px] w-[182px] flex items-center justify-center rounded-full border text-[13px] font-semibold transition-[background-color,border-color,color,box-shadow,transform] duration-300 ease-out', catalogActive ? 'header-active-in border-primary bg-primary text-primary-foreground shadow-[0_5px_14px_hsl(var(--color-text)/.13)]' : 'border-line bg-surface text-ink-muted hover:border-ink/35 hover:text-ink')}>Каталог</Link>
+      <Link href="/catalog" aria-current={catalogActive ? 'page' : undefined} className={cn('h-[42px] w-[182px] flex items-center justify-center rounded-full border border-black bg-black text-white text-[13px] font-semibold transition-[background-color,border-color,color,box-shadow,transform] duration-300 ease-out hover:bg-black/90', catalogActive && 'header-active-in shadow-[0_5px_14px_hsl(var(--color-text)/.13)]')}>Каталог</Link>
       <div className="flex min-w-0 items-center gap-2.5 overflow-x-clip">
         <Chip href="/catalog?sort=new" expected={{ sort: 'new' }}>Новинки</Chip>
         <Chip href="/catalog?sort=discount" expected={{ sort: 'discount' }}>Sale</Chip>
