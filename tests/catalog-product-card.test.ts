@@ -79,6 +79,21 @@ describe('CatalogProductCard', () => {
     expect(screen.getByAltText('CABLES cardigan').getAttribute('src')).toBe('/images/terracotta.jpg');
   });
 
+  it('disables the add-to-cart button and shows its loading label while the request is pending', () => {
+    let resolveAdd!: () => void;
+    addCartItem.mockReturnValueOnce(new Promise<void>((resolve) => { resolveAdd = resolve; }));
+    render(React.createElement(CatalogProductCard, { data }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'S' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить в корзину' }));
+
+    const button = screen.getByRole('button', { name: 'Добавляем' });
+    expect(button).toHaveProperty('disabled', true);
+    expect(button.getAttribute('aria-busy')).toBe('true');
+    expect(button.querySelector('svg.animate-spin')).not.toBeNull();
+    resolveAdd();
+  });
+
   it('adds the variant for the selected colorway and size', () => {
     addCartItem.mockResolvedValue(undefined);
     render(React.createElement(CatalogProductCard, { data }));
