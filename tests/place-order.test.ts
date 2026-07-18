@@ -26,7 +26,7 @@ import { prisma } from '@/lib/prisma-client';
 const authMock = auth as unknown as ReturnType<typeof vi.fn>;
 const cookiesMock = cookies as unknown as ReturnType<typeof vi.fn>;
 const cartFindFirst = prisma.cart.findFirst as unknown as ReturnType<typeof vi.fn>;
-const variantFindUnique = prisma.productVariant.findUnique as unknown as ReturnType<typeof vi.fn>;
+const productVariantFindUniqueMock = prisma.productVariant.findUnique as unknown as ReturnType<typeof vi.fn>;
 const variantUpdate = prisma.productVariant.update as unknown as ReturnType<typeof vi.fn>;
 const orderCreate = prisma.order.create as unknown as ReturnType<typeof vi.fn>;
 const orderItemCreate = prisma.orderItem.create as unknown as ReturnType<typeof vi.fn>;
@@ -57,7 +57,7 @@ beforeEach(() => {
   authMock.mockResolvedValue({ user: { id: 'u1' } });
   cookiesMock.mockResolvedValue({ get: () => ({ value: 't' }) });
   variantUpdate.mockResolvedValue({});
-  variantFindUnique.mockResolvedValue({ stock: 9 });
+  productVariantFindUniqueMock.mockResolvedValue({ stock: 9 });
   cartItemDeleteMany.mockResolvedValue({ count: 1 });
   orderItemCreate.mockResolvedValue({});
   orderDelete.mockResolvedValue({});
@@ -69,7 +69,7 @@ describe('placeOrder', () => {
     orderCreate.mockResolvedValue({ id: 'o1', orderNumber: 1025 });
     const r = await placeOrder(validForm);
     expect(r).toEqual({ ok: true, orderNumber: 1025 });
-    expect(variantFindUnique).toHaveBeenCalledTimes(1);
+    expect(productVariantFindUniqueMock).toHaveBeenCalledTimes(1);
     expect(variantUpdate).toHaveBeenCalledWith({ where: { id: 'v1' }, data: { stock: { decrement: 1 } } });
     expect(orderCreate).toHaveBeenCalledOnce();
     expect(orderItemCreate).toHaveBeenCalledTimes(1);
@@ -78,7 +78,7 @@ describe('placeOrder', () => {
 
   it('нехватка на 2-й позиции — компенсация 1-й, заказ НЕ создан', async () => {
     cartFindFirst.mockResolvedValue(cartWith('v1', 'v2'));
-    variantFindUnique.mockResolvedValueOnce({ stock: 9 }).mockResolvedValueOnce({ stock: 0 });
+    productVariantFindUniqueMock.mockResolvedValueOnce({ stock: 9 }).mockResolvedValueOnce({ stock: 0 });
     const r = await placeOrder(validForm);
     expect(r.ok).toBe(false);
     expect(variantUpdate).toHaveBeenCalledWith({ where: { id: 'v1' }, data: { stock: { increment: 1 } } });
@@ -108,7 +108,7 @@ describe('placeOrder', () => {
     cartFindFirst.mockResolvedValue({ id: 'c1', token: 't', items: [] });
     const r = await placeOrder(validForm);
     expect(r).toEqual({ ok: false, error: 'Корзина пуста' });
-    expect(variantFindUnique).not.toHaveBeenCalled();
+    expect(productVariantFindUniqueMock).not.toHaveBeenCalled();
   });
 
   it('неактивный товар — отказ до проверки стока', async () => {
@@ -117,7 +117,7 @@ describe('placeOrder', () => {
     cartFindFirst.mockResolvedValue(cart);
     const r = await placeOrder(validForm);
     expect(r.ok).toBe(false);
-    expect(variantFindUnique).not.toHaveBeenCalled();
+    expect(productVariantFindUniqueMock).not.toHaveBeenCalled();
     expect(orderCreate).not.toHaveBeenCalled();
   });
 
@@ -128,8 +128,7 @@ describe('placeOrder', () => {
 
   it('buy now creates a one-item order without reading or clearing the existing cart', async () => {
     const buyNowVariantId = 'ckbuyvariant000000000000001';
-    const buyNowVariantFindUnique = prisma.productVariant.findUnique as unknown as ReturnType<typeof vi.fn>;
-    buyNowVariantFindUnique
+    productVariantFindUniqueMock
       .mockResolvedValueOnce(variant(buyNowVariantId))
       .mockResolvedValueOnce({ stock: 9 });
     orderCreate.mockResolvedValue({ id: 'o1', orderNumber: 2027 });
