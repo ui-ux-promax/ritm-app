@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { validateCoupon } from '@/app/actions/coupon';
 import { useCouponStore } from '@/store/coupon';
 
@@ -53,12 +54,11 @@ export function PromoCodeField() {
           type="button"
           onClick={applyCoupon}
           disabled={pending || !input.trim()}
+          aria-busy={pending || undefined}
           aria-label={pending ? 'Проверка промокода' : 'Применить'}
           className="h-[46px] min-w-[46px] px-5 border border-line rounded-[13px] bg-surface-soft font-bold text-[13.5px] whitespace-nowrap hover:border-ink/30 transition-colors disabled:cursor-wait disabled:opacity-60"
         >
-          {pending ? (
-            <span role="status" aria-label="Проверка промокода" className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-ink-muted/30 border-t-ink" />
-          ) : 'Применить'}
+          {pending ? <Loader2 role="status" aria-label="Проверка промокода" className="h-4 w-4 animate-spin" /> : 'Применить'}
         </button>
       </div>
       {error && <p className="text-danger text-xs font-semibold" role="alert">{error}</p>}

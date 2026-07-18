@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { useEffect, useMemo, useState, useTransition, type ReactNode } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { updatePassword, updateProfile } from '@/app/actions/profile';
 import { toggleWishlist } from '@/app/actions/wishlist';
 import { addAddress, deleteAddress, setDefaultAddress } from '@/app/actions/address';
@@ -1147,9 +1147,10 @@ function Submit({ children, pending }: { children: ReactNode; pending?: boolean 
     <button
       type="submit"
       disabled={pending}
+      aria-busy={pending || undefined}
       className="inline-flex h-[52px] items-center justify-center gap-2.5 justify-self-start rounded-full bg-primary px-7 text-[15px] font-bold text-primary-foreground hover:bg-footer disabled:opacity-60"
     >
-      {children}
+      {pending ? <Loader2 role="status" aria-label="Загрузка" className="h-5 w-5 animate-spin" /> : children}
     </button>
   );
 }

@@ -19,8 +19,7 @@ export function NewsletterForm() {
 
   const label =
     state === 'done' ? 'Готово' :
-    state === 'already' ? 'Вы с нами' :
-    state === 'loading' ? '…' : 'Подписаться';
+    state === 'already' ? 'Вы с нами' : 'Подписаться';
 
   return (
     <form className="flex gap-2 mt-4 max-w-sm" onSubmit={onSubmit}>

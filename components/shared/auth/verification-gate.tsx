@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
+import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { OtpInput } from './otp-input';
 import { verifyEmailCode, resendVerificationCode } from '@/app/actions/verification';
@@ -27,6 +28,7 @@ export function VerificationGate({ email, callbackUrl }: { email: string; callba
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
   useEffect(() => {
@@ -58,10 +60,16 @@ export function VerificationGate({ email, callbackUrl }: { email: string; callba
   }, [code]);
 
   const resend = async () => {
+    if (resending) return;
     setError(null);
-    const res = await resendVerificationCode();
-    if (!res.ok) { setError(MESSAGES[res.error ?? ''] ?? 'Не удалось отправить код.'); return; }
-    setCooldown(Math.round(VERIFICATION_RESEND_COOLDOWN_MS / 1000));
+    setResending(true);
+    try {
+      const res = await resendVerificationCode();
+      if (!res.ok) { setError(MESSAGES[res.error ?? ''] ?? 'Не удалось отправить код.'); return; }
+      setCooldown(Math.round(VERIFICATION_RESEND_COOLDOWN_MS / 1000));
+    } finally {
+      setResending(false);
+    }
   };
 
   const block = (e: Event) => e.preventDefault();
@@ -91,10 +99,10 @@ export function VerificationGate({ email, callbackUrl }: { email: string; callba
             Подтвердить
           </Button>
           <button
-            type="button" onClick={resend} disabled={cooldown > 0}
+            type="button" onClick={resend} disabled={resending || cooldown > 0} aria-busy={resending || undefined}
             className="w-full text-center text-sm text-black/60 mt-3 disabled:opacity-50 hover:text-black"
           >
-            {cooldown > 0 ? `Отправить снова через ${cooldown}с` : 'Отправить код снова'}
+            {resending ? <Loader2 className="mx-auto h-4 w-4 animate-spin" role="status" aria-label="Отправляем код снова" /> : cooldown > 0 ? `Отправить снова через ${cooldown}с` : 'Отправить код снова'}
           </button>
         </Dialog.Content>
       </Dialog.Portal>
