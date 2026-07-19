@@ -106,12 +106,13 @@ describe('storefront UI regressions', () => {
     expect(list?.className).toContain('left-0');
   });
 
-  it('keeps the wishlist counter white when the profile favorites shortcut is active', () => {
+  it('renders the active wishlist counter as white with black text', () => {
     window.history.replaceState(null, '', '/profile#favorites');
 
     render(<WishlistBadge />);
 
-    expect(screen.getByText('2').className).toContain('text-white');
+    expect(screen.getByText('2').className).toContain('bg-white');
+    expect(screen.getByText('2').className).toContain('text-ink');
   });
 
   it('renders the active catalog size filter as black with white text', () => {
@@ -122,11 +123,12 @@ describe('storefront UI regressions', () => {
     expect(activeSize.className).toContain('text-white');
   });
 
-  it('keeps catalog card price inside the card header at narrow widths', () => {
+  it('keeps catalog card title and price on separate rows at narrow widths', () => {
     render(<CatalogProductCard data={cardData} />);
 
     const title = screen.getByRole('heading', { name: 'RITM Longsleeve Japan Green' });
-    expect(title.className).toContain('min-w-0');
-    expect(screen.getByText(/4[\s\u00a0]990/).closest('p')?.className).toContain('max-w-[42%]');
+    expect(title.closest('article')?.className).toContain('[container-type:inline-size]');
+    expect(title.className).toContain('text-[clamp(21px,8cqw,26px)]');
+    expect(screen.getByText(/4[\s\u00a0]990/).closest('p')?.className).toContain('justify-self-end');
   });
 });
