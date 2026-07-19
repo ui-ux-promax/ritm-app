@@ -58,7 +58,7 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
   };
 
   return (
-    <article className="flex flex-col border border-line bg-surface rounded-[24px] p-[18px] shadow-[0_18px_44px_hsl(220_12%_10%_/_0.04)] transition-transform duration-200 hover:-translate-y-[3px] hover:border-ink/22 hover:shadow-[0_18px_40px_hsl(220_12%_10%_/_0.07)]">
+    <article className="[container-type:inline-size] flex flex-col border border-line bg-surface rounded-[24px] p-[18px] shadow-[0_18px_44px_hsl(220_12%_10%_/_0.04)] transition-transform duration-200 hover:-translate-y-[3px] hover:border-ink/22 hover:shadow-[0_18px_40px_hsl(220_12%_10%_/_0.07)]">
       {/* Media */}
       <div className="relative aspect-[1.08/1] overflow-hidden rounded-[18px] border border-line bg-surface-soft">
         {data.badges[0] && (
@@ -84,14 +84,14 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
       </div>
 
       {/* Head: title + price */}
-      <div className="flex items-baseline justify-between gap-3 pt-3.5">
-        <h3 className="font-display font-bold text-[26px] leading-[0.95] tracking-tight">
+      <div className="grid gap-1.5 pt-3.5">
+        <h3 className="min-w-0 break-words font-display font-bold text-[clamp(21px,8cqw,26px)] leading-[0.96] tracking-tight">
           <Link href={href} className="hover:underline underline-offset-2">{data.name}</Link>
         </h3>
         <PriceTag
           price={data.minPrice}
           compareAtPrice={data.minCompareAtPrice}
-          className="shrink-0 whitespace-nowrap text-[15px] text-accent"
+          className="justify-self-end whitespace-nowrap text-[15px] text-accent"
         />
       </div>
 
