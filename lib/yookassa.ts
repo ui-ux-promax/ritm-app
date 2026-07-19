@@ -36,6 +36,7 @@ export function toOrigin(raw: string): string {
 }
 
 export interface CreatePaymentInput {
+  orderId: string;
   orderNumber: number;
   amountRub: number;
   baseUrl?: string;  // перекрывает siteUrl() — для рантайм-определения хоста из запроса
@@ -57,7 +58,7 @@ export async function createPayment(input: CreatePaymentInput): Promise<CreatePa
       description: `Заказ #${input.orderNumber}`,
       metadata: { orderNumber: String(input.orderNumber) },
     },
-    `order-${input.orderNumber}`,
+    `payment-${input.orderId}`,
   );
   const confirmation = payment.confirmation as IConfirmationRedirect;
   return { id: payment.id, confirmationUrl: confirmation.confirmation_url! };

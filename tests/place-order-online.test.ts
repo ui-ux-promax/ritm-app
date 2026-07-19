@@ -75,7 +75,7 @@ describe('placeOrder online', () => {
     createPaymentMock.mockResolvedValue({ id: 'pay_1', confirmationUrl: 'https://yoo/redirect' });
     const r = await placeOrder(onlineForm);
     expect(r).toEqual({ ok: true, orderNumber: 1025, paymentUrl: 'https://yoo/redirect' });
-    expect(createPaymentMock).toHaveBeenCalledWith({ orderNumber: 1025, amountRub: 5000 });
+    expect(createPaymentMock).toHaveBeenCalledWith({ orderId: 'o1', orderNumber: 1025, amountRub: 5000 });
     expect(variantUpdateMany).toHaveBeenCalledWith({
       where: { id: 'v1', stock: { gte: 1 } },
       data: { stock: { decrement: 1 } },

@@ -180,7 +180,7 @@ export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
       // return_url ДОЛЖЕН вести на тот же деплой, где оформлен заказ: там сессия, кука и
       // нужная ветка Neon (БД заводит ветку на каждое окружение, P7). Поэтому приоритет —
       // host текущего запроса; NEXT_PUBLIC_SITE_URL — только фолбэк для localhost.
-      const pay = await createPayment({ orderNumber, amountRub: totalAmount });
+      const pay = await createPayment({ orderId, orderNumber, amountRub: totalAmount });
       await prisma.payment.create({
         data: { id: pay.id, orderId, amount: totalAmount, confirmationUrl: pay.confirmationUrl, status: 'pending' },
       });
