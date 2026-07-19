@@ -45,7 +45,7 @@ export function AddressSuggest() {
   };
 
   return (
-    <ul className="absolute z-10 mt-1 w-full rounded-xl border border-line bg-surface shadow-lg max-h-60 overflow-auto">
+    <ul className="absolute left-0 top-full z-10 mt-2 w-full rounded-xl border border-line bg-surface shadow-lg max-h-60 overflow-auto">
       {items.map((s, i) => (
         <li key={i}>
           <button type="button" onClick={() => pick(s)} className="block w-full text-left px-3 py-2 text-sm hover:bg-surface-soft">

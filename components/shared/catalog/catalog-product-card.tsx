@@ -84,14 +84,14 @@ export function CatalogProductCard({ data, wishlisted = false }: { data: Product
       </div>
 
       {/* Head: title + price */}
-      <div className="flex items-baseline justify-between gap-3 pt-3.5">
-        <h3 className="font-display font-bold text-[26px] leading-[0.95] tracking-tight">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 pt-3.5">
+        <h3 className="min-w-0 break-words font-display font-bold text-[26px] leading-[0.95] tracking-tight">
           <Link href={href} className="hover:underline underline-offset-2">{data.name}</Link>
         </h3>
         <PriceTag
           price={data.minPrice}
           compareAtPrice={data.minCompareAtPrice}
-          className="shrink-0 whitespace-nowrap text-[15px] text-accent"
+          className="max-w-[42%] shrink-0 whitespace-nowrap text-[15px] text-accent"
         />
       </div>
 

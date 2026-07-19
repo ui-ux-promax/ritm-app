@@ -13,7 +13,7 @@ export function SizeFilter() {
           const on = selected.includes(s);
           return (
             <button key={s} type="button" onClick={() => toggleInList('size', s)} aria-pressed={on}
-              className={`px-2.5 py-1.5 rounded-lg border text-xs tnum ${on ? 'border-2 font-semibold border-ink' : 'border-line hover:border-ink'}`}>
+              className={`px-2.5 py-1.5 rounded-lg border text-xs tnum ${on ? 'border-ink bg-ink font-semibold text-white' : 'border-line hover:border-ink'}`}>
               {s}
             </button>
           );
